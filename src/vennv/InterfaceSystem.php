@@ -14,6 +14,8 @@ interface InterfaceSystem {
     public static function setTimeout(callable $callable, int $timeout) : void;
 
     /**
+     * @param array<int, mixed> $options
+     *
      * This method is used to fetch data from a url.
      */
     public static function fetch(string $url, array $options = [CURLOPT_RETURNTRANSFER => true]) : Promise;

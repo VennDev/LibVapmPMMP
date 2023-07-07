@@ -13,7 +13,15 @@ class EventQueue implements InterfaceEventQueue
     private const TIME_OUT = 10;
 
     private static int $nextId = 0;
+
+    /**
+     * @var Queue[]
+     */
     private static array $queues = [];
+
+    /**
+     * @var Queue[]
+     */
     private static array $returns = [];
 
     private static function generateId() : int
@@ -54,7 +62,7 @@ class EventQueue implements InterfaceEventQueue
         return self::$queues[$id] ?? null;
     }
 
-    public static function getReturn(int $id) : mixed
+    public static function getReturn(int $id) : ?Queue
     {
         return self::$returns[$id] ?? null;
     }
@@ -98,7 +106,7 @@ class EventQueue implements InterfaceEventQueue
                     break;
                 case StatusQueue::PENDING:
                     throw new EventQueueError(
-                        str_replace("%id%", $id, Error::QUEUE_STILL_PENDING)
+                        str_replace("%id%", "$id", Error::QUEUE_STILL_PENDING)
                     );
             }
 
@@ -108,7 +116,7 @@ class EventQueue implements InterfaceEventQueue
         else
         {
             throw new EventQueueError(
-                str_replace("%id%", $id, Error::QUEUE_NOT_FOUND)
+                str_replace("%id%", "$id", Error::QUEUE_NOT_FOUND)
             );
         }
     }
@@ -134,20 +142,6 @@ class EventQueue implements InterfaceEventQueue
                 }
             }
         }
-    }
-
-    /**
-     * @throws Throwable
-     */
-    private static function queueFulfilled(int $id) : bool
-    {
-        $queue = self::getQueue($id);
-        if ($queue !== null)
-        {
-            $status = $queue->getStatus();
-            return $status === StatusQueue::FULFILLED || $status === StatusQueue::REJECTED;
-        }
-        return false;
     }
 
     /**
@@ -275,7 +269,7 @@ class EventQueue implements InterfaceEventQueue
         else
         {
             throw new EventQueueError(
-                str_replace("%id%", $id, Error::QUEUE_NOT_FOUND)
+                str_replace("%id%", "$id", Error::QUEUE_NOT_FOUND)
             );
         }
     }
@@ -298,24 +292,21 @@ class EventQueue implements InterfaceEventQueue
     {
         foreach (self::$queues as $id => $queue)
         {
-            if ($queue instanceof Queue)
+            if (self::shouldCheckStatus($queue))
             {
-                
-                if (self::shouldCheckStatus($queue))
-                {
-                    self::checkStatus($id);
-                }
+                self::checkStatus($id);
+            }
 
-                // If the queue is still pending after 10 seconds of timeout, reject it.
-                // If you encounter this problem, your current promise trick is too bad.
-                if (self::shouldCheckStatus($queue, self::TIME_OUT))
-                {
-                    self::rejectQueue(
-                        $id, str_replace("%id%", $id, Error::QUEUE_IS_TIMEOUT)
-                    );
-                }
+            // If the queue is still pending after 10 seconds of timeout, reject it.
+            // If you encounter this problem, your current promise trick is too bad.
+            if (self::shouldCheckStatus($queue, self::TIME_OUT))
+            {
+                self::rejectQueue(
+                    $id, str_replace("%id%", "$id", Error::QUEUE_IS_TIMEOUT)
+                );
             }
         }
+        
         foreach (self::$returns as $id => $queue)
         {
             $canDrop = $queue->canDrop();

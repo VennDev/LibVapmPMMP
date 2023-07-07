@@ -12,15 +12,34 @@ final class Queue
     private const MAIN_QUEUE = "Main";
 
     private float $timeStart;
+
     private float $timeDrop;
+
     private mixed $return;
+
+    /**
+     * @var array<callable>
+     */
     private array $callableResolve;
+
+    /**
+     * @var array<callable>
+     */
     private array $callableReject;
+
     private mixed $returnResolve;
+
     private mixed $returnReject;
+
+    /**
+     * @var array<callable|Async|Promise>
+     */
     private array $waitingPromises = [];
+
     private bool $isRacePromise = false;
+
     private bool $isAnyPromise = false;
+
     private bool $isAllSettled = false;
 
     public function __construct(
@@ -88,9 +107,11 @@ final class Queue
 
     private function getResult(Fiber $fiber) : mixed
     {
+        $timeStart = microtime(true);
+
         while (!$fiber->isTerminated())
         {
-            if ($fiber->isTerminated())
+            if (microtime(true) - $timeStart > $this->timeDrop)
             {
                 break;
             }
@@ -110,39 +131,53 @@ final class Queue
         return $result;
     }
 
-    private function checkStatus(string $callableFc, string $return) : void
+    /**
+     * @throws Throwable
+     * @param array<callable> $callableFc
+     */
+    private function checkStatus(array $callableFc, mixed $return) : void
     {
-        while (count($this->{"$callableFc"}) > 0)
+        while (count($callableFc) > 0)
         {
             $firstCheck = false;
             $cancel = false;
 
-            foreach ($this->{"$callableFc"} as $id => $callable)
+            foreach ($callableFc as $id => $callable)
             {
-                if ($this->{"$return"} === null) 
+                if ($return === null)
                 {
                     $cancel = true;
                     break;
                 }
                 if (
                     $id !== self::MAIN_QUEUE && 
-                    $this->{"$return"} instanceof Promise && 
+                    $return instanceof Promise &&
                     !$firstCheck
                 )
                 {
-                    EventQueue::getQueue($this->{"$return"}->getId())->setCallableResolve($callable);
+                    $queue = EventQueue::getQueue($return->getId());
+
+                    if (!is_null($queue))
+                    {
+                        $queue->setCallableResolve($callable);
+                    }
                     $firstCheck = true;
                 }
                 elseif (
                     $id !== self::MAIN_QUEUE && 
-                    $this->{"$return"} instanceof Promise
+                    $return instanceof Promise
                 )
                 {
-                    EventQueue::getQueue($this->{"$return"}->getId())->then($callable);
-                    unset($this->{"$callableFc"}[$id]);
+                    $queue = EventQueue::getQueue($return->getId());
+
+                    if (!is_null($queue)) {
+                        $queue->then($callable);
+                    }
+
+                    unset($callableFc[$id]);
                     continue;
                 }
-                if (count($this->{"$callableFc"}) === 1)
+                if (count($callableFc) === 1)
                 {
                     $cancel = true;
                 }
@@ -180,11 +215,11 @@ final class Queue
 
             $this->returnResolve = $this->getResult($fiber);
 
-            $this->checkStatus("callableResolve", "returnResolve");
+            $this->checkStatus($this->callableResolve, $this->returnResolve);
         }
     }
 
-    public function setCallableResolve(mixed $callableResolve) : Queue
+    public function setCallableResolve(callable $callableResolve) : Queue
     {
         $this->callableResolve[self::MAIN_QUEUE] = $callableResolve;
         return $this;
@@ -212,11 +247,11 @@ final class Queue
 
             $this->returnReject = $this->getResult($fiber);
 
-            $this->checkStatus("callableReject", "returnReject");
+            $this->checkStatus($this->callableReject, $this->returnReject);
         }
     }
 
-    public function setCallableReject(mixed $callableReject) : Queue
+    public function setCallableReject(callable $callableReject) : Queue
     {
         $this->callableReject[self::MAIN_QUEUE] = $callableReject;
         return $this;
@@ -261,11 +296,15 @@ final class Queue
         return (microtime(true) - $this->timeStart) > $this->timeDrop;
     }
 
+    /** @return  array<callable|Async|Promise> */
     public function getWaitingPromises() : array
     {
         return $this->waitingPromises;
     }
 
+    /**
+     * @param array<callable|Async|Promise> $waitingPromises
+     */
     public function setWaitingPromises(array $waitingPromises) : void
     {
         $this->waitingPromises = $waitingPromises;
@@ -308,6 +347,31 @@ final class Queue
 
     /**
      * @throws Throwable
+     * @return array<PromiseResult>
+     */
+    private function checkPromise(Async|Promise $promise) : array
+    {
+        $results = [];
+        $queue = EventQueue::getReturn($promise->getId());
+
+        if (!is_null($queue))
+        {
+            if ($queue->getStatus() === StatusQueue::FULFILLED)
+            {
+                $results[] = new PromiseResult($queue->getReturn(), $queue->getStatus());
+            }
+
+            if ($queue->getStatus() === StatusQueue::REJECTED)
+            {
+                $results[] = new PromiseResult($queue->getReturn(), $queue->getStatus());
+            }
+        }
+
+        return $results;
+    }
+
+    /**
+     * @throws Throwable
      */
     public function hasCompletedAllPromise() : bool
     {
@@ -322,9 +386,11 @@ final class Queue
                 $fiber = new Fiber($value);
                 $fiber->start();
 
+                $timeStart = microtime(true);
+
                 while (!$fiber->isTerminated())
                 {
-                    if ($fiber->isTerminated())
+                    if ((microtime(true) - $timeStart) > $this->timeDrop)
                     {
                         break;
                     }
@@ -333,27 +399,14 @@ final class Queue
                 $result = $fiber->getReturn();
             }
 
-            if (
-                $value instanceof Promise || 
-                $value instanceof Async ||
-                $result instanceof Promise || 
-                $result instanceof Async
-            )
+            if ($value instanceof Promise || $value instanceof Async)
             {
-                $queue = EventQueue::getReturn($value->getId());
+                $results = array_merge($results, $this->checkPromise($value));
+            }
 
-                if (!is_null($queue))
-                {
-                    if ($queue->getStatus() === StatusQueue::FULFILLED)
-                    {
-                        $results[] = new PromiseResult($queue->getReturn(), $queue->getStatus());
-                    }
-
-                    if ($queue->getStatus() === StatusQueue::REJECTED)
-                    {
-                        $results[] = new PromiseResult($queue->getReturn(), $queue->getStatus());
-                    }
-                }
+            if ($result instanceof Promise || $result instanceof Async)
+            {
+                $results = array_merge($results, $this->checkPromise($result));
             }
         }
 
@@ -365,10 +418,13 @@ final class Queue
             !$this->isAnyPromise()
         )
         {
+            $resultPromise = [];
             foreach ($results as $result)
             {
-                $this->return[] = $result->getResult();
+                $resultPromise[] = $result->getResult();
             }
+
+            $this->return = $resultPromise;
             $this->setStatus(StatusQueue::FULFILLED);
             $return = true;
         }
@@ -394,12 +450,15 @@ final class Queue
                 }
             }
 
+            $resultPromise = [];
             if (!$haveRejected)
             {
                 foreach ($results as $result)
                 {
-                    $this->return[] = $result->getResult();
+                    $resultPromise[] = $result->getResult();
                 }
+
+                $this->return = $resultPromise;
                 $this->setStatus(StatusQueue::FULFILLED);
                 $return = true;
             }

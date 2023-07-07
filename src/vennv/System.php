@@ -21,14 +21,28 @@ final class System extends EventQueue implements InterfaceSystem
         return new Promise(function($resolve, $reject) use ($url, $options) 
         {
             $ch = curl_init($url);
-            curl_setopt_array($ch, $options);
-            $result = curl_exec($ch);
-            if (curl_errno($ch)) {
-                $reject(curl_error($ch));
-            } else {
-                $resolve($result);
+
+            if ($ch === false)
+            {
+                $reject('Failed to initialize cURL');
             }
-            curl_close($ch);
+            else
+            {
+                curl_setopt_array($ch, $options);
+
+                $result = curl_exec($ch);
+
+                if (curl_errno($ch) !== 0)
+                {
+                    $reject(curl_error($ch));
+                }
+                else
+                {
+                    $resolve($result);
+                }
+
+                curl_close($ch);
+            }
         });
     }
 
@@ -37,9 +51,12 @@ final class System extends EventQueue implements InterfaceSystem
         return new Promise(function($resolve, $reject) use ($url) 
         {
             $ch = file_get_contents($url);
-            if ($ch === false) {
+            if ($ch === false)
+            {
                 $reject("Error in fetching data!");
-            } else {
+            }
+            else
+            {
                 $resolve($ch);
             }
         });

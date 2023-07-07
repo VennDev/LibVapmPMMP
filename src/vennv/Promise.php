@@ -24,70 +24,119 @@ final class Promise implements InterfacePromise
         );
     }
 
-    public function then(callable $callable) : Queue
+    public function then(callable $callable) : ?Queue
     {
-        EventQueue::getQueue($this->id)->setCallableResolve($callable);
-        return EventQueue::getQueue($this->id)->thenPromise($callable);
+        $queue = EventQueue::getQueue($this->id);
+
+        if (!is_null($queue))
+        {
+            $queue->setCallableResolve($callable);
+            return $queue->thenPromise($callable);
+        }
+
+        return null;
     }
 
-    public function catch(callable $callable) : Queue
+    public function catch(callable $callable) : ?Queue
     {
-        EventQueue::getQueue($this->id)->setCallableReject($callable);
-        return EventQueue::getQueue($this->id)->catchPromise($callable);
+        $queue = EventQueue::getQueue($this->id);
+
+        if (!is_null($queue))
+        {
+            $queue->setCallableReject($callable);
+            return $queue->catchPromise($callable);
+        }
+
+        return null;
     }
 
     public static function resolve(int $id, mixed $result) : void
     {
-        EventQueue::getQueue($id)->setReturn($result);
-        EventQueue::getQueue($id)->setStatus(StatusQueue::FULFILLED);
+        $queue = EventQueue::getQueue($id);
+
+        if (!is_null($queue)) {
+            $queue->setReturn($result);
+            $queue->setStatus(StatusQueue::FULFILLED);
+        }
     }
 
     public static function reject(int $id, mixed $result) : void
     {
-        EventQueue::getQueue($id)->setReturn($result);
-        EventQueue::getQueue($id)->setStatus(StatusQueue::REJECTED);
+        $queue = EventQueue::getQueue($id);
+
+        if (!is_null($queue)) {
+            $queue->setReturn($result);
+            $queue->setStatus(StatusQueue::REJECTED);
+        }
     }
 
     /**
      * @throws Throwable
+     * @param array<callable|Async|Promise> $promises
      */
     public static function all(array $promises) : Promise
     {
         $promise = new Promise(function($resolve, $reject) {}, true);
-        EventQueue::getQueue($promise->getId())->setWaitingPromises($promises);
+        $queue = EventQueue::getQueue($promise->getId());
+
+        if (!is_null($queue))
+        {
+            $queue->setWaitingPromises($promises);
+        }
+
         return $promise;
     }
 
     /**
      * @throws Throwable
+     * @param array<callable|Async|Promise> $promises
      */
     public static function race(array $promises) : Promise
     {
         $promise = new Promise(function($resolve, $reject) {}, true);
-        EventQueue::getQueue($promise->getId())->setWaitingPromises($promises);
-        EventQueue::getQueue($promise->getId())->setRacePromise(true);
+        $queue = EventQueue::getQueue($promise->getId());
+
+        if (!is_null($queue)) {
+            $queue->setWaitingPromises($promises);
+            $queue->setRacePromise(true);
+        }
+
         return $promise;
     }
 
     /**
      * @throws Throwable
+     * @param array<callable|Async|Promise> $promises
      */
     public static function any(array $promises) : Promise
     {
         $promise = new Promise(function($resolve, $reject) {}, true);
-        EventQueue::getQueue($promise->getId())->setWaitingPromises($promises);
-        EventQueue::getQueue($promise->getId())->setAnyPromise(true);
+        $queue = EventQueue::getQueue($promise->getId());
+
+        if (!is_null($queue))
+        {
+            $queue->setWaitingPromises($promises);
+            $queue->setAnyPromise(true);
+        }
+
         return $promise;
     }
 
     /**
      * @throws Throwable
+     * @param array<callable|Async|Promise> $promises
      */
     public static function allSettled(array $promises) : Promise
     {
         $promise = new Promise(function($resolve, $reject) {}, true);
-        EventQueue::getQueue($promise->getId())->setWaitingPromises($promises);
-        EventQueue::getQueue($promise->getId())->setAllSettled(true);
+        $queue = EventQueue::getQueue($promise->getId());
+
+        if (!is_null($queue))
+        {
+            $queue->setWaitingPromises($promises);
+            $queue->setAllSettled(true);
+        }
+
         return $promise;
     }
 

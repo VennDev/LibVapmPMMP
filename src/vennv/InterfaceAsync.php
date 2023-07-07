@@ -10,7 +10,7 @@ interface InterfaceAsync
     /**
      * This method is used to await a promise.
      */
-    public static function await(mixed $callable) : mixed;
+    public static function await(callable|Promise|Async $callable) : mixed;
 
     /**
      * @throws Throwable
