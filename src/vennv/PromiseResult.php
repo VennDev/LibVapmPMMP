@@ -6,8 +6,8 @@ final class PromiseResult
 {
 
     public function __construct(
-        private readonly mixed $result,
-        private readonly StatusQueue $status
+        private mixed $result,
+        private StatusQueue $status
     )
     {}
 
