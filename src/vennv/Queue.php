@@ -43,12 +43,12 @@ final class Queue
     private bool $isAllSettled = false;
 
     public function __construct(
-        private readonly int $id,
-        private readonly Fiber $fiber,
-        private readonly float $timeOut,
+        private int $id,
+        private Fiber $fiber,
+        private float $timeOut,
         private StatusQueue $status,
-        private readonly bool $isPromise,
-        private readonly bool $isPromiseAll = false
+        private bool $isPromise,
+        private bool $isPromiseAll = false
     )
     {
         $this->timeStart = microtime(true);
