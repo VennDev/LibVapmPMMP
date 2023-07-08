@@ -13,7 +13,27 @@ final class System extends EventQueue implements InterfaceSystem
      */
     public static function setTimeout(callable $callable, int $timeout) : void
     {
-        parent::addQueue(new Fiber($callable), false, Utils::milliSecsToSecs($timeout));
+        parent::addQueue(
+            new Fiber($callable), 
+            $callable,
+            false, 
+            false, 
+            Utils::milliSecsToSecs($timeout)
+        );
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public static function setInterval(callable $callable, int $interval): void
+    {
+        parent::addQueue(
+            new Fiber($callable), 
+            $callable,
+            false, 
+            true, 
+            Utils::milliSecsToSecs($interval)
+        );
     }
 
     public static function fetch(string $url, array $options = [CURLOPT_RETURNTRANSFER => true]) : Promise 

@@ -14,6 +14,13 @@ interface InterfaceSystem {
     public static function setTimeout(callable $callable, int $timeout) : void;
 
     /**
+     * @throws Throwable
+     *
+     * This method is used to run repeatable callback after a certain amount of time.
+     */
+    public static function setInterval(callable $callable, int $interval) : void;
+
+    /**
      * @param array<int, mixed> $options
      *
      * This method is used to fetch data from an url.

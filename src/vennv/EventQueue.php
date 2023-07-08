@@ -52,7 +52,9 @@ class EventQueue implements InterfaceEventQueue
      */
     public static function addQueue(
         Fiber $fiber,
+        callable $promiseCallable,
         bool $isPromise = false,
+        bool $isRepeatable = false,
         float $timeOut = 0.0
     ) : int
     {
@@ -61,9 +63,11 @@ class EventQueue implements InterfaceEventQueue
         self::$queues[$id] = new Queue(
             $id,
             $fiber,
+            $promiseCallable,
             $timeOut,
             StatusQueue::PENDING,
-            $isPromise
+            $isPromise,
+            $isRepeatable
         );
 
         return $id;
@@ -120,6 +124,21 @@ class EventQueue implements InterfaceEventQueue
                     throw new EventQueueError(
                         str_replace("%id%", "$id", Error::QUEUE_STILL_PENDING)
                     );
+            }
+
+            $callablePromise = $queue->getPromiseCallable();
+
+            if ($queue->isRepeatable() && is_callable($callablePromise))
+            {  
+                $fiber = new Fiber($callablePromise);
+
+                self::addQueue(
+                    $fiber,
+                    $callablePromise,
+                    $queue->isPromise(),
+                    $queue->isRepeatable(),
+                    $queue->getTimeOut()
+                );
             }
 
             self::$returns[$id] = $queue;

@@ -16,7 +16,13 @@ final class Async implements InterfaceAsync
      */
     public function __construct(callable $callable)
     {
-        $this->id = EventQueue::addQueue(new Fiber($callable));
+        $this->id = EventQueue::addQueue(
+            new Fiber($callable),
+            $callable,
+            false,
+            false,
+            0.0
+        );
 
         $queue = EventQueue::getQueue($this->id);
 
