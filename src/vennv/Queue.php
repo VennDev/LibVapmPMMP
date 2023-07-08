@@ -4,6 +4,7 @@ namespace vennv;
 
 use Exception;
 use Fiber;
+use pocketmine\block\Tripwire;
 use Throwable;
 
 final class Queue implements InterfaceQueue
@@ -206,14 +207,15 @@ final class Queue implements InterfaceQueue
                 return ($this->callableResolve[self::MAIN_QUEUE])($result);
             });
             
-            try 
-            {
-                $fiber->start();
-            } 
-            catch (Throwable | Exception $error) 
-            {
-                throw new QueueError($error->getMessage());
-            }
+            // try 
+            // {
+            //     $fiber->start();
+            // } 
+            // catch (Throwable | Exception $error) 
+            // {
+            //     throw new QueueError($error->getMessage());
+            // }
+            $fiber->start();
 
             unset($this->callableResolve[self::MAIN_QUEUE]);
 
@@ -240,14 +242,15 @@ final class Queue implements InterfaceQueue
                 return ($this->callableReject[self::MAIN_QUEUE])($result);
             });
             
-            try 
-            {
-                $fiber->start();
-            } 
-            catch (Throwable | Exception $error) 
-            {
-                throw new QueueError($error->getMessage());
-            }
+            // try 
+            // {
+            //     $fiber->start();
+            // } 
+            // catch (Throwable | Exception $error) 
+            // {
+            //     throw new QueueError($error->getMessage());
+            // }
+            $fiber->start();
 
             $this->returnReject = $this->getResult($fiber);
 
@@ -512,6 +515,7 @@ final class Queue implements InterfaceQueue
             if ($countRejected === count($this->waitingPromises))
             {
                 $error = new AggregateError(Error::ALL_PROMISES_WERE_REJECTED);
+                trigger_error($error->__toString(), E_USER_WARNING);
                 
                 $this->return = $error->__toString();
                 $this->setStatus(StatusQueue::REJECTED);
