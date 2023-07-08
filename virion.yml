@@ -1,5 +1,6 @@
 name: Vapm
 version: 1.0.0
 api: 5.0.0
+php: 8.1
 antigen: vennv
 author: VennV
