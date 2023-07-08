@@ -242,7 +242,7 @@ final class Queue implements InterfaceQueue
             } 
             catch (Throwable | Exception $error) 
             {
-                echo $error->getMessage();
+                // TODO: Error handler
             }
 
             $this->returnReject = $this->getResult($fiber);
