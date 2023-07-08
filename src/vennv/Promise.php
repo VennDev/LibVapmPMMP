@@ -80,7 +80,8 @@ final class Promise implements InterfacePromise
     {
         $queue = EventQueue::getQueue($id);
 
-        if (!is_null($queue)) {
+        if (!is_null($queue)) 
+        {
             $queue->setReturn($result);
             $queue->setStatus(StatusQueue::FULFILLED);
         }
@@ -90,7 +91,8 @@ final class Promise implements InterfacePromise
     {
         $queue = EventQueue::getQueue($id);
 
-        if (!is_null($queue)) {
+        if (!is_null($queue)) 
+        {
             $queue->setReturn($result);
             $queue->setStatus(StatusQueue::REJECTED);
         }
@@ -123,7 +125,8 @@ final class Promise implements InterfacePromise
         $promise = new Promise(function($resolve, $reject) {});
         $queue = EventQueue::getQueue($promise->getId());
 
-        if (!is_null($queue)) {
+        if (!is_null($queue)) 
+        {
             $queue->setWaitingPromises($promises);
             $queue->setRacePromise(true);
         }
