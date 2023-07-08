@@ -6,7 +6,7 @@ use Exception;
 use Fiber;
 use Throwable;
 
-final class Queue
+final class Queue implements InterfaceQueue
 {
 
     private const MAIN_QUEUE = "Main";
@@ -208,7 +208,7 @@ final class Queue
             } 
             catch (Throwable | Exception $error) 
             {
-                echo $error->getMessage();
+                // TODO: Add error handler
             }
 
             unset($this->callableResolve[self::MAIN_QUEUE]);
@@ -349,7 +349,7 @@ final class Queue
      * @throws Throwable
      * @return array<PromiseResult>
      */
-    private function checkPromise(Async|Promise $promise) : array
+    private function getResultPromise(Async|Promise $promise) : array
     {
         $results = [];
         $queue = EventQueue::getReturn($promise->getId());
@@ -373,7 +373,7 @@ final class Queue
     /**
      * @throws Throwable
      */
-    public function hasCompletedAllPromise() : bool
+    public function hasCompletedAllPromises() : bool
     {
         $return = false;
         $results = [];
@@ -401,12 +401,12 @@ final class Queue
 
             if ($value instanceof Promise || $value instanceof Async)
             {
-                $results = array_merge($results, $this->checkPromise($value));
+                $results = array_merge($results, $this->getResultPromise($value));
             }
 
             if ($result instanceof Promise || $result instanceof Async)
             {
-                $results = array_merge($results, $this->checkPromise($result));
+                $results = array_merge($results, $this->getResultPromise($result));
             }
         }
 

@@ -50,10 +50,24 @@ class EventQueue implements InterfaceEventQueue
     /**
      * @throws Throwable
      */
-    public static function addQueue(Fiber $fiber, bool $isPromise = false, bool $isPromiseAll = false, float $timeOut = 0.0) : int
+    public static function addQueue(
+        Fiber $fiber,
+        bool $isPromise = false,
+        bool $isPromiseAll = false,
+        float $timeOut = 0.0
+    ) : int
     {
         $id = self::generateId();
-        self::$queues[$id] = new Queue($id, $fiber, $timeOut, StatusQueue::PENDING, $isPromise, $isPromiseAll);
+
+        self::$queues[$id] = new Queue(
+            $id,
+            $fiber,
+            $timeOut,
+            StatusQueue::PENDING,
+            $isPromise,
+            $isPromiseAll
+        );
+
         return $id;
     }
 
@@ -259,7 +273,7 @@ class EventQueue implements InterfaceEventQueue
 
                 if ($queue->isPromiseAll())
                 {
-                    if ($queue->hasCompletedAllPromise())
+                    if ($queue->hasCompletedAllPromises())
                     {
                         self::fulfillPromise($id);
                     }

@@ -3,53 +3,57 @@
 namespace vennv;
 
 use Fiber;
-use Throwable;
 
 interface InterfaceEventQueue
 {
 
     /**
-     * @deprecated This method you should not use.
+     * This method to get the next id for the queue.
      */
     public static function getNextId() : int;
 
     /**
-     * @deprecated This method you should not use.
+     * This method to check if the id is the maximum.
      */
     public static function isMaxId() : bool;
 
     /**
-     * @deprecated This method you should not use.
+     * This method to add a queue.
      */
-    public static function addQueue(Fiber $fiber, bool $isPromise = false, bool $isPromiseAll = false, float $timeOut = 0.0) : int;
+    public static function addQueue(
+        Fiber $fiber,
+        bool $isPromise = false,
+        bool $isPromiseAll = false,
+        float $timeOut = 0.0
+    ) : int;
 
     /**
-     * @deprecated This method you should not use.
+     * This method to get a queue and check if it exists.
      */
     public static function getQueue(int $id) : ?Queue;
 
     /**
-     * @deprecated This method you should not use.
+     * This method to get result of a queue and check if it exists.
      */
     public static function getReturn(int $id) : mixed;
 
     /**
-     * @deprecated This method you should not use.
+     * This method to remove a result of a queue and check if it exists.
      */
     public static function unsetReturn(int $id) : void;
 
     /**
-     * @deprecated This method you should not use.
+     * This method to run a queue with id.
      */
     public static function runQueue(int $id) : void;
 
     /**
-     * @deprecated This method you should not use.
+     * This is method to reject a queue with result for id.
      */
     public static function rejectQueue(int $id, mixed $result) : void;
 
     /**
-     * @deprecated This method you should not use.
+     * This is method to fulfill a queue with result for id.
      */
     public static function fulfillQueue(int $id, mixed $result) : void;
 

@@ -24,7 +24,7 @@ final class System extends EventQueue implements InterfaceSystem
 
             if ($ch === false)
             {
-                $reject('Failed to initialize cURL');
+                $reject(Error::FAILED_TO_INITIALIZE_CURL);
             }
             else
             {
