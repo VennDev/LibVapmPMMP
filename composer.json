@@ -1,0 +1,28 @@
+{
+    "name": "nam/vapm-pmmp",
+    "autoload": {
+        "psr-4": {
+            "vennv\\": "src/vennv/"
+        }
+    },
+    "authors": [
+        {
+            "name": "VennDev",
+            "email": "1050080275@sv.hcmunre.edu.vn"
+        }
+    ],
+	"config": {
+	"allow-plugins": {
+		"phpstan/extension-installer": true
+	}
+    },
+    "require": {
+        "php": "^8.2"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "*"
+    },
+    "scripts": {
+	"analyse-src": "./vendor/bin/phpstan analyse -c phpstan.neon.dist"
+    }
+}
