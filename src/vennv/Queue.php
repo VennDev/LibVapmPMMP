@@ -44,11 +44,11 @@ final class Queue implements InterfaceQueue
     private bool $isPromiseAll = false;
 
     public function __construct(
-        private readonly int $id,
-        private readonly Fiber $fiber,
-        private readonly float $timeOut,
+        private int $id,
+        private Fiber $fiber,
+        private float $timeOut,
         private StatusQueue $status,
-        private readonly bool $isPromise
+        private bool $isPromise
     )
     {
         $this->timeStart = microtime(true);
