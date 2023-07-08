@@ -53,7 +53,6 @@ class EventQueue implements InterfaceEventQueue
     public static function addQueue(
         Fiber $fiber,
         bool $isPromise = false,
-        bool $isPromiseAll = false,
         float $timeOut = 0.0
     ) : int
     {
@@ -64,8 +63,7 @@ class EventQueue implements InterfaceEventQueue
             $fiber,
             $timeOut,
             StatusQueue::PENDING,
-            $isPromise,
-            $isPromiseAll
+            $isPromise
         );
 
         return $id;
@@ -266,14 +264,22 @@ class EventQueue implements InterfaceEventQueue
                 {
                     self::fulfillQueue($id, self::getResultFiber($fiber));
                 }
-                elseif ($queue->getStatus() !== StatusQueue::PENDING)
+                else
                 {
-                    self::fulfillPromise($id);
-                }
+                    $specialPromise =
+                        $queue->isPromiseAll() ||
+                        $queue->isAllSettled() ||
+                        $queue->isRacePromise() ||
+                        $queue->isAnyPromise();
 
-                if ($queue->isPromiseAll())
-                {
-                    if ($queue->hasCompletedAllPromises())
+                    if ($specialPromise)
+                    {
+                        if ($queue->hasCompletedAllPromises())
+                        {
+                            self::fulfillPromise($id);
+                        }
+                    }
+                    elseif ($queue->getStatus() !== StatusQueue::PENDING)
                     {
                         self::fulfillPromise($id);
                     }

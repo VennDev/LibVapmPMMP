@@ -13,14 +13,13 @@ final class Promise implements InterfacePromise
     /**
      * @throws Throwable
      */
-    public function __construct(callable $callback, bool $isPromiseAll = false)
+    public function __construct(callable $callback)
     {
         $fiber = new Fiber($callback);
 
         $this->id = EventQueue::addQueue(
             $fiber,
-            true,
-            $isPromiseAll
+            true
         );
     }
 
@@ -76,12 +75,13 @@ final class Promise implements InterfacePromise
      */
     public static function all(array $promises) : Promise
     {
-        $promise = new Promise(function($resolve, $reject) {}, true);
+        $promise = new Promise(function($resolve, $reject) {});
         $queue = EventQueue::getQueue($promise->getId());
 
         if (!is_null($queue))
         {
             $queue->setWaitingPromises($promises);
+            $queue->setPromiseAll(true);
         }
 
         return $promise;
@@ -93,7 +93,7 @@ final class Promise implements InterfacePromise
      */
     public static function race(array $promises) : Promise
     {
-        $promise = new Promise(function($resolve, $reject) {}, true);
+        $promise = new Promise(function($resolve, $reject) {});
         $queue = EventQueue::getQueue($promise->getId());
 
         if (!is_null($queue)) {
@@ -110,7 +110,7 @@ final class Promise implements InterfacePromise
      */
     public static function any(array $promises) : Promise
     {
-        $promise = new Promise(function($resolve, $reject) {}, true);
+        $promise = new Promise(function($resolve, $reject) {});
         $queue = EventQueue::getQueue($promise->getId());
 
         if (!is_null($queue))
@@ -128,7 +128,7 @@ final class Promise implements InterfacePromise
      */
     public static function allSettled(array $promises) : Promise
     {
-        $promise = new Promise(function($resolve, $reject) {}, true);
+        $promise = new Promise(function($resolve, $reject) {});
         $queue = EventQueue::getQueue($promise->getId());
 
         if (!is_null($queue))
