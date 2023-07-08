@@ -208,7 +208,7 @@ final class Queue implements InterfaceQueue
             } 
             catch (Throwable | Exception $error) 
             {
-                echo $error->getMessage();
+                trigger_error($error->getMessage(), E_USER_NOTICE);
             }
 
             unset($this->callableResolve[self::MAIN_QUEUE]);
@@ -242,7 +242,7 @@ final class Queue implements InterfaceQueue
             } 
             catch (Throwable | Exception $error) 
             {
-                echo $error->getMessage();
+                trigger_error($error->getMessage(), E_USER_NOTICE);
             }
 
             $this->returnReject = $this->getResult($fiber);
