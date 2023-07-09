@@ -1,32 +1,9 @@
 <?php
 
-/*
- * Copyright (c) 2023 VennV
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-
-declare(strict_types = 1);
-
 namespace vennv;
 
 use Fiber;
+use pocketmine\utils\Internet;
 use Throwable;
 
 final class System extends EventQueue implements InterfaceSystem
@@ -60,32 +37,20 @@ final class System extends EventQueue implements InterfaceSystem
         );
     }
 
-    public static function fetch(string $url, array $options = [CURLOPT_RETURNTRANSFER => true]) : Promise 
+    public static function fetch(string $url, array $options = []) : Promise
     {
         return new Promise(function($resolve, $reject) use ($url, $options) 
         {
-            $ch = curl_init($url);
-
-            if ($ch === false)
-            {
-                $reject(Error::FAILED_TO_INITIALIZE_CURL);
+            $method = $options["method"] ?? "GET";
+            if ($method === "GET") {
+                $result = Internet::getURL($url, $options["timeout"] ?? 10, $options["headers"] ?? []);
+            } else {
+                $result = Internet::postURL($url, $options["body"] ?? [], $options["timeout"] ?? 10, $options["headers"] ?? []);
             }
-            else
-            {
-                curl_setopt_array($ch, $options);
-
-                $result = curl_exec($ch);
-
-                if (curl_errno($ch) !== 0)
-                {
-                    $reject(curl_error($ch));
-                }
-                else
-                {
-                    $resolve($result);
-                }
-
-                curl_close($ch);
+            if ($result === null) {
+                $reject("Error in fetching data!");
+            } else {
+                $resolve($result);
             }
         });
     }
