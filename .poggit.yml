@@ -5,6 +5,4 @@ projects:
   VapmPMMP:
     model: virion
     type: library
-    lint:
-      phpstan: false
 ...
