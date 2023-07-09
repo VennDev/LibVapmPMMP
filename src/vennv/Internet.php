@@ -146,7 +146,7 @@ final class Internet
 
 		$curlHandle = curl_init($page);
 
-                if ($curlHandle === false)
+        if ($curlHandle === false)
 		{
 			throw new InternetException(
 				"Unable to create new cURL session"
@@ -191,7 +191,7 @@ final class Internet
 			$body = substr($raw, $headerSize);
 			$headers = [];
 
-                        foreach (explode("\r\n\r\n", $rawHeaders) as $rawHeaderGroup)
+            foreach (explode("\r\n\r\n", $rawHeaders) as $rawHeaderGroup)
 			{
 				$headerGroup = [];
 
@@ -203,6 +203,7 @@ final class Internet
 					{
 						$headerGroup[trim(strtolower($nameValue[0]))] = trim($nameValue[1]);
 					}
+
 				}
 
 				$headers[] = $headerGroup;
@@ -213,7 +214,7 @@ final class Internet
 				$onSuccess($curlHandle);
 			}
 
-                        return new InternetRequestResult($headers, $body, $httpCode);
+            return new InternetRequestResult($headers, $body, $httpCode);
 		}
 		finally
 		{
