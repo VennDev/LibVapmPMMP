@@ -43,6 +43,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           install-path: "./bin"
+          pm-version-major: "5"
           
       - name: Update Composer
         run: composer update
