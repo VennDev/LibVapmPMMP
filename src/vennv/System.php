@@ -66,14 +66,19 @@ final class System extends EventQueue implements InterfaceSystem
         return new Promise(function($resolve, $reject) use ($url, $options) 
         {
             $method = $options["method"] ?? "GET";
-            if ($method === "GET") {
+            if ($method === "GET") 
+            {
                 $result = Internet::getURL($url, $options["timeout"] ?? 10, $options["headers"] ?? []);
-            } else {
+            } else 
+            {
                 $result = Internet::postURL($url, $options["body"] ?? [], $options["timeout"] ?? 10, $options["headers"] ?? []);
             }
-            if ($result === null) {
+            if ($result === null) 
+            {
                 $reject("Error in fetching data!");
-            } else {
+            } 
+            else 
+            {
                 $resolve($result);
             }
         });
