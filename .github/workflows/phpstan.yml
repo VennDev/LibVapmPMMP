@@ -10,22 +10,46 @@ permissions:
   contents: read
 
 jobs:
+  build-php:
+    name: Prepare PHP
+    runs-on: ${{ matrix.image }}
+
+    strategy:
+      matrix:
+        image: [ubuntu-20.04]
+        php: ["8.2"]
+
+    steps:
+      - name: Build and prepare PHP cache
+        uses: pmmp/setup-php-action@2.0.0
+        with:
+          php-version: ${{ matrix.php }}
+          install-path: "./bin"
+          
   build:
     name: PHPStan analysis
+    needs: build-php
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        php:
-          - "8.2"
+        php: ["8.2"]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@2.21.1
+        uses: pmmp/setup-php-action@2.0.0
         with:
           php-version: ${{ matrix.php }}
+          install-path: "./bin"
+          pm-version-major: "5"
+          
+      - name: Update Composer
+        run: composer update
+
+      - name: Install Composer
+        run: curl -sS https://getcomposer.org/installer | php
 
       - name: Restore Composer package cache
         id: composer-cache
@@ -33,7 +57,8 @@ jobs:
         with:
           path: "~/.cache/composer"
           key: "php-${{ matrix.php }}-composer-${{ hashFiles('**/composer.json') }}"
-          restore-keys: "php-${{ matrix.php }}-composer-"
+          restore-keys: |
+            composer-v2-cache-
 
       - name: Install PHPStan Composer dependencies
         run: composer install --prefer-dist --no-interaction --ignore-platform-reqs
