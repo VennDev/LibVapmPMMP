@@ -60,16 +60,24 @@ final class System extends EventQueue implements InterfaceSystem
             Utils::milliSecsToSecs($interval)
         );
     }
-
+    /**
+     * @param array<string|null, string|array<mixed, mixed>> $options
+     */
     public static function fetch(string $url, array $options = []) : Promise
     {
         return new Promise(function($resolve, $reject) use ($url, $options) 
         {
             $method = $options["method"] ?? "GET";
+            /** @var array<int, string> $headers */
+            $headers = $options["headers"] ?? [];
+            /** @var int $timeout */
+            $timeout = $options["timeout"] ?? 10;
+            /** @var array<string, string> $body  */
+            $body = $options["body"] ?? [];
             if ($method === "GET") {
-                $result = Internet::getURL($url, $options["timeout"] ?? 10, $options["headers"] ?? []);
+                $result = Internet::getURL($url, $timeout, $headers);
             } else {
-                $result = Internet::postURL($url, $options["body"] ?? [], $options["timeout"] ?? 10, $options["headers"] ?? []);
+                $result = Internet::postURL($url, $body, $timeout, $headers);
             }
             if ($result === null) {
                 $reject("Error in fetching data!");
