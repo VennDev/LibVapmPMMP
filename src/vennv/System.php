@@ -76,10 +76,10 @@ final class System extends EventQueue implements InterfaceSystem
             $body = $options["body"] ?? [];
             if ($method === "GET") 
             {
-                $result = Internet::getURL($url, $options["timeout"] ?? 10, $options["headers"] ?? []);
+                $result = Internet::getURL($url, $timeout, $headers);
             } else 
             {
-                $result = Internet::postURL($url, $options["body"] ?? [], $options["timeout"] ?? 10, $options["headers"] ?? []);
+                $result = Internet::postURL($url, $body, $timeout, $headers);
             }
             if ($result === null) 
             {
