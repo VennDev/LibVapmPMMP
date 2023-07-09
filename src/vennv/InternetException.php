@@ -26,12 +26,25 @@ declare(strict_types = 1);
 
 namespace vennv;
 
-final class Utils
+use TypeError;
+
+final class InternetException extends TypeError
 {
 
-    public static function milliSecsToSecs(float $milliSecs) : float
+    public function __construct(
+        protected string $errorMessage,
+        protected int $errorCode = 0
+    )
     {
-        return $milliSecs / 1000;
+        parent::__construct(
+            $this->errorMessage,
+            $this->errorCode
+        );
+    }
+
+    public function __toString() : string
+    {
+        return __CLASS__ . ": [$this->errorCode]: $this->errorMessage\n";
     }
 
 }

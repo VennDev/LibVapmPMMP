@@ -26,12 +26,23 @@ declare(strict_types = 1);
 
 namespace vennv;
 
-final class Utils
+final class SamplePromise
 {
 
-    public static function milliSecsToSecs(float $milliSecs) : float
+    public function __construct(
+        private readonly Promise $promise,
+        private readonly ?Queue  $queue = null
+    )
+    {}
+
+    public function getPromise() : Promise
     {
-        return $milliSecs / 1000;
+        return $this->promise;
+    }
+
+    public function getQueue() : ?Queue
+    {
+        return $this->queue;
     }
 
 }

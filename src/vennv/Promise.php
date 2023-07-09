@@ -15,7 +15,7 @@
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
@@ -104,8 +104,10 @@ final class Promise implements InterfacePromise
      */
     public static function all(array $promises) : Promise
     {
-        $promise = new Promise(function($resolve, $reject) {});
-        $queue = EventQueue::getQueue($promise->getId());
+        $samplePromise = self::createEmptyPromise();
+
+        $queue = $samplePromise->getQueue();
+        $promise = $samplePromise->getPromise();
 
         if (!is_null($queue))
         {
@@ -122,8 +124,10 @@ final class Promise implements InterfacePromise
      */
     public static function race(array $promises) : Promise
     {
-        $promise = new Promise(function($resolve, $reject) {});
-        $queue = EventQueue::getQueue($promise->getId());
+        $samplePromise = self::createEmptyPromise();
+
+        $queue = $samplePromise->getQueue();
+        $promise = $samplePromise->getPromise();
 
         if (!is_null($queue)) 
         {
@@ -140,8 +144,10 @@ final class Promise implements InterfacePromise
      */
     public static function any(array $promises) : Promise
     {
-        $promise = new Promise(function($resolve, $reject) {});
-        $queue = EventQueue::getQueue($promise->getId());
+        $samplePromise = self::createEmptyPromise();
+
+        $queue = $samplePromise->getQueue();
+        $promise = $samplePromise->getPromise();
 
         if (!is_null($queue))
         {
@@ -158,8 +164,10 @@ final class Promise implements InterfacePromise
      */
     public static function allSettled(array $promises) : Promise
     {
-        $promise = new Promise(function($resolve, $reject) {});
-        $queue = EventQueue::getQueue($promise->getId());
+        $samplePromise = self::createEmptyPromise();
+
+        $queue = $samplePromise->getQueue();
+        $promise = $samplePromise->getPromise();
 
         if (!is_null($queue))
         {
@@ -168,6 +176,17 @@ final class Promise implements InterfacePromise
         }
 
         return $promise;
+    }
+
+    /**
+     * @throws Throwable
+     */
+    private static function createEmptyPromise() : SamplePromise
+    {
+        $promise = new Promise(function($resolve, $reject) {});
+        $queue = EventQueue::getQueue($promise->getId());
+
+        return new SamplePromise($promise, $queue);
     }
 
     public function getId() : int

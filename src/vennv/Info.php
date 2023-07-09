@@ -26,12 +26,15 @@ declare(strict_types = 1);
 
 namespace vennv;
 
-final class Utils
+class Info
 {
 
-    public static function milliSecsToSecs(float $milliSecs) : float
-    {
-        return $milliSecs / 1000;
-    }
+    public const VERSION = "0.0.1";
+
+    public const AUTHOR = "VennV";
+
+    public const LICENSE = "MIT";
+
+    public const GITHUB = "https://github.com/VennDev";
 
 }

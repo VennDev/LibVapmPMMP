@@ -15,7 +15,7 @@
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
@@ -45,13 +45,18 @@ interface InterfaceSystem {
     public static function setInterval(callable $callable, int $interval) : void;
 
     /**
-     * @param array<int, mixed> $options
+     * @param string $url
+     * @param array<string|null, string|array> $options
+     * @return Promise when Promise resolve InternetRequestResult and when Promise reject Error
+     * @throws Throwable
+     * @phpstan-param array{method?: string, headers?: array<int, string>, timeout?: int, body?: array<string, string>} $options
      *
      * This method is used to fetch data from an url.
      */
-    public static function fetch(string $url, array $options = [CURLOPT_RETURNTRANSFER => true]) : Promise;
+    public static function fetch(string $url, array $options = []) : Promise;
 
     /**
+     * @throws Throwable
      * This method is used to fetch data from an url. But it uses file_get_contents() instead of curl.
      */
     public static function fetchJg(string $url) : Promise;
