@@ -9,8 +9,17 @@
 ```php
 protected function onEnable() : void
 {
-		VapmPMMP::init($this);
+    VapmPMMP::init($this);
 }
+```
+- What is VapmPMMP::init($this) ?
+```php
+/**
+* @param PluginBase $plugin
+*
+* This method is called by VapmPMMP::init(), it will run event loop.
+*/
+public static function init(PluginBase $plugin) : void;
 ```
 - Finally, just use the methods in this: [here](https://github.com/VennDev/Vapm/blob/main/README.md)
 - This is plugin Example: [plugin](https://github.com/VennDev/SimplifyLibasynql/tree/main/Examples/Test)
