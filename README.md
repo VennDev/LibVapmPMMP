@@ -1,4 +1,4 @@
-# VapmPMMP
+# LibVapmPMMP
 - This is Virion Async/Promise for PocketMine-PMMP
 
 # How to setup ?
