@@ -2,7 +2,7 @@
     "name": "nam/vapm-pmmp",
     "autoload": {
         "psr-4": {
-            "vennv\\": "src/vennv/"
+            "vennv\\vapm\\": "src/vennv/vapm/"
         }
     },
     "authors": [
