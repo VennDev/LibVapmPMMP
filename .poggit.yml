@@ -2,7 +2,7 @@
 branches:
 - main
 projects:
-  VapmPMMP:
+  LibVapmPMMP:
     model: virion
     type: library
 ...
