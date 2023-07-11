@@ -120,7 +120,7 @@ final class System extends EventLoop implements SystemInterface
                 {
                     $resolve($result);
                 }
-            }, 500);
+            }, 0);
         });
     }
 
@@ -143,7 +143,7 @@ final class System extends EventLoop implements SystemInterface
                 {
                     $resolve($ch);
                 }
-            }, 500);
+            }, 0);
         });
     }
 
