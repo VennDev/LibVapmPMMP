@@ -33,6 +33,6 @@ final class Settings
      * The time in seconds to check should drop the promise if the promise is not resolved or rejected
      * in the specified time.
      */
-    public const TIME_DROP = 5;
+    public const TIME_DROP = 15;
 
 }

@@ -378,12 +378,12 @@ final class Promise implements PromiseInterface
                             }
                         }
                     }
-                }
 
-                if (count($results) === count($promises))
-                {
-                    $resolve($results);
-                    $isSolved = true;
+                    if (count($results) === count($promises))
+                    {
+                        $resolve($results);
+                        $isSolved = true;
+                    }
                 }
 
                 if ($isSolved === false)
@@ -425,15 +425,15 @@ final class Promise implements PromiseInterface
 
                         if ($return !== null)
                         {
-                            $results[] = $return;
+                            $results[] = $return->getResult();
                         }
                     }
-                }
 
-                if (count($results) === count($promises))
-                {
-                    $resolve($results);
-                    $isSolved = true;
+                    if (count($results) === count($promises))
+                    {
+                        $resolve($results);
+                        $isSolved = true;
+                    }
                 }
 
                 if ($isSolved === false)
@@ -487,12 +487,12 @@ final class Promise implements PromiseInterface
                             }
                         }
                     }
-                }
 
-                if (count($results) === count($promises))
-                {
-                    $reject($results);
-                    $isSolved = true;
+                    if (count($results) === count($promises))
+                    {
+                        $reject($results);
+                        $isSolved = true;
+                    }
                 }
 
                 if ($isSolved === false)
