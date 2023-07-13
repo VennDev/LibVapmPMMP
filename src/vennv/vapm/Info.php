@@ -29,7 +29,7 @@ namespace vennv\vapm;
 class Info
 {
 
-    public const VERSION = "1.5.0";
+    public const VERSION = "1.5.7";
 
     public const AUTHOR = "VennV";
 

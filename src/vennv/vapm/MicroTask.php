@@ -27,6 +27,7 @@ declare(strict_types = 1);
 namespace vennv\vapm;
 
 use Throwable;
+use function microtime;
 
 final class MicroTask
 {

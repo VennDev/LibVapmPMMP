@@ -28,6 +28,7 @@ namespace vennv\vapm;
 
 use Fiber;
 use Throwable;
+use function is_null;
 
 final class FiberManager
 {

@@ -26,54 +26,35 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
-use Throwable;
-use function is_callable;
-
-final class Async implements AsyncInterface
+interface StatusThreadInterface
 {
 
-    private int $id;
+    /**
+     * @return int|float
+     *
+     * This method is used to get the time sleeping.
+     */
+    public function getTimeSleeping(): int|float;
 
     /**
-     * @throws Throwable
+     * @return int|float
+     *
+     * This method is used to get the sleep start time.
      */
-    public function __construct(callable $callback)
-    {
-        $promise = new Promise($callback, true);
-        $this->id = $promise->getId();
-    }
-
-    public function getId(): int
-    {
-        return $this->id;
-    }
+    public function getSleepStartTime(): int|float;
 
     /**
-     * @throws Throwable
+     * @param int|float $seconds
+     *
+     * This method is used to sleep the thread.
      */
-    public static function await(Promise|Async|callable $await): mixed
-    {
-        $result = null;
+    public function sleep(int|float $seconds): void;
 
-        if (is_callable($await))
-        {
-            $await = new Async($await);
-        }
-
-        $return = EventLoop::getReturn($await->getId());
-
-        while ($return === null)
-        {
-            $return = EventLoop::getReturn($await->getId());
-            FiberManager::wait();
-        }
-
-        if ($return instanceof Promise)
-        {
-            $result = $return->getResult();
-        }
-
-        return $result;
-    }
+    /**
+     * @return bool
+     *
+     * This method is used to check if the thread can wake up.
+     */
+    public function canWakeUp(): bool;
 
 }

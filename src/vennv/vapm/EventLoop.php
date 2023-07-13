@@ -27,6 +27,8 @@ declare(strict_types = 1);
 namespace vennv\vapm;
 
 use Throwable;
+use function count;
+use const PHP_INT_MAX;
 
 class EventLoop implements EventLoopInterface
 {
@@ -125,6 +127,11 @@ class EventLoop implements EventLoopInterface
      */
     protected static function run(): void
     {
+        if (count(GreenThread::getFibers()) > 0)
+        {
+            GreenThread::run();
+        }
+
         foreach (self::$queues as $id => $promise)
         {
             $fiber = $promise->getFiber();
@@ -163,7 +170,7 @@ class EventLoop implements EventLoopInterface
      */
     protected static function runSingle(): void
     {
-        while (count(self::$queues) > 0 || count(MicroTask::getTasks()) > 0 || count(MacroTask::getTasks()) > 0)
+        while (count(self::$queues) > 0 || count(MicroTask::getTasks()) > 0 || count(MacroTask::getTasks()) > 0 || count(GreenThread::getFibers()) > 0)
         {
             self::run();
         }

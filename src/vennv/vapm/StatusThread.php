@@ -26,54 +26,38 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
-use Throwable;
-use function is_callable;
+use function microtime;
 
-final class Async implements AsyncInterface
+final class StatusThread implements StatusThreadInterface
 {
 
-    private int $id;
+    private int|float $timeSleeping = 0;
 
-    /**
-     * @throws Throwable
-     */
-    public function __construct(callable $callback)
+    private int|float $sleepStartTime;
+
+    public function __construct()
     {
-        $promise = new Promise($callback, true);
-        $this->id = $promise->getId();
+        $this->sleepStartTime = microtime(true);
     }
 
-    public function getId(): int
+    public function getTimeSleeping(): int|float
     {
-        return $this->id;
+        return $this->timeSleeping;
     }
 
-    /**
-     * @throws Throwable
-     */
-    public static function await(Promise|Async|callable $await): mixed
+    public function getSleepStartTime(): int|float
     {
-        $result = null;
+        return $this->sleepStartTime;
+    }
 
-        if (is_callable($await))
-        {
-            $await = new Async($await);
-        }
+    public function sleep(int|float $seconds): void
+    {
+        $this->timeSleeping += $seconds;
+    }
 
-        $return = EventLoop::getReturn($await->getId());
-
-        while ($return === null)
-        {
-            $return = EventLoop::getReturn($await->getId());
-            FiberManager::wait();
-        }
-
-        if ($return instanceof Promise)
-        {
-            $result = $return->getResult();
-        }
-
-        return $result;
+    public function canWakeUp(): bool
+    {
+        return microtime(true) - $this->sleepStartTime >= $this->timeSleeping;
     }
 
 }

@@ -26,6 +26,8 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
+use const PHP_INT_MAX;
+
 final class MacroTask
 {
 

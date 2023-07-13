@@ -28,6 +28,10 @@ namespace vennv\vapm;
 
 use Fiber;
 use Throwable;
+use function count;
+use function microtime;
+use function is_callable;
+use function call_user_func;
 
 final class Promise implements PromiseInterface
 {

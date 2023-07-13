@@ -27,6 +27,7 @@ declare(strict_types = 1);
 namespace vennv\vapm;
 
 use Throwable;
+use function file_get_contents;
 
 final class System extends EventLoop implements SystemInterface
 {

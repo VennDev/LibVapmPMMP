@@ -26,6 +26,9 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
+use function call_user_func;
+use function microtime;
+
 final class SampleMacro implements SampleMacroInterface
 {
 
