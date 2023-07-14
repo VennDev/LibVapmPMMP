@@ -110,6 +110,14 @@ final class Promise implements PromiseInterface
         EventLoop::addQueue($this);
     }
 
+    /**
+     * @throws Throwable
+     */
+    public static function c(callable $callback, bool $justGetResult = false): Promise
+    {
+        return new self($callback, $justGetResult);
+    }
+
     public function getId(): int
     {
         return $this->id;
