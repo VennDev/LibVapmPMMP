@@ -45,7 +45,7 @@ final class VapmPMMP
                 {
                     System::runEventLoop();
                 }
-            ), 20);
+            ), 1);
         }
     }
 
