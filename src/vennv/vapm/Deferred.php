@@ -55,12 +55,7 @@ final class Deferred implements DeferredInterface
             $this->childCoroutine->run();
         }
 
-        if ($this->childCoroutine->isFinished())
-        {
-            return $this->childCoroutine->getReturn();
-        }
-
-        return $this->childCoroutine;
+        return $this->childCoroutine->getReturn();
     }
 
 }
