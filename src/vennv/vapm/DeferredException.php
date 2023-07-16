@@ -26,36 +26,25 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
-use Generator;
+use TypeError;
 
-final class Deferred implements DeferredInterface
+final class DeferredException extends TypeError
 {
 
-    protected ChildCoroutine $childCoroutine;
-
-    public function __construct(callable $callback)
+    public function __construct(
+        protected string $errorMessage,
+        protected int $errorCode = 0
+    )
     {
-        $generator = call_user_func($callback);
-
-        if ($generator instanceof Generator)
-        {
-            $this->childCoroutine = new ChildCoroutine(0, $generator);
-        }
-        else
-        {
-            throw new DeferredException("Deferred callback must return a Generator");
-        }
+        parent::__construct(
+            $this->errorMessage,
+            $this->errorCode
+        );
     }
 
-    public function await(): mixed
+    public function __toString() : string
     {
-
-        while (!$this->childCoroutine->isFinished())
-        {
-            $this->childCoroutine->run();
-        }
-
-        return $this->childCoroutine->getReturn();
+        return __CLASS__ . ": [$this->errorCode]: $this->errorMessage\n";
     }
 
 }
