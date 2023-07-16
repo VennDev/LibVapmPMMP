@@ -26,15 +26,17 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
-class Info
+use Generator;
+
+interface CoroutineGenInterface
 {
 
-    public const VERSION = "1.6.1";
+    /**
+     * @param Generator|callable ...$coroutines
+     * @return void
+     */
+    public static function runBlocking(Generator|callable ...$coroutines): void;
 
-    public const AUTHOR = "VennV";
-
-    public const LICENSE = "MIT";
-
-    public const GITHUB = "https://github.com/VennDev";
+    public static function launch(callable $callback): Generator;
 
 }

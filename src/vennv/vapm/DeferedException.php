@@ -26,15 +26,25 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
-class Info
+use TypeError;
+
+final class DeferedException extends TypeError
 {
 
-    public const VERSION = "1.6.1";
+    public function __construct(
+        protected string $errorMessage,
+        protected int $errorCode = 0
+    )
+    {
+        parent::__construct(
+            $this->errorMessage,
+            $this->errorCode
+        );
+    }
 
-    public const AUTHOR = "VennV";
-
-    public const LICENSE = "MIT";
-
-    public const GITHUB = "https://github.com/VennDev";
+    public function __toString() : string
+    {
+        return __CLASS__ . ": [$this->errorCode]: $this->errorMessage\n";
+    }
 
 }

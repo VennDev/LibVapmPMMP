@@ -26,15 +26,9 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
-class Info
+interface DeferredInterface
 {
 
-    public const VERSION = "1.6.1";
-
-    public const AUTHOR = "VennV";
-
-    public const LICENSE = "MIT";
-
-    public const GITHUB = "https://github.com/VennDev";
+    public function await(): mixed;
 
 }

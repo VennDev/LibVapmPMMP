@@ -26,15 +26,47 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
-class Info
+use Generator;
+use Exception;
+
+final class ChildCoroutine implements ChildCoroutineInterface
 {
 
-    public const VERSION = "1.6.1";
+    protected int $id;
 
-    public const AUTHOR = "VennV";
+    protected Generator $coroutine;
 
-    public const LICENSE = "MIT";
+    protected Exception $exception;
 
-    public const GITHUB = "https://github.com/VennDev";
+    public function __construct(int $id, Generator $coroutine)
+    {
+        $this->id = $id;
+        $this->coroutine = $coroutine;
+    }
+
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    public function setException(Exception $exception): void
+    {
+        $this->exception = $exception;
+    }
+
+    public function run(): void
+    {
+        $this->coroutine->send($this->coroutine->current());
+    }
+
+    public function isFinished(): bool
+    {
+        return !$this->coroutine->valid();
+    }
+
+    public function getReturn(): mixed
+    {
+        return $this->coroutine->getReturn();
+    }
 
 }

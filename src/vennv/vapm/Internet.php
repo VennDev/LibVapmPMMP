@@ -72,7 +72,7 @@ final class Internet
         int $timeout = 10,
         array $extraHeaders = [],
         string &$error = null
-	) : ?InternetRequestResult
+	): ?InternetRequestResult
 	{
 		try
 		{
@@ -103,7 +103,7 @@ final class Internet
 		int $timeout = 10, 
 		array $extraHeaders = [], 
 		string &$error = null
-	) : ?InternetRequestResult
+	): ?InternetRequestResult
 	{
 		try
 		{
@@ -139,7 +139,7 @@ final class Internet
 		array $extraHeaders = [], 
 		array $extraOpts = [], 
 		?Closure $onSuccess = null
-	) : InternetRequestResult
+	): InternetRequestResult
 	{
 
 		$time = (int) ($timeout * 1000);

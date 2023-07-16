@@ -26,15 +26,41 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
-class Info
+use Generator;
+
+final class Deferred implements DeferredInterface
 {
 
-    public const VERSION = "1.6.1";
+    protected ChildCoroutine $childCoroutine;
 
-    public const AUTHOR = "VennV";
+    public function __construct(callable $callback)
+    {
+        $generator = call_user_func($callback);
 
-    public const LICENSE = "MIT";
+        if ($generator instanceof Generator)
+        {
+            $this->childCoroutine = new ChildCoroutine(0, $generator);
+        }
+        else
+        {
+            throw new DeferedException("Deferred callback must return a Generator");
+        }
+    }
 
-    public const GITHUB = "https://github.com/VennDev";
+    public function await(): mixed
+    {
+
+        while (!$this->childCoroutine->isFinished())
+        {
+            $this->childCoroutine->run();
+        }
+
+        if ($this->childCoroutine->isFinished())
+        {
+            return $this->childCoroutine->getReturn();
+        }
+
+        return $this->childCoroutine;
+    }
 
 }

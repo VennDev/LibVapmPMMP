@@ -26,15 +26,19 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
-class Info
+use Exception;
+
+interface ChildCoroutineInterface
 {
 
-    public const VERSION = "1.6.1";
+    public function getId(): int;
 
-    public const AUTHOR = "VennV";
+    public function setException(Exception $exception): void;
 
-    public const LICENSE = "MIT";
+    public function run(): void;
 
-    public const GITHUB = "https://github.com/VennDev";
+    public function isFinished(): bool;
+
+    public function getReturn(): mixed;
 
 }
