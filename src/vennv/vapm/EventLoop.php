@@ -113,10 +113,12 @@ class EventLoop implements EventLoopInterface
 
     private static function clearGarbage(): void
     {
-        foreach (self::$returns as $id => $promise)
+        foreach (GeneratorManager::getFromArray(self::$returns) as $id => $promise)
         {
+            /** @var Promise $promise */
             if ($promise->canDrop())
             {
+                /** @var int $id */
                 self::removeReturn($id);
             }
         }
@@ -132,8 +134,9 @@ class EventLoop implements EventLoopInterface
             GreenThread::run();
         }
 
-        foreach (self::$queues as $id => $promise)
+        foreach (GeneratorManager::getFromArray(self::$queues) as $id => $promise)
         {
+            /** @var Promise $promise */
             $fiber = $promise->getFiber();
             
             if ($fiber->isSuspended())
@@ -147,6 +150,7 @@ class EventLoop implements EventLoopInterface
             
             if ($fiber->isTerminated() && ($promise->getStatus() !== StatusPromise::PENDING || $promise->isJustGetResult()))
             {
+                /** @var int $id */
                 MicroTask::addTask($id, $promise);
                 self::removeQueue($id);
             }

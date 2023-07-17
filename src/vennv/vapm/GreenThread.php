@@ -80,7 +80,7 @@ final class GreenThread implements GreenThreadInterface
      */
     public static function run(): void
     {
-        foreach (self::$fibers as $i => $fiber)
+        foreach (GeneratorManager::getFromArray(self::$fibers) as $i => $fiber)
         {
             if (!self::$status[self::$names[$i]]->canWakeUp())
             {
@@ -91,6 +91,7 @@ final class GreenThread implements GreenThreadInterface
 
             try
             {
+                /** @var Fiber $fiber */
                 if (!$fiber->isStarted())
                 {
                     $fiber->start(...self::$params[$i]);

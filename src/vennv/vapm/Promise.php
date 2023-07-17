@@ -300,7 +300,7 @@ final class Promise implements PromiseInterface
         {
             $cancel = false;
 
-            foreach ($callbacks as $case => $callable)
+            foreach (GeneratorManager::getFromArray($callbacks) as $case => $callable)
             {
                 if ($return === null)
                 {
@@ -317,6 +317,7 @@ final class Promise implements PromiseInterface
 
                     if (!is_null($queue1)) 
                     {
+                        /** @var callable $callable */
                         $queue1->then($callable);
 
                         if (is_callable($this->callbackReject))
@@ -326,6 +327,7 @@ final class Promise implements PromiseInterface
                     }
                     elseif (!is_null($queue2))
                     {
+                        /** @var callable $callable */
                         $queue2->then($callable);
 
                         if (is_callable($this->callbackReject))
@@ -365,7 +367,7 @@ final class Promise implements PromiseInterface
 
             while ($isSolved === false)
             {
-                foreach ($promises as $promise)
+                foreach (GeneratorManager::getFromArray($promises) as $promise)
                 {
                     if (is_callable($promise))
                     {
@@ -417,14 +419,14 @@ final class Promise implements PromiseInterface
      */
     public static function allSettled(array $promises): Promise
     {
-        $promise = new Promise(function($resolve, $reject) use ($promises): void
+        $promise = new Promise(function($resolve) use ($promises): void
         {
             $results = [];
             $isSolved = false;
 
             while ($isSolved === false)
             {
-                foreach ($promises as $promise)
+                foreach (GeneratorManager::getFromArray($promises) as $promise)
                 {
                     if (is_callable($promise))
                     {
@@ -437,7 +439,7 @@ final class Promise implements PromiseInterface
 
                         if ($return !== null)
                         {
-                            $results[] = $return->getResult();
+                            $results[] = new PromiseResult($return->getStatus(), $return->getResult());
                         }
                     }
 
@@ -474,7 +476,7 @@ final class Promise implements PromiseInterface
 
             while ($isSolved === false)
             {
-                foreach ($promises as $promise)
+                foreach (GeneratorManager::getFromArray($promises) as $promise)
                 {
                     if (is_callable($promise))
                     {
@@ -532,7 +534,7 @@ final class Promise implements PromiseInterface
 
             while ($isSolved === false)
             {
-                foreach ($promises as $promise)
+                foreach (GeneratorManager::getFromArray($promises) as $promise)
                 {
                     if (is_callable($promise))
                     {

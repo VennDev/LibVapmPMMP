@@ -26,58 +26,27 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
-use Throwable;
-use function microtime;
-
-final class MicroTask
+final class PromiseResult implements PromiseResultInterface
 {
 
-    /**
-     * @var array<int, Promise>
-     */
-    private static array $tasks = [];
+    private string $status;
 
-    public static function addTask(int $id, Promise $promise): void
+    private mixed $result;
+
+    public function __construct(string $status, mixed $result)
     {
-        self::$tasks[$id] = $promise;
+        $this->status = $status;
+        $this->result = $result;
     }
 
-    public static function removeTask(int $id): void
+    public function getStatus(): string
     {
-        unset(self::$tasks[$id]);
+        return $this->status;
     }
 
-    public static function getTask(int $id): ?Promise
+    public function getResult(): mixed
     {
-        return self::$tasks[$id] ?? null;
-    }
-
-    /**
-     * @return array<int, Promise>
-     */
-    public static function getTasks(): array
-    {
-        return self::$tasks;
-    }
-
-    /**
-     * @throws Throwable
-     */
-    public static function run(): void
-    {
-        foreach (GeneratorManager::getFromArray(self::$tasks) as $id => $promise)
-        {
-            /**
-             * @var Promise $promise
-             * @var int $id
-             */
-            $promise->useCallbacks();
-            $promise->setTimeEnd(microtime(true));
-            
-            EventLoop::addReturn($promise);
-
-            self::removeTask($id);
-        }
+        return $this->result;
     }
 
 }
