@@ -6,6 +6,5 @@ projects:
     model: virion
     type: library
     includeDirs:
-      - vendor
-    compressBuilds: false
+      vendor: vendor
 ...
