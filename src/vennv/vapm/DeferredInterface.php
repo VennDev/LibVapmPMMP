@@ -29,6 +29,9 @@ namespace vennv\vapm;
 interface DeferredInterface
 {
 
+    /**
+     * This method is used to get the result of the deferred.
+     */
     public function await(): mixed;
 
 }

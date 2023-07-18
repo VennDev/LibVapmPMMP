@@ -78,9 +78,8 @@ final class MacroTask
 
     public static function run(): void
     {
-        foreach (GeneratorManager::getFromArray(self::$tasks) as $task)
+        foreach (self::$tasks as $task)
         {
-            /** @var SampleMacro $task */
             if ($task->checkTimeOut())
             {
                 $task->run();

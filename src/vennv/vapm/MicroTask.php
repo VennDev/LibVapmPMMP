@@ -65,12 +65,8 @@ final class MicroTask
      */
     public static function run(): void
     {
-        foreach (GeneratorManager::getFromArray(self::$tasks) as $id => $promise)
+        foreach (self::$tasks as $id => $promise)
         {
-            /**
-             * @var Promise $promise
-             * @var int $id
-             */
             $promise->useCallbacks();
             $promise->setTimeEnd(microtime(true));
             

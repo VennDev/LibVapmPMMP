@@ -273,11 +273,6 @@ final class Promise implements PromiseInterface
                     $this->checkStatus($callbacks, $this->return);
                 }
             }
-
-            if (is_callable($this->callbackFinally))
-            {
-                call_user_func($this->callbackFinally);
-            }
         }
         elseif ($this->isRejected())
         {
@@ -296,11 +291,13 @@ final class Promise implements PromiseInterface
      */
     private function checkStatus(array $callbacks, mixed $return) : void
     {
+        $lastPromise = null;
+
         while (count($callbacks) > 0)
         {
             $cancel = false;
 
-            foreach (GeneratorManager::getFromArray($callbacks) as $case => $callable)
+            foreach ($callbacks as $case => $callable)
             {
                 if ($return === null)
                 {
@@ -317,23 +314,25 @@ final class Promise implements PromiseInterface
 
                     if (!is_null($queue1)) 
                     {
-                        /** @var callable $callable */
                         $queue1->then($callable);
 
                         if (is_callable($this->callbackReject))
                         {
                             $queue1->catch($this->callbackReject);
                         }
+
+                        $lastPromise = $queue1;
                     }
                     elseif (!is_null($queue2))
                     {
-                        /** @var callable $callable */
                         $queue2->then($callable);
 
                         if (is_callable($this->callbackReject))
                         {
                             $queue2->catch($this->callbackReject);
                         }
+
+                        $lastPromise = $queue2;
                     }
 
                     unset($callbacks[$case]);
@@ -349,6 +348,18 @@ final class Promise implements PromiseInterface
             if ($cancel)
             {
                 break;
+            }
+        }
+
+        if ($lastPromise !== null)
+        {
+            $lastPromise->finally($this->callbackFinally);
+        }
+        else
+        {
+            if (is_callable($this->callbackFinally))
+            {
+                call_user_func($this->callbackFinally);
             }
         }
     }
@@ -367,7 +378,7 @@ final class Promise implements PromiseInterface
 
             while ($isSolved === false)
             {
-                foreach (GeneratorManager::getFromArray($promises) as $promise)
+                foreach ($promises as $promise)
                 {
                     if (is_callable($promise))
                     {
@@ -426,7 +437,7 @@ final class Promise implements PromiseInterface
 
             while ($isSolved === false)
             {
-                foreach (GeneratorManager::getFromArray($promises) as $promise)
+                foreach ($promises as $promise)
                 {
                     if (is_callable($promise))
                     {
@@ -476,7 +487,7 @@ final class Promise implements PromiseInterface
 
             while ($isSolved === false)
             {
-                foreach (GeneratorManager::getFromArray($promises) as $promise)
+                foreach ($promises as $promise)
                 {
                     if (is_callable($promise))
                     {
@@ -534,7 +545,7 @@ final class Promise implements PromiseInterface
 
             while ($isSolved === false)
             {
-                foreach (GeneratorManager::getFromArray($promises) as $promise)
+                foreach ($promises as $promise)
                 {
                     if (is_callable($promise))
                     {
