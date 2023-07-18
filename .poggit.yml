@@ -7,4 +7,5 @@ projects:
     type: library
     includeDirs:
       vendor: vendor
+    fullGzip: true
 ...
