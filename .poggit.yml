@@ -5,4 +5,6 @@ projects:
   LibVapmPMMP:
     model: virion
     type: library
+    includeDirs:
+      - vendor
 ...
