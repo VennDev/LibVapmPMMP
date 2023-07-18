@@ -26,13 +26,25 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
-final class Error
+use TypeError;
+
+final class ThreadException extends TypeError
 {
 
-    public const FAILED_IN_FETCHING_DATA = "Error in fetching data";
+    public function __construct(
+        protected string $errorMessage,
+        protected int $errorCode = 0
+    )
+    {
+        parent::__construct(
+            $this->errorMessage,
+            $this->errorCode
+        );
+    }
 
-    public const WRONG_TYPE_WHEN_USE_CURL_EXEC = "curl_exec() should return string|false when CURL-OPT_RETURN-TRANSFER is set";
-
-    public const UNABLE_START_THREAD = "Unable to start thread";
+    public function __toString() : string
+    {
+        return __CLASS__ . ": [$this->errorCode]: $this->errorMessage\n";
+    }
 
 }

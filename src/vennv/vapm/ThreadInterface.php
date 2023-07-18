@@ -26,13 +26,20 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
-final class Error
+use ReflectionException;
+use Throwable;
+
+interface ThreadInterface
 {
 
-    public const FAILED_IN_FETCHING_DATA = "Error in fetching data";
+    public function onRun(): void;
 
-    public const WRONG_TYPE_WHEN_USE_CURL_EXEC = "curl_exec() should return string|false when CURL-OPT_RETURN-TRANSFER is set";
-
-    public const UNABLE_START_THREAD = "Unable to start thread";
+    /**
+     * @param array<int, array<string>> $mode
+     * @throws ReflectionException
+     * @throws Throwable
+     * @phpstan-param array<int, array<string>> $mode
+     */
+    public function start(array $mode = DescriptorSpec::BASIC): void;
 
 }

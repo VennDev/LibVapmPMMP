@@ -26,13 +26,49 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
-final class Error
+final class DescriptorSpec
 {
 
-    public const FAILED_IN_FETCHING_DATA = "Error in fetching data";
+    public const BASIC = [
+        0 => ['pipe', 'r'],
+        1 => ['pipe', 'w'],
+        2 => ['pipe', 'w']
+    ];
 
-    public const WRONG_TYPE_WHEN_USE_CURL_EXEC = "curl_exec() should return string|false when CURL-OPT_RETURN-TRANSFER is set";
+    public const IGNORE_STDIN = [
+        0 => ['file', '/dev/null', 'r'],
+        1 => ['pipe', 'w'],
+        2 => ['pipe', 'w']
+    ];
 
-    public const UNABLE_START_THREAD = "Unable to start thread";
+    public const IGNORE_STDOUT = [
+        0 => ['pipe', 'r'],
+        1 => ['file', '/dev/null', 'w'],
+        2 => ['pipe', 'w']
+    ];
+
+    public const IGNORE_STDERR = [
+        0 => ['pipe', 'r'],
+        1 => ['pipe', 'w'],
+        2 => ['file', '/dev/null', 'w']
+    ];
+
+    public const IGNORE_STDOUT_AND_STDERR = [
+        0 => ['pipe', 'r'],
+        1 => ['file', '/dev/null', 'w'],
+        2 => ['file', '/dev/null', 'w']
+    ];
+
+    public const IGNORE_STDIN_AND_STDERR = [
+        0 => ['file', '/dev/null', 'r'],
+        1 => ['pipe', 'w'],
+        2 => ['file', '/dev/null', 'w']
+    ];
+
+    public const IGNORE_STDIN_AND_STDOUT = [
+        0 => ['file', '/dev/null', 'r'],
+        1 => ['file', '/dev/null', 'w'],
+        2 => ['pipe', 'w']
+    ];
 
 }
