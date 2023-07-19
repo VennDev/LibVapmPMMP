@@ -1,5 +1,5 @@
 # LibVapmPMMP
-- This is Virion Async/Promise/Coroutine for PocketMine-PMMP
+- This is Virion Async/Promise/Coroutine/Thread/GreenThread for PocketMine-PMMP
 
 # How to setup ?
 - Download the Phar officially [here](https://github.com/VennDev/LibVapmPMMP/releases)
