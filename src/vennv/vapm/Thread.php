@@ -33,6 +33,9 @@ use Throwable;
 interface ThreadInterface
 {
 
+    /**
+     * This abstract method use to run the thread
+     */
     public function onRun(): void;
 
     /**
@@ -40,6 +43,8 @@ interface ThreadInterface
      * @throws ReflectionException
      * @throws Throwable
      * @phpstan-param array<int, array<string>> $mode
+     *
+     * This method use to start the thread
      */
     public function start(array $mode = DescriptorSpec::BASIC): void;
 
@@ -48,39 +53,62 @@ interface ThreadInterface
 interface ThreadedInterface
 {
 
+    /**
+     * This method use to get the pid of the thread
+     */
     public function getPid(): int;
 
-    public function setPid(int $pid): void;
-
+    /**
+     * This method use to get the exit code of the thread
+     */
     public function getExitCode(): int;
 
-    public function setExitCode(int $exitCode): void;
-
+    /*
+     * This method use to get the running status of the thread
+     */
     public function isRunning(): bool;
 
-    public function setRunning(bool $isRunning): void;
-
+    /**
+     * This method use to get the signaled status of the thread
+     */
     public function isSignaled(): bool;
 
-    public function setSignaled(bool $signaled): void;
-
+    /**
+     * This method use to get the stopped status of the thread
+     */
     public function isStopped(): bool;
-
-    public function setStopped(bool $stopped): void;
 
     /**
      * @return array<string, mixed>
      * @phpstan-return array<string, mixed>
+     *
+     * This method use to get the shared data of the thread
      */
     public static function getShared(): array;
 
     /**
      * @param array<string, mixed> $shared
      * @phpstan-param array<string, mixed> $shared
+     *
+     * This method use to set the shared data of the thread
      */
     public static function setShared(array $shared): void;
 
+    /**
+     * @param string $key
+     * @param mixed $value
+     * @phpstan-param mixed $value
+     *
+     * This method use to add the shared data of the thread
+     */
     public static function addShared(string $key, mixed $value): void;
+
+    /**
+     * @return false|string
+     *
+     * This method use to get the shared data of the thread
+     */
+    public static function getSharedData(): false|string;
 
 }
 
@@ -177,6 +205,11 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
     public static function addShared(string $key, mixed $value): void
     {
         self::$shared[$key] = $value;
+    }
+
+    public static function getSharedData(): false|string
+    {
+        return fgets(STDIN);
     }
 
     abstract public function onRun(): void;
