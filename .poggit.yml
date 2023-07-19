@@ -6,4 +6,10 @@ projects:
   LibVapmPMMP:
     model: virion
     type: library
+    lint:
+      closeTag: false
+      directStdout: false
+      nonPsr: false
+      syntaxError: true
+      phpstan: false
 ...
