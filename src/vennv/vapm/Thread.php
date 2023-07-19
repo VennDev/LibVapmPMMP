@@ -149,7 +149,7 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
         return $this->exitCode;
     }
 
-    public function setExitCode(int $exitCode): void
+    protected function setExitCode(int $exitCode): void
     {
         $this->exitCode = $exitCode;
     }
@@ -159,7 +159,7 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
         return $this->isRunning;
     }
 
-    public function setRunning(bool $isRunning): void
+    protected function setRunning(bool $isRunning): void
     {
         $this->isRunning = $isRunning;
     }
@@ -169,7 +169,7 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
         return $this->signaled;
     }
 
-    public function setSignaled(bool $signaled): void
+    protected function setSignaled(bool $signaled): void
     {
         $this->signaled = $signaled;
     }
@@ -179,7 +179,7 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
         return $this->stopped;
     }
 
-    public function setStopped(bool $stopped): void
+    protected function setStopped(bool $stopped): void
     {
         $this->stopped = $stopped;
     }
