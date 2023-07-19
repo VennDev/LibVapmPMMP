@@ -1,15 +1,9 @@
 ---
-build-by-default: true
+build-by-default: false
 branches:
 - main
 projects:
   LibVapmPMMP:
     model: virion
     type: library
-    lint:
-      closeTag: false
-      directStdout: false
-      nonPsr: false
-      syntaxError: true
-      phpstan: false
 ...
