@@ -1,10 +1,12 @@
 ---
+build-by-default: false
 branches:
 - main
 projects:
   LibVapmPMMP:
     model: virion
     type: library
+    compressBuilds: false
     includeDirs:
       vendor: vendor
 ...
