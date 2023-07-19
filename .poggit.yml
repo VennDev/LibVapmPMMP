@@ -1,5 +1,4 @@
 ---
-build-by-default: true
 branches:
 - main
 projects:
@@ -11,7 +10,7 @@ projects:
       directStdout: false
       nonPsr: false
       syntaxError: false
-			phpstan: false
+      phpstan: false
     includeDirs:
       vendor: vendor
 ...
