@@ -29,6 +29,20 @@ namespace vennv\vapm;
 use ReflectionClass;
 use ReflectionException;
 use Throwable;
+use function is_string;
+use function is_array;
+use function explode;
+use function fwrite;
+use function fclose;
+use function proc_open;
+use function proc_get_status;
+use function is_resource;
+use function stream_get_contents;
+use function stream_set_blocking;
+use function json_decode;
+use function json_encode;
+use function str_replace;
+use function get_called_class;
 
 interface ThreadInterface
 {
@@ -82,15 +96,15 @@ interface ThreadedInterface
      * @return array<string, mixed>
      * @phpstan-return array<string, mixed>
      *
-     * This method use to get the shared data of the thread
+     * This method use to get the shared data of the main thread
      */
-    public static function getShared(): array;
+    public static function getDataMainThread(): array;
 
     /**
      * @param array<string, mixed> $shared
      * @phpstan-param array<string, mixed> $shared
      *
-     * This method use to set the shared data of the thread
+     * This method use to set the shared data of the main thread
      */
     public static function setShared(array $shared): void;
 
@@ -99,21 +113,50 @@ interface ThreadedInterface
      * @param mixed $value
      * @phpstan-param mixed $value
      *
-     * This method use to add the shared data of the thread
+     * This method use to add the shared data of the MAIN-THREAD
      */
     public static function addShared(string $key, mixed $value): void;
 
     /**
-     * @return false|string
+     * @return array<string, mixed>
      *
-     * This method use to get the shared data of the thread
+     * This method use to get the shared data of the child thread
      */
-    public static function getSharedData(): false|string;
+    public static function getSharedData(): array;
+
+    /**
+     * @param array<string, mixed> $data
+     * @return void
+     * @phpstan-param array<string, mixed> $data
+     *
+     * This method use to post all data the main thread
+     */
+    public static function postMainThread(array $data): void;
+
+    /**
+     * @param string $data
+     * @return void
+     *
+     * This method use to load the shared data from the main thread
+     */
+    public static function loadSharedData(string $data): void;
+
+    /**
+     * @param string $data
+     * @return void
+     *
+     * This method use to alert for the main thread
+     */
+    public static function alert(string $data): void;
 
 }
 
 abstract class Thread implements ThreadInterface, ThreadedInterface
 {
+
+    private const POST_MAIN_THREAD = 'postMainThread'; // example: postMainThread=>{data}
+
+    private const POST_ALERT_THREAD = 'postAlertThread'; // example: postAlertThread=>{data}
 
     private int $pid = -1;
 
@@ -188,7 +231,7 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
      * @return array<string, mixed>
      * @phpstan-return array<string, mixed>
      */
-    public static function getShared(): array
+    public static function getDataMainThread(): array
     {
         return self::$shared;
     }
@@ -207,9 +250,72 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
         self::$shared[$key] = $value;
     }
 
-    public static function getSharedData(): false|string
+    public static function getSharedData(): array
     {
-        return fgets(STDIN);
+        $data = fgets(STDIN);
+
+        if (is_string($data))
+        {
+            $data = json_decode($data, true);
+
+            if (is_array($data))
+            {
+                return $data;
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @phpstan-param array<string, mixed> $data
+     */
+    public static function postMainThread(array $data): void
+    {
+        fwrite(STDOUT, self::POST_MAIN_THREAD . '=>' . json_encode($data) . PHP_EOL);
+    }
+
+    private static function isPostMainThread(string $data): bool
+    {
+        return explode('=>', $data)[0] === self::POST_MAIN_THREAD;
+    }
+
+    public static function loadSharedData(string $data): void
+    {
+        $data = explode('=>', $data);
+
+        if ($data[0] === self::POST_MAIN_THREAD)
+        {
+            $result = json_decode($data[1], true);
+
+            if (is_array($result))
+            {
+                self::setShared($result);
+            }
+        }
+    }
+
+    public static function alert(string $data): void
+    {
+        fwrite(STDOUT, self::POST_ALERT_THREAD . '=>' . $data . PHP_EOL);
+    }
+
+    private static function isAlert(string $data): bool
+    {
+        return explode('=>', $data)[0] === self::POST_ALERT_THREAD;
+    }
+
+    private static function loadAlert(string $data): void
+    {
+        $data = explode('=>', $data);
+
+        if ($data[0] === self::POST_ALERT_THREAD)
+        {
+            $result = json_decode($data[1], true);
+
+            echo $result . PHP_EOL;
+        }
     }
 
     abstract public function onRun(): void;
@@ -250,7 +356,7 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
                 stream_set_blocking($pipes[1], false);
                 stream_set_blocking($pipes[2], false);
 
-                $data = json_encode(self::getShared());
+                $data = json_encode(self::getDataMainThread());
 
                 if (is_string($data))
                 {
@@ -283,7 +389,26 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
                 }
                 else
                 {
-                    echo $output;
+                    if (!is_bool($output))
+                    {
+                        $explode = explode(PHP_EOL, $output);
+
+                        foreach ($explode as $item)
+                        {
+                            if ($item !== '')
+                            {
+                                if (self::isPostMainThread($item))
+                                {
+                                    self::loadSharedData($item);
+                                }
+
+                                if (self::isAlert($item))
+                                {
+                                    self::loadAlert($item);
+                                }
+                            }
+                        }
+                    }
                 }
             }
             else
