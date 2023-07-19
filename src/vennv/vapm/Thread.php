@@ -130,3 +130,139 @@ abstract class Thread extends Threaded implements ThreadInterface
     }
 
 }
+
+interface ThreadedInterface
+{
+
+    public function getPid(): int;
+
+    public function setPid(int $pid): void;
+
+    public function getExitCode(): int;
+
+    public function setExitCode(int $exitCode): void;
+
+    public function isRunning(): bool;
+
+    public function setRunning(bool $isRunning): void;
+
+    public function isSignaled(): bool;
+
+    public function setSignaled(bool $signaled): void;
+
+    public function isStopped(): bool;
+
+    public function setStopped(bool $stopped): void;
+
+    /**
+     * @return array<string, mixed>
+     * @phpstan-return array<string, mixed>
+     */
+    public static function getShared(): array;
+
+    /**
+     * @param array<string, mixed> $shared
+     * @phpstan-param array<string, mixed> $shared
+     */
+    public static function setShared(array $shared): void;
+
+    public static function addShared(string $key, mixed $value): void;
+
+}
+
+class Threaded implements ThreadedInterface
+{
+
+    private int $pid = -1;
+
+    private int $exitCode = -1;
+
+    private bool $isRunning = false;
+
+    private bool $signaled = false;
+
+    private bool $stopped = false;
+
+    /**
+     * @var array<string, mixed>
+     * @phpstan-var array<string, mixed>
+     */
+    private static array $shared = [];
+
+    public function __construct()
+    {}
+
+    public function getPid(): int
+    {
+        return $this->pid;
+    }
+
+    public function setPid(int $pid): void
+    {
+        $this->pid = $pid;
+    }
+
+    public function getExitCode(): int
+    {
+        return $this->exitCode;
+    }
+
+    public function setExitCode(int $exitCode): void
+    {
+        $this->exitCode = $exitCode;
+    }
+
+    public function isRunning(): bool
+    {
+        return $this->isRunning;
+    }
+
+    public function setRunning(bool $isRunning): void
+    {
+        $this->isRunning = $isRunning;
+    }
+
+    public function isSignaled(): bool
+    {
+        return $this->signaled;
+    }
+
+    public function setSignaled(bool $signaled): void
+    {
+        $this->signaled = $signaled;
+    }
+
+    public function isStopped(): bool
+    {
+        return $this->stopped;
+    }
+
+    public function setStopped(bool $stopped): void
+    {
+        $this->stopped = $stopped;
+    }
+
+    /**
+     * @return array<string, mixed>
+     * @phpstan-return array<string, mixed>
+     */
+    public static function getShared(): array
+    {
+        return self::$shared;
+    }
+
+    /**
+     * @param array<string, mixed> $shared
+     * @phpstan-param array<string, mixed> $shared
+     */
+    public static function setShared(array $shared): void
+    {
+        self::$shared = $shared;
+    }
+
+    public static function addShared(string $key, mixed $value): void
+    {
+        self::$shared[$key] = $value;
+    }
+
+}
