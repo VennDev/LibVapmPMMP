@@ -45,92 +45,6 @@ interface ThreadInterface
 
 }
 
-abstract class Thread extends Threaded implements ThreadInterface
-{
-
-    abstract public function onRun(): void;
-
-    /**
-     * @param array<int, array<string>> $mode
-     * @throws ReflectionException
-     * @throws Throwable
-     * @phpstan-param array<int, array<string>> $mode
-     */
-    public function start(array $mode = DescriptorSpec::BASIC): void
-    {
-        new Async(function() use ($mode): void
-        {
-            $className = get_called_class();
-
-            $reflection = new ReflectionClass($className);
-
-            $class = $reflection->getFileName();
-
-            $pathAutoLoad = __FILE__;
-            $pathAutoLoad = str_replace(
-                'src\vennv\vapm\Thread.php',
-                'src\vendor\autoload.php',
-                $pathAutoLoad
-            );
-
-            $command = 'php -r "require_once \'' . $pathAutoLoad . '\'; include \'' . $class . '\'; $class = new ' . static::class . '(); $class->onRun();"';
-
-            $process = proc_open(
-                $command,
-                $mode,
-                $pipes
-            );
-
-            if (is_resource($process))
-            {
-                stream_set_blocking($pipes[1], false);
-                stream_set_blocking($pipes[2], false);
-
-                $data = json_encode(self::getShared());
-
-                if (is_string($data))
-                {
-                    fwrite($pipes[0], $data);
-                    fclose($pipes[0]);
-                }
-
-                while (proc_get_status($process)['running'])
-                {
-                    $status = proc_get_status($process);
-
-                    $this->setPid($status['pid']);
-                    $this->setExitCode($status['exitcode']);
-                    $this->setRunning($status['running']);
-                    $this->setSignaled($status['signaled']);
-                    $this->setStopped($status['stopped']);
-
-                    FiberManager::wait();
-                }
-
-                $output = stream_get_contents($pipes[1]);
-                $error = stream_get_contents($pipes[2]);
-
-                fclose($pipes[1]);
-                fclose($pipes[2]);
-
-                if ($error !== '' && is_string($error))
-                {
-                    throw new ThreadException($error);
-                }
-                else
-                {
-                    echo $output;
-                }
-            }
-            else
-            {
-                throw new ThreadException(Error::UNABLE_START_THREAD);
-            }
-        });
-    }
-
-}
-
 interface ThreadedInterface
 {
 
@@ -170,7 +84,7 @@ interface ThreadedInterface
 
 }
 
-class Threaded implements ThreadedInterface
+abstract class Thread implements ThreadInterface, ThreadedInterface
 {
 
     private int $pid = -1;
@@ -263,6 +177,87 @@ class Threaded implements ThreadedInterface
     public static function addShared(string $key, mixed $value): void
     {
         self::$shared[$key] = $value;
+    }
+
+    abstract public function onRun(): void;
+
+    /**
+     * @param array<int, array<string>> $mode
+     * @throws ReflectionException
+     * @throws Throwable
+     * @phpstan-param array<int, array<string>> $mode
+     */
+    public function start(array $mode = DescriptorSpec::BASIC): void
+    {
+        new Async(function() use ($mode): void
+        {
+            $className = get_called_class();
+
+            $reflection = new ReflectionClass($className);
+
+            $class = $reflection->getFileName();
+
+            $pathAutoLoad = __FILE__;
+            $pathAutoLoad = str_replace(
+                'src\vennv\vapm\Thread.php',
+                'src\vendor\autoload.php',
+                $pathAutoLoad
+            );
+
+            $command = 'php -r "require_once \'' . $pathAutoLoad . '\'; include \'' . $class . '\'; $class = new ' . static::class . '(); $class->onRun();"';
+
+            $process = proc_open(
+                $command,
+                $mode,
+                $pipes
+            );
+
+            if (is_resource($process))
+            {
+                stream_set_blocking($pipes[1], false);
+                stream_set_blocking($pipes[2], false);
+
+                $data = json_encode(self::getShared());
+
+                if (is_string($data))
+                {
+                    fwrite($pipes[0], $data);
+                    fclose($pipes[0]);
+                }
+
+                while (proc_get_status($process)['running'])
+                {
+                    $status = proc_get_status($process);
+
+                    $this->setPid($status['pid']);
+                    $this->setExitCode($status['exitcode']);
+                    $this->setRunning($status['running']);
+                    $this->setSignaled($status['signaled']);
+                    $this->setStopped($status['stopped']);
+
+                    FiberManager::wait();
+                }
+
+                $output = stream_get_contents($pipes[1]);
+                $error = stream_get_contents($pipes[2]);
+
+                fclose($pipes[1]);
+                fclose($pipes[2]);
+
+                if ($error !== '' && is_string($error))
+                {
+                    throw new ThreadException($error);
+                }
+                else
+                {
+                    echo $output;
+                }
+            }
+            else
+            {
+                throw new ThreadException(Error::UNABLE_START_THREAD);
+            }
+        });
     }
 
 }
