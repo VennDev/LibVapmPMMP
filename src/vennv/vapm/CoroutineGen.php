@@ -69,9 +69,9 @@ final class CoroutineGen implements CoroutineGenInterface
         return yield $callback;
     }
 
-    private static function schedule(ChildCoroutine $ChildCoroutine): void
+    private static function schedule(ChildCoroutine $childCoroutine): void
     {
-        self::$taskQueue?->enqueue($ChildCoroutine);
+        self::$taskQueue?->enqueue($childCoroutine);
     }
 
     private static function run(): void
@@ -81,18 +81,18 @@ final class CoroutineGen implements CoroutineGenInterface
             while (!self::$taskQueue->isEmpty())
             {
                 /**
-                 * @var ChildCoroutine $ChildCoroutine
+                 * @var ChildCoroutine $childCoroutine
                  */
-                $ChildCoroutine = self::$taskQueue->dequeue();
-                $ChildCoroutine->run();
+                $childCoroutine = self::$taskQueue->dequeue();
+                $childCoroutine->run();
 
-                if ($ChildCoroutine->isFinished())
+                if ($childCoroutine->isFinished())
                 {
                     //TODO: Remove from queue
                 }
                 else
                 {
-                    self::schedule($ChildCoroutine);
+                    self::schedule($childCoroutine);
                 }
             }
         }

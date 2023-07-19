@@ -30,7 +30,7 @@ use ReflectionClass;
 use ReflectionException;
 use Throwable;
 
-abstract class Thread implements ThreadInterface
+abstract class Thread extends Threaded implements ThreadInterface
 {
 
     abstract public function onRun(): void;
@@ -58,7 +58,7 @@ abstract class Thread implements ThreadInterface
                 $pathAutoLoad
             );
 
-            $command = 'php -r "require_once \'' . $pathAutoLoad . '\'; include \'' . $class . '\'; $class = new ' . static::class . '(); $class->run();"';
+            $command = 'php -r "require_once \'' . $pathAutoLoad . '\'; include \'' . $class . '\'; $class = new ' . static::class . '(); $class->onRun();"';
 
             $process = proc_open(
                 $command,
@@ -71,10 +71,24 @@ abstract class Thread implements ThreadInterface
                 stream_set_blocking($pipes[1], false);
                 stream_set_blocking($pipes[2], false);
 
-                fclose($pipes[0]);
+                $data = json_encode(self::getShared());
+
+                if (is_string($data))
+                {
+                    fwrite($pipes[0], $data);
+                    fclose($pipes[0]);
+                }
 
                 while (proc_get_status($process)['running'])
                 {
+                    $status = proc_get_status($process);
+
+                    $this->setPid($status['pid']);
+                    $this->setExitCode($status['exitcode']);
+                    $this->setRunning($status['running']);
+                    $this->setSignaled($status['signaled']);
+                    $this->setStopped($status['stopped']);
+
                     FiberManager::wait();
                 }
 

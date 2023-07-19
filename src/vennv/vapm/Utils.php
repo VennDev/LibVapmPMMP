@@ -26,12 +26,37 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
+use Generator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use SplFileInfo;
+use function preg_match;
+
 final class Utils
 {
 
-    public static function milliSecsToSecs(float $milliSecs) : float
+    public static function milliSecsToSecs(float $milliSecs): float
     {
         return $milliSecs / 1000;
+    }
+
+    public static function getAllPHP(string $path): Generator
+    {
+        $dir = new RecursiveDirectoryIterator($path);
+        $iterator = new RecursiveIteratorIterator($dir);
+
+        foreach ($iterator as $file)
+        {
+            if ($file instanceof SplFileInfo)
+            {
+                $fname = $file->getFilename();
+
+                if (preg_match('%\.php$%', $fname) === 1)
+                {
+                    yield $file->getPathname();
+                }
+            }
+        }
     }
 
 }

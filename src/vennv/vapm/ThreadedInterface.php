@@ -26,15 +26,41 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
-class Info
+interface ThreadedInterface
 {
 
-    public const VERSION = "1.7.0";
+    public function getPid(): int;
 
-    public const AUTHOR = "VennV";
+    public function setPid(int $pid): void;
 
-    public const LICENSE = "MIT";
+    public function getExitCode(): int;
 
-    public const GITHUB = "https://github.com/VennDev";
+    public function setExitCode(int $exitCode): void;
+
+    public function isRunning(): bool;
+
+    public function setRunning(bool $isRunning): void;
+
+    public function isSignaled(): bool;
+
+    public function setSignaled(bool $signaled): void;
+
+    public function isStopped(): bool;
+
+    public function setStopped(bool $stopped): void;
+
+    /**
+     * @return array<string, mixed>
+     * @phpstan-return array<string, mixed>
+     */
+    public static function getShared(): array;
+
+    /**
+     * @param array<string, mixed> $shared
+     * @phpstan-param array<string, mixed> $shared
+     */
+    public static function setShared(array $shared): void;
+
+    public static function addShared(string $key, mixed $value): void;
 
 }
