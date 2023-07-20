@@ -52,7 +52,7 @@ final class VapmPMMP implements VapmPMMPInterface
                 {
                     System::runEventLoop();
                 }
-            ), 20);
+            ), 1);
         }
     }
 
