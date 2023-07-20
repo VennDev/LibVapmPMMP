@@ -149,6 +149,22 @@ interface ThreadedInterface
      */
     public static function alert(string $data): void;
 
+    /**
+     * @param int $pid
+     * @return bool
+     *
+     * This method use to check the thread is running or not
+     */
+    public static function threadIsRunning(int $pid): bool;
+
+    /**
+     * @param int $pid
+     * @return bool
+     *
+     * This method use to kill the thread
+     */
+    public static function killThread(int $pid): bool;
+
 }
 
 abstract class Thread implements ThreadInterface, ThreadedInterface
@@ -173,6 +189,12 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
      * @phpstan-var array<string, mixed>
      */
     private static array $shared = [];
+
+    /**
+     * @var array<int, Thread>
+     * @phpstan-var array<int, Thread>
+     */
+    private static array $threads = [];
 
     public function __construct()
     {}
@@ -291,7 +313,7 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
 
             if (is_array($result))
             {
-                self::setShared($result);
+                self::setShared(array_merge(self::$shared, $result));
             }
         }
     }
@@ -299,6 +321,27 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
     public static function alert(string $data): void
     {
         fwrite(STDOUT, self::POST_ALERT_THREAD . '=>' . $data . PHP_EOL);
+    }
+
+    public static function threadIsRunning(int $pid): bool
+    {
+        return isset(self::$threads[$pid]);
+    }
+
+    public static function killThread(int $pid): bool
+    {
+        if (isset(self::$threads[$pid]))
+        {
+            $thread = self::$threads[$pid];
+
+            if ($thread->isRunning())
+            {
+                $thread->setStopped(true);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static function isAlert(string $data): bool
@@ -368,11 +411,25 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
                 {
                     $status = proc_get_status($process);
 
-                    $this->setPid($status['pid']);
-                    $this->setExitCode($status['exitcode']);
-                    $this->setRunning($status['running']);
-                    $this->setSignaled($status['signaled']);
-                    $this->setStopped($status['stopped']);
+                    if (!isset(self::$threads[$status['pid']]))
+                    {
+                        $this->setPid($status['pid']);
+
+                        self::$threads[$status['pid']] = $this;
+                    }
+
+                    $thread = self::$threads[$status['pid']];
+
+                    $thread->setExitCode($status['exitcode']);
+                    $thread->setRunning($status['running']);
+                    $thread->setSignaled($status['signaled']);
+                    $thread->setStopped($status['stopped']);
+
+                    if ($thread->isStopped())
+                    {
+                        proc_terminate($process);
+                        break;
+                    }
 
                     FiberManager::wait();
                 }
@@ -415,6 +472,9 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
             {
                 throw new ThreadException(Error::UNABLE_START_THREAD);
             }
+
+            proc_close($process);
+            unset(self::$threads[$this->getPid()]);
         });
     }
 

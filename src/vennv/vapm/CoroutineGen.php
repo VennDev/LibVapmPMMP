@@ -99,11 +99,7 @@ final class CoroutineGen implements CoroutineGenInterface
                 $childCoroutine = self::$taskQueue->dequeue();
                 $childCoroutine->run();
 
-                if ($childCoroutine->isFinished())
-                {
-                    //TODO: Remove from queue
-                }
-                else
+                if (!$childCoroutine->isFinished())
                 {
                     self::schedule($childCoroutine);
                 }
