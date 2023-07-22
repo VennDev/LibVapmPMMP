@@ -196,8 +196,12 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
      */
     private static array $threads = [];
 
-    public function __construct()
-    {}
+    private static string $input;
+
+    public function __construct(string $input = '')
+    {
+        self::$input = $input;
+    }
 
     public function getPid(): int
     {
@@ -418,7 +422,7 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
                 $pathAutoLoad
             );
 
-            $command = 'php -r "require_once \'' . $pathAutoLoad . '\'; include \'' . $class . '\'; $class = new ' . static::class . '(); $class->onRun();"';
+            $command = 'php -r "require_once \'' . $pathAutoLoad . '\'; include \'' . $class . '\'; $class = new ' . static::class . '(); $class->onRun("' . self::$input . '");"';
 
             $process = proc_open(
                 $command,
