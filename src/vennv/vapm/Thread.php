@@ -361,17 +361,49 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
         }
     }
 
+    /**
+     * @param false|string $data
+     * @return array<int, mixed>
+     * @phpstan-return array<int, mixed>
+     */
+    private static function getAlert(false|string $data): array
+    {
+        $result = [];
+
+        if (is_string($data))
+        {
+            $explode = explode(PHP_EOL, $data);
+
+            foreach ($explode as $item)
+            {
+                if ($item !== '')
+                {
+                    $dataExplode = explode('=>', $data);
+
+                    if ($dataExplode[0] === self::POST_ALERT_THREAD)
+                    {
+                        $result[] = json_decode($dataExplode[1], true);
+                    }
+                }
+            }
+        }
+
+        return $result;
+    }
+
     abstract public function onRun(): void;
 
     /**
      * @param array<int, array<string>> $mode
+     * @return Async
      * @throws ReflectionException
      * @throws Throwable
      * @phpstan-param array<int, array<string>> $mode
+     * @phpstan-return Async
      */
     public function start(array $mode = DescriptorSpec::BASIC): Async
     {
-        return new Async(function() use ($mode): mixed
+        return new Async(function() use ($mode): array
         {
             $className = get_called_class();
 
@@ -476,7 +508,7 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
             proc_close($process);
             unset(self::$threads[$this->getPid()]);
 
-            return $output;
+            return self::getAlert($output);
         });
     }
 
