@@ -67,6 +67,9 @@ interface ThreadInterface
 interface ThreadedInterface
 {
 
+    /**
+     * @return string
+     */
     public function getInput(): string;
 
     /**
@@ -198,16 +201,20 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
      */
     private static array $threads = [];
 
-    private static string $input;
+    /**
+     * @var array<string, string>
+     * @phpstan-var array<string, string>
+     */
+    private static array $inputs = [];
 
-    public function __construct(string $input = '')
+    public function __construct(string $input)
     {
-        self::$input = $input;
+        self::$inputs[get_called_class()] = $input;
     }
 
     public function getInput(): string
     {
-        return self::$input;
+        return self::$inputs[get_called_class()];
     }
 
     public function getPid(): int
@@ -429,7 +436,9 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
                 $pathAutoLoad
             );
 
-            $command = 'php -r "require_once \'' . $pathAutoLoad . '\'; include \'' . $class . '\'; $class = new ' . static::class . '(); $class->onRun(\'' . self::$input . '\');"';
+            $command = 'php -r "require_once \'' . $pathAutoLoad . '\'; include \'' . $class . '\'; $class = new ' . static::class . '(\'' . self::$inputs[get_called_class()] . '\'); $class->onRun();"';
+
+            unset(self::$inputs[get_called_class()]);
 
             $process = proc_open(
                 $command,
