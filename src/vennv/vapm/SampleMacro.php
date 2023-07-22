@@ -1,16 +1,18 @@
 <?php
 
-/*
- * Copyright (c) 2023 VennV, CC0 1.0 Universal
+/**
+ * Vapm and a brief idea of what it does.>
+ * Copyright (C) 2023  VennDev
  *
- * CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE
- * LEGAL SERVICES. DISTRIBUTION OF THIS DOCUMENT DOES NOT CREATE AN
- * ATTORNEY-CLIENT RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS
- * INFORMATION ON AN "AS-IS" BASIS. CREATIVE COMMONS MAKES NO WARRANTIES
- * REGARDING THE USE OF THIS DOCUMENT OR THE INFORMATION OR WORKS
- * PROVIDED HEREUNDER, AND DISCLAIMS LIABILITY FOR DAMAGES RESULTING FROM
- * THE USE OF THIS DOCUMENT OR THE INFORMATION OR WORKS PROVIDED
- * HEREUNDER.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  */
 
 declare(strict_types = 1);
