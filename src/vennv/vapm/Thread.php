@@ -60,7 +60,7 @@ interface ThreadInterface
      *
      * This method use to start the thread
      */
-    public function start(array $mode = DescriptorSpec::BASIC): void;
+    public function start(array $mode = DescriptorSpec::BASIC): Async;
 
 }
 
@@ -369,9 +369,9 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
      * @throws Throwable
      * @phpstan-param array<int, array<string>> $mode
      */
-    public function start(array $mode = DescriptorSpec::BASIC): void
+    public function start(array $mode = DescriptorSpec::BASIC): Async
     {
-        new Async(function() use ($mode): void
+        return new Async(function() use ($mode): mixed
         {
             $className = get_called_class();
 
@@ -475,6 +475,8 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
 
             proc_close($process);
             unset(self::$threads[$this->getPid()]);
+
+            return $output;
         });
     }
 
