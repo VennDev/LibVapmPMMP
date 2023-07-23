@@ -22,4 +22,8 @@ protected function onEnable() : void
 public static function init(PluginBase $plugin) : void;
 ```
 - Finally, here's a guide to the methods you can use: [here](https://venndev.gitbook.io/vapm/)
-- This is plugin Example: [plugin](https://github.com/VennDev/SimplifyLibasynql/tree/main/Examples/Test)
+- This is plugin Example:
+- [SimplifyLibasynql](https://github.com/VennDev/SimplifyLibasynql/tree/main/Examples/Test)
+- [VSharedData](https://github.com/VennDev/VSharedData)
+- [VJesusBucket](https://github.com/VennDev/VJesusBucket)
+- [VBasket](https://github.com/VennDev/VBasket)
