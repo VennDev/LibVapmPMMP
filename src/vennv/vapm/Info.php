@@ -26,7 +26,7 @@ class Info
 
     public const AUTHOR = "VennV";
 
-    public const LICENSE = "MIT";
+    public const LICENSE = "GPL-2.0 license";
 
     public const GITHUB = "https://github.com/VennDev";
 
