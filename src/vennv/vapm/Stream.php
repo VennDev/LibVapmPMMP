@@ -118,7 +118,7 @@ final class Stream implements StreamInterface
     {
         return new Promise(function($resolve , $reject) use ($path, $data): void
         {
-            $generator = function($path, $data) use ($reject): void
+            $callback = function($path, $data) use ($reject): void
             {
                 $handle = fopen($path, 'w');
 
@@ -134,7 +134,7 @@ final class Stream implements StreamInterface
                 }
             };
 
-            $generator($path, $data);
+            $callback($path, $data);
 
             $resolve('');
         });
@@ -147,7 +147,7 @@ final class Stream implements StreamInterface
     {
         return new Promise(function($resolve , $reject) use ($path, $data): void
         {
-            $generator = function($path, $data) use ($reject): void
+            $callback = function($path, $data) use ($reject): void
             {
                 $handle = fopen($path, 'a');
 
@@ -163,7 +163,7 @@ final class Stream implements StreamInterface
                 }
             };
 
-            $generator($path, $data);
+            $callback($path, $data);
 
             $resolve('');
         });
@@ -176,7 +176,7 @@ final class Stream implements StreamInterface
     {
         return new Promise(function($resolve , $reject) use ($path): void
         {
-            $generator = function($path) use ($reject): void
+            $callback = function($path) use ($reject): void
             {
                 if (file_exists($path))
                 {
@@ -188,7 +188,7 @@ final class Stream implements StreamInterface
                 }
             };
 
-            $generator($path);
+            $callback($path);
 
             $resolve('');
         });
@@ -201,7 +201,7 @@ final class Stream implements StreamInterface
     {
         return new Promise(function($resolve , $reject) use ($path): void
         {
-            $generator = function($path) use ($reject): void
+            $callback = function($path) use ($reject): void
             {
                 if (!file_exists($path))
                 {
@@ -213,7 +213,7 @@ final class Stream implements StreamInterface
                 }
             };
 
-            $generator($path);
+            $callback($path);
 
             $resolve('');
         });
@@ -226,7 +226,7 @@ final class Stream implements StreamInterface
     {
         return new Promise(function($resolve , $reject) use ($path, $data): void
         {
-            $generator = function($path, $data) use ($reject): void
+            $callback = function($path, $data) use ($reject): void
             {
                 $handle = fopen($path, 'w+');
 
@@ -242,7 +242,7 @@ final class Stream implements StreamInterface
                 }
             };
 
-            $generator($path, $data);
+            $callback($path, $data);
 
             $resolve('');
         });
