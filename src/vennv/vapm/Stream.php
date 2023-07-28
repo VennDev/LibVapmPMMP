@@ -79,35 +79,38 @@ final class Stream implements StreamInterface
     {
         return new Promise(function($resolve , $reject) use ($path): void
         {
-            $generator = function($path) use ($reject): Generator
+            System::setTimeout(function() use ($resolve , $reject, $path): void
             {
-                $handle = fopen($path, 'r');
-
-                if ($handle === false)
+                $generator = function($path) use ($reject): Generator
                 {
-                    $reject(Error::UNABLE_TO_OPEN_FILE);
-                }
-                else
-                {
-                    stream_set_blocking($handle, false);
+                    $handle = fopen($path, 'r');
 
-                    while (($line = fgets($handle)) !== false)
+                    if ($handle === false)
                     {
-                        yield $line;
+                        $reject(Error::UNABLE_TO_OPEN_FILE);
                     }
+                    else
+                    {
+                        stream_set_blocking($handle, false);
 
-                    fclose($handle);
+                        while (($line = fgets($handle)) !== false)
+                        {
+                            yield $line;
+                        }
+
+                        fclose($handle);
+                    }
+                };
+
+                $lines = '';
+
+                foreach ($generator($path) as $line)
+                {
+                    $lines .= $line . PHP_EOL;
                 }
-            };
 
-            $lines = '';
-
-            foreach ($generator($path) as $line)
-            {
-                $lines .= $line . PHP_EOL;
-            }
-
-            $resolve($lines);
+                $resolve($lines);
+            }, 0);
         });
     }
 
@@ -118,25 +121,28 @@ final class Stream implements StreamInterface
     {
         return new Promise(function($resolve , $reject) use ($path, $data): void
         {
-            $callback = function($path, $data) use ($reject): void
+            System::setTimeout(function() use ($resolve , $reject, $path, $data): void
             {
-                $handle = fopen($path, 'w');
-
-                if ($handle === false)
+                $callback = function($path, $data) use ($reject): void
                 {
-                    $reject(Error::UNABLE_TO_OPEN_FILE);
-                }
-                else
-                {
-                    stream_set_blocking($handle, false);
-                    fwrite($handle, $data);
-                    fclose($handle);
-                }
-            };
+                    $handle = fopen($path, 'w');
 
-            $callback($path, $data);
+                    if ($handle === false)
+                    {
+                        $reject(Error::UNABLE_TO_OPEN_FILE);
+                    }
+                    else
+                    {
+                        stream_set_blocking($handle, false);
+                        fwrite($handle, $data);
+                        fclose($handle);
+                    }
+                };
 
-            $resolve('');
+                $callback($path, $data);
+
+                $resolve('');
+            }, 0);
         });
     }
 
@@ -147,25 +153,28 @@ final class Stream implements StreamInterface
     {
         return new Promise(function($resolve , $reject) use ($path, $data): void
         {
-            $callback = function($path, $data) use ($reject): void
+            System::setTimeout(function() use ($resolve , $reject, $path, $data): void
             {
-                $handle = fopen($path, 'a');
-
-                if ($handle === false)
+                $callback = function($path, $data) use ($reject): void
                 {
-                    $reject(Error::UNABLE_TO_OPEN_FILE);
-                }
-                else
-                {
-                    stream_set_blocking($handle, false);
-                    fwrite($handle, $data);
-                    fclose($handle);
-                }
-            };
+                    $handle = fopen($path, 'a');
 
-            $callback($path, $data);
+                    if ($handle === false)
+                    {
+                        $reject(Error::UNABLE_TO_OPEN_FILE);
+                    }
+                    else
+                    {
+                        stream_set_blocking($handle, false);
+                        fwrite($handle, $data);
+                        fclose($handle);
+                    }
+                };
 
-            $resolve('');
+                $callback($path, $data);
+
+                $resolve('');
+            }, 0);
         });
     }
 
@@ -176,21 +185,24 @@ final class Stream implements StreamInterface
     {
         return new Promise(function($resolve , $reject) use ($path): void
         {
-            $callback = function($path) use ($reject): void
+            System::setTimeout(function() use ($resolve , $reject, $path): void
             {
-                if (file_exists($path))
+                $callback = function($path) use ($reject): void
                 {
-                    unlink($path);
-                }
-                else
-                {
-                    $reject(Error::FILE_DOES_NOT_EXIST);
-                }
-            };
+                    if (file_exists($path))
+                    {
+                        unlink($path);
+                    }
+                    else
+                    {
+                        $reject(Error::FILE_DOES_NOT_EXIST);
+                    }
+                };
 
-            $callback($path);
+                $callback($path);
 
-            $resolve('');
+                $resolve('');
+            }, 0);
         });
     }
 
@@ -201,21 +213,24 @@ final class Stream implements StreamInterface
     {
         return new Promise(function($resolve , $reject) use ($path): void
         {
-            $callback = function($path) use ($reject): void
+            System::setTimeout(function() use ($resolve , $reject, $path): void
             {
-                if (!file_exists($path))
+                $callback = function($path) use ($reject): void
                 {
-                    touch($path);
-                }
-                else
-                {
-                    $reject(Error::FILE_ALREADY_EXISTS);
-                }
-            };
+                    if (!file_exists($path))
+                    {
+                        touch($path);
+                    }
+                    else
+                    {
+                        $reject(Error::FILE_ALREADY_EXISTS);
+                    }
+                };
 
-            $callback($path);
+                $callback($path);
 
-            $resolve('');
+                $resolve('');
+            }, 0);
         });
     }
 
@@ -226,25 +241,28 @@ final class Stream implements StreamInterface
     {
         return new Promise(function($resolve , $reject) use ($path, $data): void
         {
-            $callback = function($path, $data) use ($reject): void
+            System::setTimeout(function() use ($resolve , $reject, $path, $data): void
             {
-                $handle = fopen($path, 'w+');
-
-                if ($handle === false)
+                $callback = function($path, $data) use ($reject): void
                 {
-                    $reject(Error::UNABLE_TO_OPEN_FILE);
-                }
-                else
-                {
-                    stream_set_blocking($handle, false);
-                    fwrite($handle, $data);
-                    fclose($handle);
-                }
-            };
+                    $handle = fopen($path, 'w+');
 
-            $callback($path, $data);
+                    if ($handle === false)
+                    {
+                        $reject(Error::UNABLE_TO_OPEN_FILE);
+                    }
+                    else
+                    {
+                        stream_set_blocking($handle, false);
+                        fwrite($handle, $data);
+                        fclose($handle);
+                    }
+                };
 
-            $resolve('');
+                $callback($path, $data);
+
+                $resolve('');
+            }, 0);
         });
     }
 
