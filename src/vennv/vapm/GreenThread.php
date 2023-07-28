@@ -136,8 +136,8 @@ final class GreenThread implements GreenThreadInterface
         }
 
         self::$names[]  = $name;
-        self::$fibers[] = new Fiber($callback);
         self::$params[] = $params;
+        self::$fibers[] = new Fiber($callback);
         self::$status[$name] = new StatusThread();
     }
 

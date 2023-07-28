@@ -52,7 +52,6 @@ final class Deferred implements DeferredInterface
 
     public function await(): mixed
     {
-
         while (!$this->childCoroutine->isFinished())
         {
             $this->childCoroutine->run();

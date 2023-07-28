@@ -116,12 +116,12 @@ interface PromiseInterface
     /**
      * This method is used to resolve the promise.
      */
-    public function resolve(mixed $value): void;
+    public function resolve(mixed $value = ''): void;
 
     /**
      * This method is used to reject the promise.
      */
-    public function reject(mixed $value): void;
+    public function reject(mixed $value = ''): void;
 
     /**
      * This method is used to set the callback when the promise is resolved.
@@ -226,12 +226,12 @@ final class Promise implements PromiseInterface
         }
         else
         {
-            $resolve = function($result): void
+            $resolve = function($result = ''): void
             {
                 $this->resolve($result);
             };
 
-            $reject = function($result): void
+            $reject = function($result = ''): void
             {
                 $this->reject($result);
             };
@@ -337,7 +337,7 @@ final class Promise implements PromiseInterface
         return $this->callback;
     }
 
-    public function resolve(mixed $value): void
+    public function resolve(mixed $value = ''): void
     {
         if ($this->isPending())
         {
@@ -346,7 +346,7 @@ final class Promise implements PromiseInterface
         }
     }
 
-    public function reject(mixed $value): void
+    public function reject(mixed $value = ''): void
     {
         if ($this->isPending())
         {

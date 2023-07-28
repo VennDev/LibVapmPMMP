@@ -21,6 +21,15 @@ namespace vennv\vapm;
 
 use Generator;
 use Throwable;
+use function fclose;
+use function fgets;
+use function file_exists;
+use function fopen;
+use function fwrite;
+use function stream_set_blocking;
+use function touch;
+use function unlink;
+use const PHP_EOL;
 
 interface StreamInterface
 {
@@ -141,7 +150,7 @@ final class Stream implements StreamInterface
 
                 $callback($path, $data);
 
-                $resolve('');
+                $resolve();
             }, 0);
         });
     }
@@ -173,7 +182,7 @@ final class Stream implements StreamInterface
 
                 $callback($path, $data);
 
-                $resolve('');
+                $resolve();
             }, 0);
         });
     }
@@ -201,7 +210,7 @@ final class Stream implements StreamInterface
 
                 $callback($path);
 
-                $resolve('');
+                $resolve();
             }, 0);
         });
     }
@@ -229,7 +238,7 @@ final class Stream implements StreamInterface
 
                 $callback($path);
 
-                $resolve('');
+                $resolve();
             }, 0);
         });
     }
@@ -261,7 +270,7 @@ final class Stream implements StreamInterface
 
                 $callback($path, $data);
 
-                $resolve('');
+                $resolve();
             }, 0);
         });
     }
