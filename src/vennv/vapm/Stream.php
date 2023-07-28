@@ -95,6 +95,8 @@ final class Stream implements StreamInterface
                     {
                         yield $line;
                     }
+
+                    fclose($handle);
                 }
             };
 
@@ -116,7 +118,7 @@ final class Stream implements StreamInterface
     {
         return new Promise(function($resolve , $reject) use ($path, $data): void
         {
-            $generator = function($path, $data) use ($reject): Generator
+            $generator = function($path, $data) use ($reject): void
             {
                 $handle = fopen($path, 'w');
 
@@ -127,8 +129,8 @@ final class Stream implements StreamInterface
                 else
                 {
                     stream_set_blocking($handle, false);
-
-                    yield fwrite($handle, $data);
+                    fwrite($handle, $data);
+                    fclose($handle);
                 }
             };
 
@@ -145,7 +147,7 @@ final class Stream implements StreamInterface
     {
         return new Promise(function($resolve , $reject) use ($path, $data): void
         {
-            $generator = function($path, $data) use ($reject): Generator
+            $generator = function($path, $data) use ($reject): void
             {
                 $handle = fopen($path, 'a');
 
@@ -156,8 +158,8 @@ final class Stream implements StreamInterface
                 else
                 {
                     stream_set_blocking($handle, false);
-
-                    yield fwrite($handle, $data);
+                    fwrite($handle, $data);
+                    fclose($handle);
                 }
             };
 
@@ -174,11 +176,11 @@ final class Stream implements StreamInterface
     {
         return new Promise(function($resolve , $reject) use ($path): void
         {
-            $generator = function($path) use ($reject): Generator
+            $generator = function($path) use ($reject): void
             {
                 if (file_exists($path))
                 {
-                    yield unlink($path);
+                    unlink($path);
                 }
                 else
                 {
@@ -199,11 +201,11 @@ final class Stream implements StreamInterface
     {
         return new Promise(function($resolve , $reject) use ($path): void
         {
-            $generator = function($path) use ($reject): Generator
+            $generator = function($path) use ($reject): void
             {
                 if (!file_exists($path))
                 {
-                    yield touch($path);
+                    touch($path);
                 }
                 else
                 {
@@ -224,7 +226,7 @@ final class Stream implements StreamInterface
     {
         return new Promise(function($resolve , $reject) use ($path, $data): void
         {
-            $generator = function($path, $data) use ($reject): Generator
+            $generator = function($path, $data) use ($reject): void
             {
                 $handle = fopen($path, 'w+');
 
@@ -235,8 +237,8 @@ final class Stream implements StreamInterface
                 else
                 {
                     stream_set_blocking($handle, false);
-
-                    yield fwrite($handle, $data);
+                    fwrite($handle, $data);
+                    fclose($handle);
                 }
             };
 
