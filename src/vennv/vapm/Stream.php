@@ -53,6 +53,20 @@ interface StreamInterface
      */
     public static function delete(string $path) : Promise;
 
+    /**
+     * @throws Throwable
+     *
+     * Use this to create a file.
+     */
+    public static function create(string $path) : Promise;
+
+    /**
+     * @throws Throwable
+     *
+     * Use this to create a file or overwrite a file.
+     */
+    public static function overWrite(string $path, string $data) : Promise;
+
 }
 
 final class Stream implements StreamInterface
@@ -173,6 +187,60 @@ final class Stream implements StreamInterface
             };
 
             $generator($path);
+
+            $resolve();
+        });
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public static function create(string $path): Promise
+    {
+        return new Promise(function($resolve , $reject) use ($path): void
+        {
+            $generator = function($path) use ($reject): Generator
+            {
+                if (!file_exists($path))
+                {
+                    yield touch($path);
+                }
+                else
+                {
+                    $reject(Error::FILE_ALREADY_EXISTS);
+                }
+            };
+
+            $generator($path);
+
+            $resolve();
+        });
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public static function overWrite(string $path, string $data): Promise
+    {
+        return new Promise(function($resolve , $reject) use ($path, $data): void
+        {
+            $generator = function($path, $data) use ($reject): Generator
+            {
+                $handle = fopen($path, 'w+');
+
+                if ($handle === false)
+                {
+                    $reject(Error::UNABLE_TO_OPEN_FILE);
+                }
+                else
+                {
+                    stream_set_blocking($handle, false);
+
+                    yield fwrite($handle, $data);
+                }
+            };
+
+            $generator($path, $data);
 
             $resolve();
         });

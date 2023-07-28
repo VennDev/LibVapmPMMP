@@ -34,4 +34,6 @@ final class Error
 
     public const FILE_DOES_NOT_EXIST = "Error: File does not exist!";
 
+    public const FILE_ALREADY_EXISTS = "Error: File already exists!";
+
 }
