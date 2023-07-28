@@ -210,6 +210,8 @@ final class Promise implements PromiseInterface
 
     /**
      * @throws Throwable
+     * @param callable $callback
+     * @param bool $justGetResult
      */
     public function __construct(callable $callback, bool $justGetResult = false)
     {
@@ -220,7 +222,7 @@ final class Promise implements PromiseInterface
 
         if ($justGetResult)
         {
-            $this->fiber->start();
+            $this->result = $this->fiber->start();
         }
         else
         {

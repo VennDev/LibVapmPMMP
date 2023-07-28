@@ -46,7 +46,7 @@ final class Deferred implements DeferredInterface
         }
         else
         {
-            throw new DeferredException("Deferred callback must return a Generator");
+            throw new DeferredException(Error::DEFERRED_CALLBACK_MUST_RETURN_GENERATOR);
         }
     }
 

@@ -22,11 +22,11 @@ namespace vennv\vapm;
 class Info
 {
 
-    public const VERSION = "1.7.0";
+    public const VERSION = "1.7.5";
 
     public const AUTHOR = "VennV";
 
-    public const LICENSE = "GPL-2.0 license";
+    public const LICENSE = "MIT";
 
     public const GITHUB = "https://github.com/VennDev";
 

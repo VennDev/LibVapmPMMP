@@ -28,4 +28,10 @@ final class Error
 
     public const UNABLE_START_THREAD = "Unable to start thread";
 
+    public const DEFERRED_CALLBACK_MUST_RETURN_GENERATOR = "Deferred callback must return a Generator";
+
+    public const UNABLE_TO_OPEN_FILE = "Error: Unable to open file!";
+
+    public const FILE_DOES_NOT_EXIST = "Error: File does not exist!";
+
 }

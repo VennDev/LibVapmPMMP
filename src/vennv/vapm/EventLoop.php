@@ -55,17 +55,17 @@ interface EventLoopInterface
 class EventLoop implements EventLoopInterface
 {
 
-    private static int $nextId = 0;
+    protected static int $nextId = 0;
 
     /**
      * @var array<int, Promise>
      */
-    private static array $queues = [];
+    protected static array $queues = [];
 
     /**
      * @var array<int, Promise>
      */
-    private static array $returns = [];
+    protected static array $returns = [];
 
     public static function generateId(): int
     {
