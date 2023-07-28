@@ -134,7 +134,7 @@ final class Stream implements StreamInterface
 
             $generator($path, $data);
 
-            $resolve();
+            $resolve('');
         });
     }
 
@@ -163,7 +163,7 @@ final class Stream implements StreamInterface
 
             $generator($path, $data);
 
-            $resolve();
+            $resolve('');
         });
     }
 
@@ -188,7 +188,7 @@ final class Stream implements StreamInterface
 
             $generator($path);
 
-            $resolve();
+            $resolve('');
         });
     }
 
@@ -213,7 +213,7 @@ final class Stream implements StreamInterface
 
             $generator($path);
 
-            $resolve();
+            $resolve('');
         });
     }
 
@@ -242,7 +242,7 @@ final class Stream implements StreamInterface
 
             $generator($path, $data);
 
-            $resolve();
+            $resolve('');
         });
     }
 
