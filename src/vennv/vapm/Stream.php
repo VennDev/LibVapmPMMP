@@ -84,31 +84,23 @@ final class Stream implements StreamInterface {
      */
     public static function read(string $path) : Promise {
         return new Promise(function ($resolve, $reject) use ($path) : void {
-            System::setTimeout(function () use ($resolve, $reject, $path) : void {
-                $generator = function ($path) use ($reject) : Generator {
-                    $handle = fopen($path, 'r');
+            $lines = '';
+            $handle = fopen($path, 'r');
 
-                    if ($handle === false) {
-                        $reject(Error::UNABLE_TO_OPEN_FILE);
-                    } else {
-                        stream_set_blocking($handle, false);
+            if ($handle === false) {
+                $reject(Error::UNABLE_TO_OPEN_FILE);
+            } else {
+                stream_set_blocking($handle, false);
 
-                        while (($line = fgets($handle)) !== false) {
-                            yield $line;
-                        }
-
-                        fclose($handle);
-                    }
-                };
-
-                $lines = '';
-
-                foreach ($generator($path) as $line) {
-                    $lines .= $line . PHP_EOL;
+                while (($line = fgets($handle)) !== false) {
+                    $lines .= $line;
+                    FiberManager::wait();
                 }
 
-                $resolve($lines);
-            }, 0);
+                fclose($handle);
+            }
+
+            $resolve($lines);
         });
     }
 

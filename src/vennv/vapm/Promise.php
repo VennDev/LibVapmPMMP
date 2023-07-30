@@ -29,6 +29,14 @@ use function call_user_func;
 interface PromiseInterface {
 
     /**
+     * @param mixed $result
+     * @return Promise
+     *
+     * This method is used to set the result of the promise.
+     */
+    public function setResult(mixed $result) : Promise;
+
+    /**
      * @throws Throwable
      *
      * This method is used to create a new promise.
@@ -243,6 +251,11 @@ final class Promise implements PromiseInterface {
         $this->callbackFinally = function () : void {};
 
         EventLoop::addQueue($this);
+    }
+
+    public function setResult(mixed $result) : Promise {
+        $this->result = $result;
+        return $this;
     }
 
     /**
