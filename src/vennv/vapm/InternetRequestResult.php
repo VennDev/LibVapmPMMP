@@ -19,8 +19,7 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
-interface InternetRequestResultInterface
-{
+interface InternetRequestResultInterface {
 
     /**
      * @return string[][]
@@ -33,12 +32,11 @@ interface InternetRequestResultInterface
 
 }
 
-final class InternetRequestResult implements InternetRequestResultInterface
-{
+final class InternetRequestResult implements InternetRequestResultInterface {
 
-	/**
-	 * @var string[][] $headers
-	 */
+    /**
+     * @var string[][] $headers
+     */
     private array $headers;
 
     private string $body;
@@ -50,29 +48,25 @@ final class InternetRequestResult implements InternetRequestResultInterface
      * @param string $body
      * @param int $code
      */
-	public function __construct(array $headers, string $body, int $code)
-	{
+    public function __construct(array $headers, string $body, int $code) {
         $this->headers = $headers;
         $this->body = $body;
         $this->code = $code;
     }
 
-	/**
-	 * @return string[][]
-	 */
-	public function getHeaders() : array
-	{ 
-		return $this->headers; 
-	}
+    /**
+     * @return string[][]
+     */
+    public function getHeaders() : array {
+        return $this->headers;
+    }
 
-	public function getBody() : string
-	{ 
-		return $this->body; 
-	}
+    public function getBody() : string {
+        return $this->body;
+    }
 
-	public function getCode() : int
-	{ 
-		return $this->code; 
-	}
+    public function getCode() : int {
+        return $this->code;
+    }
 
 }

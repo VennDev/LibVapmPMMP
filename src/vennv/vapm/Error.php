@@ -19,8 +19,7 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
-final class Error
-{
+final class Error {
 
     public const FAILED_IN_FETCHING_DATA = "Error in fetching data";
 

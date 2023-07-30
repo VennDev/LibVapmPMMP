@@ -31,8 +31,7 @@ use function touch;
 use function unlink;
 use const PHP_EOL;
 
-interface StreamInterface
-{
+interface StreamInterface {
 
     /**
      * @throws Throwable
@@ -44,21 +43,21 @@ interface StreamInterface
     /**
      * @throws Throwable
      *
-     * Use this to write to a file.
+     * Use this to write to a file or url.
      */
     public static function write(string $path, string $data) : Promise;
 
     /**
      * @throws Throwable
      *
-     * Use this to append to a file.
+     * Use this to append to a file or url.
      */
     public static function append(string $path, string $data) : Promise;
 
     /**
      * @throws Throwable
      *
-     * Use this to delete a file.
+     * Use this to delete a file or url.
      */
     public static function delete(string $path) : Promise;
 
@@ -78,32 +77,23 @@ interface StreamInterface
 
 }
 
-final class Stream implements StreamInterface
-{
+final class Stream implements StreamInterface {
 
     /**
      * @throws Throwable
      */
-    public static function read(string $path): Promise
-    {
-        return new Promise(function($resolve , $reject) use ($path): void
-        {
-            System::setTimeout(function() use ($resolve , $reject, $path): void
-            {
-                $generator = function($path) use ($reject): Generator
-                {
+    public static function read(string $path) : Promise {
+        return new Promise(function ($resolve, $reject) use ($path) : void {
+            System::setTimeout(function () use ($resolve, $reject, $path) : void {
+                $generator = function ($path) use ($reject) : Generator {
                     $handle = fopen($path, 'r');
 
-                    if ($handle === false)
-                    {
+                    if ($handle === false) {
                         $reject(Error::UNABLE_TO_OPEN_FILE);
-                    }
-                    else
-                    {
+                    } else {
                         stream_set_blocking($handle, false);
 
-                        while (($line = fgets($handle)) !== false)
-                        {
+                        while (($line = fgets($handle)) !== false) {
                             yield $line;
                         }
 
@@ -113,8 +103,7 @@ final class Stream implements StreamInterface
 
                 $lines = '';
 
-                foreach ($generator($path) as $line)
-                {
+                foreach ($generator($path) as $line) {
                     $lines .= $line . PHP_EOL;
                 }
 
@@ -126,22 +115,15 @@ final class Stream implements StreamInterface
     /**
      * @throws Throwable
      */
-    public static function write(string $path, string $data): Promise
-    {
-        return new Promise(function($resolve , $reject) use ($path, $data): void
-        {
-            System::setTimeout(function() use ($resolve , $reject, $path, $data): void
-            {
-                $callback = function($path, $data) use ($reject): void
-                {
+    public static function write(string $path, string $data) : Promise {
+        return new Promise(function ($resolve, $reject) use ($path, $data) : void {
+            System::setTimeout(function () use ($resolve, $reject, $path, $data) : void {
+                $callback = function ($path, $data) use ($reject) : void {
                     $handle = fopen($path, 'w');
 
-                    if ($handle === false)
-                    {
+                    if ($handle === false) {
                         $reject(Error::UNABLE_TO_OPEN_FILE);
-                    }
-                    else
-                    {
+                    } else {
                         stream_set_blocking($handle, false);
                         fwrite($handle, $data);
                         fclose($handle);
@@ -158,22 +140,15 @@ final class Stream implements StreamInterface
     /**
      * @throws Throwable
      */
-    public static function append(string $path, string $data): Promise
-    {
-        return new Promise(function($resolve , $reject) use ($path, $data): void
-        {
-            System::setTimeout(function() use ($resolve , $reject, $path, $data): void
-            {
-                $callback = function($path, $data) use ($reject): void
-                {
+    public static function append(string $path, string $data) : Promise {
+        return new Promise(function ($resolve, $reject) use ($path, $data) : void {
+            System::setTimeout(function () use ($resolve, $reject, $path, $data) : void {
+                $callback = function ($path, $data) use ($reject) : void {
                     $handle = fopen($path, 'a');
 
-                    if ($handle === false)
-                    {
+                    if ($handle === false) {
                         $reject(Error::UNABLE_TO_OPEN_FILE);
-                    }
-                    else
-                    {
+                    } else {
                         stream_set_blocking($handle, false);
                         fwrite($handle, $data);
                         fclose($handle);
@@ -190,20 +165,13 @@ final class Stream implements StreamInterface
     /**
      * @throws Throwable
      */
-    public static function delete(string $path): Promise
-    {
-        return new Promise(function($resolve , $reject) use ($path): void
-        {
-            System::setTimeout(function() use ($resolve , $reject, $path): void
-            {
-                $callback = function($path) use ($reject): void
-                {
-                    if (file_exists($path))
-                    {
+    public static function delete(string $path) : Promise {
+        return new Promise(function ($resolve, $reject) use ($path) : void {
+            System::setTimeout(function () use ($resolve, $reject, $path) : void {
+                $callback = function ($path) use ($reject) : void {
+                    if (file_exists($path)) {
                         unlink($path);
-                    }
-                    else
-                    {
+                    } else {
                         $reject(Error::FILE_DOES_NOT_EXIST);
                     }
                 };
@@ -218,20 +186,13 @@ final class Stream implements StreamInterface
     /**
      * @throws Throwable
      */
-    public static function create(string $path): Promise
-    {
-        return new Promise(function($resolve , $reject) use ($path): void
-        {
-            System::setTimeout(function() use ($resolve , $reject, $path): void
-            {
-                $callback = function($path) use ($reject): void
-                {
-                    if (!file_exists($path))
-                    {
+    public static function create(string $path) : Promise {
+        return new Promise(function ($resolve, $reject) use ($path) : void {
+            System::setTimeout(function () use ($resolve, $reject, $path) : void {
+                $callback = function ($path) use ($reject) : void {
+                    if (!file_exists($path)) {
                         touch($path);
-                    }
-                    else
-                    {
+                    } else {
                         $reject(Error::FILE_ALREADY_EXISTS);
                     }
                 };
@@ -246,22 +207,15 @@ final class Stream implements StreamInterface
     /**
      * @throws Throwable
      */
-    public static function overWrite(string $path, string $data): Promise
-    {
-        return new Promise(function($resolve , $reject) use ($path, $data): void
-        {
-            System::setTimeout(function() use ($resolve , $reject, $path, $data): void
-            {
-                $callback = function($path, $data) use ($reject): void
-                {
+    public static function overWrite(string $path, string $data) : Promise {
+        return new Promise(function ($resolve, $reject) use ($path, $data) : void {
+            System::setTimeout(function () use ($resolve, $reject, $path, $data) : void {
+                $callback = function ($path, $data) use ($reject) : void {
                     $handle = fopen($path, 'w+');
 
-                    if ($handle === false)
-                    {
+                    if ($handle === false) {
                         $reject(Error::UNABLE_TO_OPEN_FILE);
-                    }
-                    else
-                    {
+                    } else {
                         stream_set_blocking($handle, false);
                         fwrite($handle, $data);
                         fclose($handle);

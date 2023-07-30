@@ -23,37 +23,35 @@ use Throwable;
 use function count;
 use const PHP_INT_MAX;
 
-interface EventLoopInterface
-{
+interface EventLoopInterface {
 
-    public static function generateId(): int;
+    public static function generateId() : int;
 
-    public static function addQueue(Promise $promise): void;
+    public static function addQueue(Promise $promise) : void;
 
-    public static function removeQueue(int $id): void;
+    public static function removeQueue(int $id) : void;
 
-    public static function getQueue(int $id): ?Promise;
-
-    /**
-     * @return array<int, Promise>
-     */
-    public static function getQueues(): array;
-
-    public static function addReturn(Promise $promise): void;
-
-    public static function removeReturn(int $id): void;
-
-    public static function getReturn(int $id): ?Promise;
+    public static function getQueue(int $id) : ?Promise;
 
     /**
      * @return array<int, Promise>
      */
-    public static function getReturns(): array;
+    public static function getQueues() : array;
+
+    public static function addReturn(Promise $promise) : void;
+
+    public static function removeReturn(int $id) : void;
+
+    public static function getReturn(int $id) : ?Promise;
+
+    /**
+     * @return array<int, Promise>
+     */
+    public static function getReturns() : array;
 
 }
 
-class EventLoop implements EventLoopInterface
-{
+class EventLoop implements EventLoopInterface {
 
     protected static int $nextId = 0;
 
@@ -67,78 +65,63 @@ class EventLoop implements EventLoopInterface
      */
     protected static array $returns = [];
 
-    public static function generateId(): int
-    {
-        if (self::$nextId >= PHP_INT_MAX)
-        {
+    public static function generateId() : int {
+        if (self::$nextId >= PHP_INT_MAX) {
             self::$nextId = 0;
         }
 
         return self::$nextId++;
     }
 
-    public static function addQueue(Promise $promise): void
-    {
+    public static function addQueue(Promise $promise) : void {
         $id = $promise->getId();
 
-        if (!isset(self::$queues[$id]))
-        {
+        if (!isset(self::$queues[$id])) {
             self::$queues[$id] = $promise;
         }
     }
 
-    public static function removeQueue(int $id): void
-    {
+    public static function removeQueue(int $id) : void {
         unset(self::$queues[$id]);
     }
 
-    public static function getQueue(int $id): ?Promise
-    {
+    public static function getQueue(int $id) : ?Promise {
         return self::$queues[$id] ?? null;
     }
 
     /**
      * @return array<int, Promise>
      */
-    public static function getQueues(): array
-    {
+    public static function getQueues() : array {
         return self::$queues;
     }
 
-    public static function addReturn(Promise $promise): void
-    {
+    public static function addReturn(Promise $promise) : void {
         $id = $promise->getId();
 
-        if (!isset(self::$returns[$id]))
-        {
+        if (!isset(self::$returns[$id])) {
             self::$returns[$id] = $promise;
         }
     }
 
-    public static function removeReturn(int $id): void
-    {
+    public static function removeReturn(int $id) : void {
         unset(self::$returns[$id]);
     }
 
-    public static function getReturn(int $id): ?Promise
-    {
+    public static function getReturn(int $id) : ?Promise {
         return self::$returns[$id] ?? null;
     }
 
     /**
      * @return array<int, Promise>
      */
-    public static function getReturns(): array
-    {
+    public static function getReturns() : array {
         return self::$returns;
     }
 
-    private static function clearGarbage(): void
-    {
-        foreach (self::$returns as $id => $promise)
-        {
-            if ($promise->canDrop())
-            {
+    private static function clearGarbage() : void {
+        foreach (self::$returns as $id => $promise) {
+            if ($promise->canDrop()) {
                 self::removeReturn($id);
             }
         }
@@ -147,40 +130,31 @@ class EventLoop implements EventLoopInterface
     /**
      * @throws Throwable
      */
-    protected static function run(): void
-    {
-        if (count(GreenThread::getFibers()) > 0)
-        {
+    protected static function run() : void {
+        if (count(GreenThread::getFibers()) > 0) {
             GreenThread::run();
         }
 
-        foreach (self::$queues as $id => $promise)
-        {
+        foreach (self::$queues as $id => $promise) {
             $fiber = $promise->getFiber();
-            
-            if ($fiber->isSuspended())
-            {
+
+            if ($fiber->isSuspended()) {
                 $fiber->resume();
-            }
-            elseif (!$fiber->isTerminated())
-            {
+            } else if (!$fiber->isTerminated()) {
                 FiberManager::wait();
             }
-            
-            if ($fiber->isTerminated() && ($promise->getStatus() !== StatusPromise::PENDING || $promise->isJustGetResult()))
-            {
+
+            if ($fiber->isTerminated() && ($promise->getStatus() !== StatusPromise::PENDING || $promise->isJustGetResult())) {
                 MicroTask::addTask($id, $promise);
                 self::removeQueue($id);
             }
         }
 
-        if (count(MicroTask::getTasks()) > 0)
-        {
+        if (count(MicroTask::getTasks()) > 0) {
             MicroTask::run();
         }
 
-        if (count(MacroTask::getTasks()) > 0)
-        {
+        if (count(MacroTask::getTasks()) > 0) {
             MacroTask::run();
         }
 
@@ -190,10 +164,8 @@ class EventLoop implements EventLoopInterface
     /**
      * @throws Throwable
      */
-    protected static function runSingle(): void
-    {
-        while (count(self::$queues) > 0 || count(MicroTask::getTasks()) > 0 || count(MacroTask::getTasks()) > 0 || count(GreenThread::getFibers()) > 0)
-        {
+    protected static function runSingle() : void {
+        while (count(self::$queues) > 0 || count(MicroTask::getTasks()) > 0 || count(MacroTask::getTasks()) > 0 || count(GreenThread::getFibers()) > 0) {
             self::run();
         }
     }

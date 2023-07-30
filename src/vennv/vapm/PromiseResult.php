@@ -19,35 +19,30 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
-interface PromiseResultInterface
-{
+interface PromiseResultInterface {
 
-    public function getStatus(): string;
+    public function getStatus() : string;
 
-    public function getResult(): mixed;
+    public function getResult() : mixed;
 
 }
 
-final class PromiseResult implements PromiseResultInterface
-{
+final class PromiseResult implements PromiseResultInterface {
 
     private string $status;
 
     private mixed $result;
 
-    public function __construct(string $status, mixed $result)
-    {
+    public function __construct(string $status, mixed $result) {
         $this->status = $status;
         $this->result = $result;
     }
 
-    public function getStatus(): string
-    {
+    public function getStatus() : string {
         return $this->status;
     }
 
-    public function getResult(): mixed
-    {
+    public function getResult() : mixed {
         return $this->result;
     }
 

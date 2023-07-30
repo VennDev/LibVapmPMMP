@@ -22,23 +22,21 @@ namespace vennv\vapm;
 use Generator;
 use Exception;
 
-interface ChildCoroutineInterface
-{
+interface ChildCoroutineInterface {
 
-    public function getId(): int;
+    public function getId() : int;
 
-    public function setException(Exception $exception): void;
+    public function setException(Exception $exception) : void;
 
-    public function run(): void;
+    public function run() : void;
 
-    public function isFinished(): bool;
+    public function isFinished() : bool;
 
-    public function getReturn(): mixed;
+    public function getReturn() : mixed;
 
 }
 
-final class ChildCoroutine implements ChildCoroutineInterface
-{
+final class ChildCoroutine implements ChildCoroutineInterface {
 
     protected int $id;
 
@@ -46,34 +44,28 @@ final class ChildCoroutine implements ChildCoroutineInterface
 
     protected Exception $exception;
 
-    public function __construct(int $id, Generator $coroutine)
-    {
+    public function __construct(int $id, Generator $coroutine) {
         $this->id = $id;
         $this->coroutine = $coroutine;
     }
 
-    public function getId(): int
-    {
+    public function getId() : int {
         return $this->id;
     }
 
-    public function setException(Exception $exception): void
-    {
+    public function setException(Exception $exception) : void {
         $this->exception = $exception;
     }
 
-    public function run(): void
-    {
+    public function run() : void {
         $this->coroutine->send($this->coroutine->current());
     }
 
-    public function isFinished(): bool
-    {
+    public function isFinished() : bool {
         return !$this->coroutine->valid();
     }
 
-    public function getReturn(): mixed
-    {
+    public function getReturn() : mixed {
         return $this->coroutine->getReturn();
     }
 

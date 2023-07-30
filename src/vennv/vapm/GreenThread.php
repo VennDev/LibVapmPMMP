@@ -22,8 +22,7 @@ namespace vennv\vapm;
 use Fiber;
 use Throwable;
 
-interface GreenThreadInterface
-{
+interface GreenThreadInterface {
 
     /**
      * @param string|int $name
@@ -32,45 +31,45 @@ interface GreenThreadInterface
      *
      * This method is used to register a green thread.
      */
-    public static function register(string|int $name, callable $callback, array $params): void;
+    public static function register(string|int $name, callable $callback, array $params) : void;
 
     /**
      * @throws Throwable
      */
-    public static function run(): void;
+    public static function run() : void;
 
     /**
      * This method is used to clear the data of the green threads.
      */
-    public static function clear(): void;
+    public static function clear() : void;
 
     /**
      * @return array<int, string|int>
      *
      * This method is used to get the names of the green threads.
      */
-    public static function getNames(): array;
+    public static function getNames() : array;
 
     /**
      * @return array<int, Fiber>
      *
      * This method is used to get the fibers of the green threads.
      */
-    public static function getFibers(): array;
+    public static function getFibers() : array;
 
     /**
      * @return array<int, array<int, mixed>>
      *
      * This method is used to get the params of the green threads.
      */
-    public static function getParams(): array;
+    public static function getParams() : array;
 
     /**
      * @return array<string|int, mixed>
      *
      * This method is used to get the outputs of the green threads.
      */
-    public static function getOutputs(): array;
+    public static function getOutputs() : array;
 
     /**
      * @param string|int $name
@@ -78,12 +77,12 @@ interface GreenThreadInterface
      *
      * This method is used to get the output of a green thread.
      */
-    public static function getOutput(string|int $name): mixed;
+    public static function getOutput(string|int $name) : mixed;
 
     /**
      * @throws Throwable
      */
-    public static function sleep(string $name, int $seconds): void;
+    public static function sleep(string $name, int $seconds) : void;
 
     /**
      * @param string|int $name
@@ -91,12 +90,11 @@ interface GreenThreadInterface
      *
      * This method is used to get the status of a green thread.
      */
-    public static function getStatus(string|int $name): StatusThread|null;
+    public static function getStatus(string|int $name) : StatusThread|null;
 
 }
 
-final class GreenThread implements GreenThreadInterface
-{
+final class GreenThread implements GreenThreadInterface {
 
     /**
      * @var array<int, string|int>
@@ -128,14 +126,12 @@ final class GreenThread implements GreenThreadInterface
      * @param callable $callback
      * @param array<int, mixed> $params
      */
-    public static function register(string|int $name, callable $callback, array $params): void
-    {
-        if (isset(self::$outputs[$name]))
-        {
+    public static function register(string|int $name, callable $callback, array $params) : void {
+        if (isset(self::$outputs[$name])) {
             unset(self::$outputs[$name]);
         }
 
-        self::$names[]  = $name;
+        self::$names[] = $name;
         self::$params[] = $params;
         self::$fibers[] = new Fiber($callback);
         self::$status[$name] = new StatusThread();
@@ -144,43 +140,31 @@ final class GreenThread implements GreenThreadInterface
     /**
      * @throws Throwable
      */
-    public static function run(): void
-    {
-        foreach (self::$fibers as $i => $fiber)
-        {
-            if (!self::$status[self::$names[$i]]->canWakeUp())
-            {
+    public static function run() : void {
+        foreach (self::$fibers as $i => $fiber) {
+            if (!self::$status[self::$names[$i]]->canWakeUp()) {
                 continue;
             }
 
             $name = self::$names[$i];
 
-            try
-            {
-                if (!$fiber->isStarted())
-                {
+            try {
+                if (!$fiber->isStarted()) {
                     $fiber->start(...self::$params[$i]);
-                }
-                elseif ($fiber->isTerminated())
-                {
+                } else if ($fiber->isTerminated()) {
                     self::$outputs[$name] = $fiber->getReturn();
                     unset(self::$fibers[$i]);
-                }
-                elseif ($fiber->isSuspended())
-                {
+                } else if ($fiber->isSuspended()) {
                     $fiber->resume();
                 }
-            }
-            catch (Throwable $e)
-            {
+            } catch (Throwable $e) {
                 self::$outputs[$name] = $e;
             }
         }
     }
 
-    public static function clear(): void
-    {
-        self::$names  = [];
+    public static function clear() : void {
+        self::$names = [];
         self::$fibers = [];
         self::$params = [];
     }
@@ -188,32 +172,28 @@ final class GreenThread implements GreenThreadInterface
     /**
      * @return array<int, string|int>
      */
-    public static function getNames(): array
-    {
+    public static function getNames() : array {
         return self::$names;
     }
 
     /**
      * @return array<int, Fiber>
      */
-    public static function getFibers(): array
-    {
+    public static function getFibers() : array {
         return self::$fibers;
     }
 
     /**
      * @return array<int, array<int, mixed>>
      */
-    public static function getParams(): array
-    {
+    public static function getParams() : array {
         return self::$params;
     }
 
     /**
      * @return array<string|int, mixed>
      */
-    public static function getOutputs(): array
-    {
+    public static function getOutputs() : array {
         return self::$outputs;
     }
 
@@ -221,28 +201,24 @@ final class GreenThread implements GreenThreadInterface
      * @param string|int $name
      * @return mixed
      */
-    public static function getOutput(string|int $name): mixed
-    {
+    public static function getOutput(string|int $name) : mixed {
         return self::$outputs[$name];
     }
 
     /**
      * @throws Throwable
      */
-    public static function sleep(string $name, int $seconds): void
-    {
+    public static function sleep(string $name, int $seconds) : void {
         self::$status[$name]->sleep($seconds);
 
         $fiberCurrent = Fiber::getCurrent();
 
-        if ($fiberCurrent !== null)
-        {
+        if ($fiberCurrent !== null) {
             $fiberCurrent::suspend();
         }
     }
 
-    public static function getStatus(string|int $name): StatusThread|null
-    {
+    public static function getStatus(string|int $name) : StatusThread|null {
         return self::$status[$name] ?? null;
     }
 

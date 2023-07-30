@@ -22,59 +22,51 @@ namespace vennv\vapm;
 use Throwable;
 use function is_callable;
 
-interface AsyncInterface
-{
+interface AsyncInterface {
 
-    public function getId(): int;
+    public function getId() : int;
 
     /**
      * @throws Throwable
      */
-    public static function await(Promise|Async|callable $await): mixed;
+    public static function await(Promise|Async|callable $await) : mixed;
 
 }
 
-final class Async implements AsyncInterface
-{
+final class Async implements AsyncInterface {
 
     private int $id;
 
     /**
      * @throws Throwable
      */
-    public function __construct(callable $callback)
-    {
+    public function __construct(callable $callback) {
         $promise = new Promise($callback, true);
         $this->id = $promise->getId();
     }
 
-    public function getId(): int
-    {
+    public function getId() : int {
         return $this->id;
     }
 
     /**
      * @throws Throwable
      */
-    public static function await(Promise|Async|callable $await): mixed
-    {
+    public static function await(Promise|Async|callable $await) : mixed {
         $result = null;
 
-        if (is_callable($await))
-        {
+        if (is_callable($await)) {
             $await = new Async($await);
         }
 
         $return = EventLoop::getReturn($await->getId());
 
-        while ($return === null)
-        {
+        while ($return === null) {
             $return = EventLoop::getReturn($await->getId());
             FiberManager::wait();
         }
 
-        if ($return instanceof Promise)
-        {
+        if ($return instanceof Promise) {
             $result = $return->getResult();
         }
 

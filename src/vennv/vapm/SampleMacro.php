@@ -22,31 +22,29 @@ namespace vennv\vapm;
 use function call_user_func;
 use function microtime;
 
-interface SampleMacroInterface
-{
+interface SampleMacroInterface {
 
-    public function isRepeat(): bool;
+    public function isRepeat() : bool;
 
-    public function getTimeOut(): float;
+    public function getTimeOut() : float;
 
-    public function getTimeStart(): float;
+    public function getTimeStart() : float;
 
-    public function getCallback(): callable;
+    public function getCallback() : callable;
 
-    public function getId(): int;
+    public function getId() : int;
 
-    public function checkTimeOut(): bool;
+    public function checkTimeOut() : bool;
 
-    public function isRunning(): bool;
+    public function isRunning() : bool;
 
-    public function run(): void;
+    public function run() : void;
 
-    public function stop(): void;
+    public function stop() : void;
 
 }
 
-final class SampleMacro implements SampleMacroInterface
-{
+final class SampleMacro implements SampleMacroInterface {
 
     private float $timeOut;
 
@@ -59,8 +57,7 @@ final class SampleMacro implements SampleMacroInterface
 
     private int $id;
 
-    public function __construct(callable $callback, float $timeOut = 0.0, bool $isRepeat = false)
-    {
+    public function __construct(callable $callback, float $timeOut = 0.0, bool $isRepeat = false) {
         $this->id = MacroTask::generateId();
         $this->timeOut = Utils::milliSecsToSecs($timeOut);
         $this->isRepeat = $isRepeat;
@@ -68,48 +65,39 @@ final class SampleMacro implements SampleMacroInterface
         $this->callback = $callback;
     }
 
-    public function isRepeat(): bool
-    {
+    public function isRepeat() : bool {
         return $this->isRepeat;
     }
 
-    public function getTimeOut(): float
-    {
+    public function getTimeOut() : float {
         return $this->timeOut;
     }
 
-    public function getTimeStart(): float
-    {
+    public function getTimeStart() : float {
         return $this->timeStart;
     }
 
-    public function getCallback(): callable
-    {
+    public function getCallback() : callable {
         return $this->callback;
     }
 
-    public function getId(): int
-    {
+    public function getId() : int {
         return $this->id;
     }
 
-    public function checkTimeOut(): bool
-    {
+    public function checkTimeOut() : bool {
         return microtime(true) - $this->timeStart >= $this->timeOut;
     }
 
-    public function isRunning(): bool
-    {
+    public function isRunning() : bool {
         return MacroTask::getTask($this->id) !== null;
     }
 
-    public function run(): void
-    {
+    public function run() : void {
         call_user_func($this->callback);
     }
 
-    public function stop(): void
-    {
+    public function stop() : void {
         MacroTask::removeTask($this);
     }
 

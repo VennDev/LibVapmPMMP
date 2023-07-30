@@ -21,68 +21,61 @@ namespace vennv\vapm;
 
 use function microtime;
 
-interface StatusThreadInterface
-{
+interface StatusThreadInterface {
 
     /**
      * @return int|float
      *
      * This method is used to get the time sleeping.
      */
-    public function getTimeSleeping(): int|float;
+    public function getTimeSleeping() : int|float;
 
     /**
      * @return int|float
      *
      * This method is used to get the sleep start time.
      */
-    public function getSleepStartTime(): int|float;
+    public function getSleepStartTime() : int|float;
 
     /**
      * @param int|float $seconds
      *
      * This method is used to sleep the thread.
      */
-    public function sleep(int|float $seconds): void;
+    public function sleep(int|float $seconds) : void;
 
     /**
      * @return bool
      *
      * This method is used to check if the thread can wake up.
      */
-    public function canWakeUp(): bool;
+    public function canWakeUp() : bool;
 
 }
 
-final class StatusThread implements StatusThreadInterface
-{
+final class StatusThread implements StatusThreadInterface {
 
     private int|float $timeSleeping = 0;
 
     private int|float $sleepStartTime;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->sleepStartTime = microtime(true);
     }
 
-    public function getTimeSleeping(): int|float
-    {
+    public function getTimeSleeping() : int|float {
         return $this->timeSleeping;
     }
 
-    public function getSleepStartTime(): int|float
-    {
+    public function getSleepStartTime() : int|float {
         return $this->sleepStartTime;
     }
 
-    public function sleep(int|float $seconds): void
-    {
+    public function sleep(int|float $seconds) : void {
         $this->timeSleeping += $seconds;
     }
 
-    public function canWakeUp(): bool
-    {
+    public function canWakeUp() : bool {
         return microtime(true) - $this->sleepStartTime >= $this->timeSleeping;
     }
 

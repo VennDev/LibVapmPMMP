@@ -19,8 +19,7 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
-final class StatusPromise
-{
+final class StatusPromise {
 
     public const PENDING = "pending";
     public const FULFILLED = "fulfilled";

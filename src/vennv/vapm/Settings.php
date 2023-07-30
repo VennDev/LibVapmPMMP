@@ -19,8 +19,7 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
-final class Settings
-{
+final class Settings {
 
     /**
      * The time in seconds to check should drop the promise if the promise is not resolved or rejected

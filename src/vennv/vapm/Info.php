@@ -19,14 +19,13 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
-class Info
-{
+class Info {
 
     public const VERSION = "1.7.5";
 
     public const AUTHOR = "VennV";
 
-    public const LICENSE = "MIT";
+    public const LICENSE = "GPL-2.0";
 
     public const GITHUB = "https://github.com/VennDev";
 

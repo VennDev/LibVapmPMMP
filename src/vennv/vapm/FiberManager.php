@@ -23,18 +23,15 @@ use Fiber;
 use Throwable;
 use function is_null;
 
-final class FiberManager
-{
+final class FiberManager {
 
     /**
      * @throws Throwable
      */
-    public static function wait(): void
-    {
+    public static function wait() : void {
         $fiber = Fiber::getCurrent();
 
-        if (!is_null($fiber))
-        {
+        if (!is_null($fiber)) {
             Fiber::suspend();
         }
     }

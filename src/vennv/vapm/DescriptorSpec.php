@@ -19,8 +19,7 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
-final class DescriptorSpec
-{
+final class DescriptorSpec {
 
     public const BASIC = [
         0 => ['pipe', 'r'],

@@ -21,39 +21,31 @@ namespace vennv\vapm;
 
 use Generator;
 
-interface DeferredInterface
-{
+interface DeferredInterface {
 
     /**
      * This method is used to get the result of the deferred.
      */
-    public function await(): mixed;
+    public function await() : mixed;
 
 }
 
-final class Deferred implements DeferredInterface
-{
+final class Deferred implements DeferredInterface {
 
     protected ChildCoroutine $childCoroutine;
 
-    public function __construct(callable $callback)
-    {
+    public function __construct(callable $callback) {
         $generator = call_user_func($callback);
 
-        if ($generator instanceof Generator)
-        {
+        if ($generator instanceof Generator) {
             $this->childCoroutine = new ChildCoroutine(0, $generator);
-        }
-        else
-        {
+        } else {
             throw new DeferredException(Error::DEFERRED_CALLBACK_MUST_RETURN_GENERATOR);
         }
     }
 
-    public function await(): mixed
-    {
-        while (!$this->childCoroutine->isFinished())
-        {
+    public function await() : mixed {
+        while (!$this->childCoroutine->isFinished()) {
             $this->childCoroutine->run();
         }
 
