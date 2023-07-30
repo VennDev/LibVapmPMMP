@@ -22,27 +22,22 @@ namespace vennv\vapm;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\ClosureTask;
 
-interface VapmPMMPInterface
-{
+interface VapmPMMPInterface {
 
     public static function init(PluginBase $plugin) : void;
 
 }
 
-final class VapmPMMP implements VapmPMMPInterface
-{
+final class VapmPMMP implements VapmPMMPInterface {
 
     private static bool $isInit = false;
 
-    public static function init(PluginBase $plugin) : void
-    {
-        if (!self::$isInit)
-        {
+    public static function init(PluginBase $plugin) : void {
+        if (!self::$isInit) {
             self::$isInit = true;
 
             $plugin->getScheduler()->scheduleRepeatingTask(new ClosureTask(
-                function() : void
-                {
+                function () : void {
                     System::runEventLoop();
                 }
             ), 1);
