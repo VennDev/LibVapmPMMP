@@ -36,6 +36,8 @@ interface SampleMacroInterface {
 
     public function checkTimeOut() : bool;
 
+    public function resetTimeOut() : void;
+
     public function isRunning() : bool;
 
     public function run() : void;
