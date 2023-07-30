@@ -21,6 +21,15 @@ namespace vennv\vapm;
 
 use Throwable;
 use function file_get_contents;
+use function curl_init;
+use function curl_multi_init;
+use function curl_multi_add_handle;
+use function curl_multi_exec;
+use function curl_multi_remove_handle;
+use function curl_multi_close;
+use function curl_multi_getcontent;
+use const CURLOPT_RETURNTRANSFER;
+use const CURLM_OK;
 
 interface SystemInterface {
 
@@ -66,6 +75,15 @@ interface SystemInterface {
      * @phpstan-param array{method?: string, headers?: array<int, string>, timeout?: int, body?: array<string, string>} $options
      */
     public static function fetch(string $url, array $options = []) : Promise;
+
+    /**
+     * @param string ...$curls
+     * @return Promise
+     * @throws Throwable
+     *
+     * Use this to curl multiple addresses at once
+     */
+    public static function fetchAll(string ...$curls) : Promise;
 
     /**
      * @throws Throwable
@@ -151,6 +169,56 @@ final class System extends EventLoop implements SystemInterface {
                     $resolve($result);
                 }
             }, 0);
+        });
+    }
+
+    /**
+     * @param string ...$curls
+     * @return Promise
+     * @throws Throwable
+     *
+     * Use this to curl multiple addresses at once
+     */
+    public static function fetchAll(string ...$curls) : Promise {
+        return new Promise(function ($resolve, $reject) use ($curls) : void {
+            $multiHandle = curl_multi_init();
+            $handles = [];
+
+            foreach ($curls as $url) {
+                $handle = curl_init($url);
+
+                if ($handle === false) {
+                    $reject(Error::FAILED_IN_FETCHING_DATA);
+                } else {
+                    curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
+                    curl_multi_add_handle($multiHandle, $handle);
+
+                    $handles[] = $handle;
+                }
+            }
+
+            $running = null;
+
+            do {
+                $status = curl_multi_exec($multiHandle, $running);
+
+                if ($status !== CURLM_OK) {
+                    $reject(Error::FAILED_IN_FETCHING_DATA);
+                }
+
+                FiberManager::wait();
+            } while ($running > 0);
+
+            $results = [];
+
+            foreach ($handles as $handle) {
+                $results[] = curl_multi_getcontent($handle);
+                curl_multi_remove_handle($multiHandle, $handle);
+            }
+
+            curl_multi_close($multiHandle);
+
+            $resolve($results);
         });
     }
 
