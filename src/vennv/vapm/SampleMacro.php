@@ -57,7 +57,7 @@ final class SampleMacro implements SampleMacroInterface {
 
     private int $id;
 
-    public function __construct(callable $callback, float $timeOut = 0.0, bool $isRepeat = false) {
+    public function __construct(callable $callback, int $timeOut = 0, bool $isRepeat = false) {
         $this->id = MacroTask::generateId();
         $this->timeOut = Utils::milliSecsToSecs($timeOut);
         $this->isRepeat = $isRepeat;
@@ -87,6 +87,10 @@ final class SampleMacro implements SampleMacroInterface {
 
     public function checkTimeOut() : bool {
         return microtime(true) - $this->timeStart >= $this->timeOut;
+    }
+
+    public function resetTimeOut() : void {
+        $this->timeStart = microtime(true);
     }
 
     public function isRunning() : bool {

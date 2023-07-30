@@ -68,6 +68,8 @@ final class MacroTask {
 
                 if (!$task->isRepeat()) {
                     self::removeTask($task);
+                } else {
+                    $task->resetTimeOut();
                 }
             }
         }
