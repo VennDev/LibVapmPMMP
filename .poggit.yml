@@ -1,5 +1,5 @@
 ---
-build-by-default: true
+build-by-default: false
 branches:
 - main
 projects:
