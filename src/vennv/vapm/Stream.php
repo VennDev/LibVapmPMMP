@@ -43,21 +43,21 @@ interface StreamInterface {
     /**
      * @throws Throwable
      *
-     * Use this to write to a file or url.
+     * Use this to write to a file.
      */
     public static function write(string $path, string $data) : Promise;
 
     /**
      * @throws Throwable
      *
-     * Use this to append to a file or url.
+     * Use this to append to a file.
      */
     public static function append(string $path, string $data) : Promise;
 
     /**
      * @throws Throwable
      *
-     * Use this to delete a file or url.
+     * Use this to delete a file.
      */
     public static function delete(string $path) : Promise;
 

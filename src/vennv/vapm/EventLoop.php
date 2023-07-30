@@ -145,7 +145,7 @@ class EventLoop implements EventLoopInterface {
             }
 
             if ($fiber->isTerminated() && ($promise->getStatus() !== StatusPromise::PENDING || $promise->isJustGetResult())) {
-                MicroTask::addTask($id, $promise->setResult($fiber->getReturn()));
+                MicroTask::addTask($id, $promise);
                 self::removeQueue($id);
             }
         }
