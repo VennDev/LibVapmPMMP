@@ -247,7 +247,14 @@ final class Promise implements PromiseInterface {
 
         $this->timeStart = microtime(true);
 
-        $this->callbackReject = function ($result) : void {};
+        $this->callbacksResolve["master"] = function ($result) : mixed {
+            return $result;
+        };
+
+        $this->callbackReject = function ($result) : mixed {
+            return $result;
+        };
+
         $this->callbackFinally = function () : void {};
 
         EventLoop::addQueue($this);
@@ -360,41 +367,64 @@ final class Promise implements PromiseInterface {
     /**
      * @throws Throwable
      */
+    private function runCallback(callable $callback, mixed ...$input) : CallbackResult {
+        $fiber = new Fiber($callback);
+        $fiber->start(...$input);
+
+        $timeStart = microtime(true);
+
+        $hasError = false;
+
+        while (!$fiber->isTerminated()) {
+            $diff = microtime(true) - $timeStart;
+
+            if ($diff > Settings::TIME_DROP) {
+                $hasError = true;
+                $this->timeOut = $diff;
+                $this->status = StatusPromise::REJECTED;
+                $this->result = "Promise timeout";
+                break;
+            }
+        }
+
+        return new CallbackResult($hasError, $fiber->getReturn());
+    }
+
+    /**
+     * @throws Throwable
+     */
     public function useCallbacks() : void {
         $result = $this->result;
 
         if ($this->isResolved()) {
             $callbacks = $this->callbacksResolve;
+            $master = $callbacks["master"];
+
+            $callbackResult = $this->runCallback($master, $result);
+
+            if (!$callbackResult->hasError()) {
+                $this->result = $callbackResult->getResult();
+            }
+
+            unset($callbacks["master"]);
 
             if (count($callbacks) > 0) {
-                $fiber = new Fiber($callbacks[0]);
-                $fiber->start($result);
+                $callbackResult = $this->runCallback($callbacks[0], $this->result);
 
-                $timeStart = microtime(true);
-
-                $isTimeout = false;
-
-                while (!$fiber->isTerminated()) {
-                    $diff = microtime(true) - $timeStart;
-
-                    if ($diff > Settings::TIME_DROP) {
-                        $isTimeout = true;
-                        $this->timeOut = $diff;
-                        $this->status = StatusPromise::REJECTED;
-                        $this->result = "Promise timeout";
-                        break;
-                    }
-
-                }
-
-                if (!$isTimeout) {
-                    $this->return = $fiber->getReturn();
+                if (!$callbackResult->hasError()) {
+                    $this->result = $callbackResult->getResult();
+                    $this->return = $callbackResult->getResult();
                     $this->checkStatus($callbacks, $this->return);
                 }
             }
         } else if ($this->isRejected()) {
             if (is_callable($this->callbackReject) && is_callable($this->callbackFinally)) {
-                call_user_func($this->callbackReject, $result);
+                $callbackResult = $this->runCallback($this->callbackReject, $result);
+
+                if (!$callbackResult->hasError()) {
+                    $this->result = $callbackResult->getResult();
+                }
+
                 call_user_func($this->callbackFinally);
             }
         }
