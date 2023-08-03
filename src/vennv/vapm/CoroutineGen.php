@@ -30,6 +30,10 @@ interface CoroutineGenInterface {
      */
     public static function runBlocking(Generator|callable ...$coroutines) : void;
 
+    /**
+     * @param callable $callback
+     * @return Generator
+     */
     public static function launch(callable $callback) : Generator;
 
 }
@@ -64,7 +68,7 @@ final class CoroutineGen implements CoroutineGenInterface {
     }
 
     public static function launch(callable $callback) : Generator {
-        return yield $callback;
+        return yield $callback();
     }
 
     private static function schedule(ChildCoroutine $childCoroutine) : void {
