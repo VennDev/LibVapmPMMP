@@ -38,7 +38,7 @@ interface GeneratorManagerInterface {
 final class GeneratorManager implements GeneratorManagerInterface {
 
     public static function calculateSeconds(int $milliseconds) : int {
-        return ($milliseconds * 1000) + ($milliseconds * 450);
+        return ($milliseconds * 1000) + ($milliseconds * 550);
     }
 
 }
