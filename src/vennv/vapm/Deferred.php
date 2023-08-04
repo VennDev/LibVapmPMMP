@@ -55,13 +55,12 @@ final class Deferred implements DeferredInterface {
     }
 
     public function await() : Generator {
-        $this->childCoroutine->run();
-
         while (!$this->childCoroutine->isFinished()) {
-            $this->return = $this->childCoroutine->getReturn();
-
+            $this->childCoroutine->run();
             yield;
         }
+
+        $this->return = $this->childCoroutine->getReturn();
 
         return $this->return;
     }
