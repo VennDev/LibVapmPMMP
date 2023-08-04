@@ -22,20 +22,20 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
-final class Error {
+final class Dispatchers {
 
-    public const FAILED_IN_FETCHING_DATA = "Error in fetching data";
+    /**
+     * @var string
+     *
+     * Use the current thread to run tasks from Coroutine.
+     */
+    public const DEFAULT = "default";
 
-    public const WRONG_TYPE_WHEN_USE_CURL_EXEC = "curl_exec() should return string|false when CURL-OPT_RETURN-TRANSFER is set";
-
-    public const UNABLE_START_THREAD = "Unable to start thread";
-
-    public const DEFERRED_CALLBACK_MUST_RETURN_GENERATOR = "Deferred callback must return a Generator";
-
-    public const UNABLE_TO_OPEN_FILE = "Error: Unable to open file!";
-
-    public const FILE_DOES_NOT_EXIST = "Error: File does not exist!";
-
-    public const FILE_ALREADY_EXISTS = "Error: File already exists!";
+    /**
+     * @var string
+     *
+     * Use Separate Threads to Run Coroutine.
+     */
+    public const IO = "io";
 
 }

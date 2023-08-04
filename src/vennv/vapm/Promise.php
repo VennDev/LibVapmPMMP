@@ -1,7 +1,10 @@
 <?php
 
 /**
- * Vapm and a brief idea of what it does.>
+ * Vapm - A library for PHP about Async, Promise, Coroutine, GreenThread,
+ *      Thread and other non-blocking methods. The method is based on Fibers &
+ *      Generator & Processes, requires you to have php version from >= 8.1
+ *
  * Copyright (C) 2023  VennDev
  *
  * This program is free software; you can redistribute it and/or modify

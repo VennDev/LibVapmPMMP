@@ -1,7 +1,10 @@
 <?php
 
 /**
- * Vapm and a brief idea of what it does.>
+ * Vapm - A library for PHP about Async, Promise, Coroutine, GreenThread,
+ *      Thread and other non-blocking methods. The method is based on Fibers &
+ *      Generator & Processes, requires you to have php version from >= 8.1
+ *
  * Copyright (C) 2023  VennDev
  *
  * This program is free software; you can redistribute it and/or modify
@@ -26,11 +29,18 @@ interface DeferredInterface {
     /**
      * This method is used to get the result of the deferred.
      */
-    public function await() : mixed;
+    public function await() : Generator;
+
+    /**
+     * This method is used to get the result of the deferred.
+     */
+    public function getComplete() : mixed;
 
 }
 
 final class Deferred implements DeferredInterface {
+
+    protected mixed $return = null;
 
     protected ChildCoroutine $childCoroutine;
 
@@ -38,18 +48,26 @@ final class Deferred implements DeferredInterface {
         $generator = call_user_func($callback);
 
         if ($generator instanceof Generator) {
-            $this->childCoroutine = new ChildCoroutine(0, $generator);
+            $this->childCoroutine = new ChildCoroutine($generator);
         } else {
             throw new DeferredException(Error::DEFERRED_CALLBACK_MUST_RETURN_GENERATOR);
         }
     }
 
-    public function await() : mixed {
+    public function await() : Generator {
+        $this->childCoroutine->run();
+
         while (!$this->childCoroutine->isFinished()) {
-            $this->childCoroutine->run();
+            $this->return = $this->childCoroutine->getReturn();
+
+            yield;
         }
 
-        return $this->childCoroutine->getReturn();
+        return $this->return;
+    }
+
+    public function getComplete() : mixed {
+        return $this->return;
     }
 
 }

@@ -22,20 +22,23 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
-final class Error {
+interface GeneratorManagerInterface {
 
-    public const FAILED_IN_FETCHING_DATA = "Error in fetching data";
+    /**
+     * @param int $milliseconds
+     * @return int
+     *
+     * This is a function that calculates the seconds from milliseconds for Generator functions.
+     * For example, if you run a function with multiple yields, this calculates the time spent on each of them in seconds.
+     */
+    public static function calculateSeconds(int $milliseconds) : int;
 
-    public const WRONG_TYPE_WHEN_USE_CURL_EXEC = "curl_exec() should return string|false when CURL-OPT_RETURN-TRANSFER is set";
+}
 
-    public const UNABLE_START_THREAD = "Unable to start thread";
+final class GeneratorManager implements GeneratorManagerInterface {
 
-    public const DEFERRED_CALLBACK_MUST_RETURN_GENERATOR = "Deferred callback must return a Generator";
-
-    public const UNABLE_TO_OPEN_FILE = "Error: Unable to open file!";
-
-    public const FILE_DOES_NOT_EXIST = "Error: File does not exist!";
-
-    public const FILE_ALREADY_EXISTS = "Error: File already exists!";
+    public static function calculateSeconds(int $milliseconds) : int {
+        return ($milliseconds * 1000) + ($milliseconds * 450);
+    }
 
 }

@@ -22,20 +22,37 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
-final class Error {
+interface CoroutineThreadInterface {
 
-    public const FAILED_IN_FETCHING_DATA = "Error in fetching data";
+    /**
+     * @param callable $callback
+     * @return void
+     *
+     * This function sets the callback function for the thread.
+     */
+    public function setCallback(callable $callback) : void;
 
-    public const WRONG_TYPE_WHEN_USE_CURL_EXEC = "curl_exec() should return string|false when CURL-OPT_RETURN-TRANSFER is set";
+    /**
+     * @return void
+     *
+     * This function runs the callback function for the thread.
+     */
+    public function onRun() : void;
 
-    public const UNABLE_START_THREAD = "Unable to start thread";
+}
 
-    public const DEFERRED_CALLBACK_MUST_RETURN_GENERATOR = "Deferred callback must return a Generator";
+final class CoroutineThread extends Thread implements CoroutineThreadInterface {
 
-    public const UNABLE_TO_OPEN_FILE = "Error: Unable to open file!";
+    private mixed $callback = null;
 
-    public const FILE_DOES_NOT_EXIST = "Error: File does not exist!";
+    public function setCallback(callable $callback) : void {
+        $this->callback = $callback;
+    }
 
-    public const FILE_ALREADY_EXISTS = "Error: File already exists!";
+    public function onRun() : void {
+        if (is_callable($this->callback)) {
+            call_user_func($this->callback);
+        }
+    }
 
 }
