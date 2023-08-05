@@ -95,9 +95,30 @@ interface SystemInterface {
      */
     public static function read(string $path) : Promise;
 
+    /**
+     * @param string $name
+     * @return void
+     *
+     * This function is used to start a timer
+     */
+    public static function time(string $name = 'Console') : void;
+
+    /**
+     * @param string $name
+     * @return void
+     *
+     * This function is used to end a timer
+     */
+    public static function timeEnd(string $name = 'Console') : void;
+
 }
 
 final class System extends EventLoop implements SystemInterface {
+
+    /**
+     * @var array<string, int|float>
+     */
+    private static array $timings = [];
 
     /**
      * @throws Throwable
@@ -240,6 +261,21 @@ final class System extends EventLoop implements SystemInterface {
                 }
             }, 0);
         });
+    }
+
+    public static function time(string $name = 'Console') : void {
+        self::$timings[$name] = microtime(true);
+    }
+
+    public static function timeEnd(string $name = 'Console') : void {
+        if (!isset(self::$timings[$name])) {
+            return;
+        }
+
+        $time = microtime(true) - self::$timings[$name];
+        echo "Time for $name: $time\n";
+
+        unset(self::$timings[$name]);
     }
 
 }
