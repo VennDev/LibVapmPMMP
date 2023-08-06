@@ -42,6 +42,7 @@ use function json_decode;
 use function json_encode;
 use function str_replace;
 use function get_called_class;
+use const PHP_BINARY;
 
 interface ThreadInterface {
 
@@ -414,7 +415,7 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
                 throw new RuntimeException('Input must be string or callable');
             }
 
-            $command = 'php -r "require_once \'' . $pathAutoLoad . '\'; include \'' . $class . '\'; $input = ' . $input . ' $class = new ' . static::class . '($input); $class->onRun();"';
+            $command = PHP_BINARY . ' -r "require_once \'' . $pathAutoLoad . '\'; include \'' . $class . '\'; $input = ' . $input . ' $class = new ' . static::class . '($input); $class->onRun();"';
 
             unset(self::$inputs[get_called_class()]);
 
