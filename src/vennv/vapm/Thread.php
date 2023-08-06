@@ -22,11 +22,14 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
+use Closure;
 use ReflectionClass;
 use ReflectionException;
+use RuntimeException;
 use Throwable;
 use function is_string;
 use function is_array;
+use function is_callable;
 use function explode;
 use function fwrite;
 use function fclose;
@@ -62,9 +65,9 @@ interface ThreadInterface {
 interface ThreadedInterface {
 
     /**
-     * @return string
+     * @return mixed
      */
-    public function getInput() : string;
+    public function getInput() : mixed;
 
     /**
      * This method use to get the pid of the thread
@@ -195,16 +198,16 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
     private static array $threads = [];
 
     /**
-     * @var array<string, string>
-     * @phpstan-var array<string, string>
+     * @var array<string, mixed>
+     * @phpstan-var array<string, mixed>
      */
     private static array $inputs = [];
 
-    public function __construct(string $input) {
+    public function __construct(mixed $input = '') {
         self::$inputs[get_called_class()] = $input;
     }
 
-    public function getInput() : string {
+    public function getInput() : mixed {
         return self::$inputs[get_called_class()];
     }
 
@@ -391,7 +394,27 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
                 $pathAutoLoad
             );
 
-            $command = 'php -r "require_once \'' . $pathAutoLoad . '\'; include \'' . $class . '\'; $class = new ' . static::class . '(\'' . self::$inputs[get_called_class()] . '\'); $class->onRun();"';
+            $input = self::$inputs[get_called_class()];
+            if (is_string($input)) {
+                $input = '\'' . self::$inputs[get_called_class()] . '\'';
+            }
+
+            if (is_callable($input) && $input instanceof Closure) {
+                $input = Utils::closureToString($input);
+                $input = Utils::outlineToInline($input);
+
+                if (!is_string($input)) {
+                    throw new RuntimeException('Input must be string or callable');
+                }
+
+                $input = Utils::fixInputCommand($input . ';');
+            }
+
+            if (!is_string($input)) {
+                throw new RuntimeException('Input must be string or callable');
+            }
+
+            $command = 'php -r "require_once \'' . $pathAutoLoad . '\'; include \'' . $class . '\'; $input = ' . $input . ' $class = new ' . static::class . '($input); $class->onRun();"';
 
             unset(self::$inputs[get_called_class()]);
 

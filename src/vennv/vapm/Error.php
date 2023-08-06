@@ -38,4 +38,8 @@ final class Error {
 
     public const FILE_ALREADY_EXISTS = "Error: File already exists!";
 
+    public const CANNOT_FIND_FUNCTION_KEYWORD = "Cannot find function or fn keyword in closure";
+
+    public const CANNOT_READ_FILE = "Cannot read file";
+
 }
