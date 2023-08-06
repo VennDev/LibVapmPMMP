@@ -25,14 +25,6 @@ namespace vennv\vapm;
 interface CoroutineThreadInterface {
 
     /**
-     * @param callable $callback
-     * @return void
-     *
-     * This function sets the callback function for the thread.
-     */
-    public function setCallback(callable $callback) : void;
-
-    /**
      * @return void
      *
      * This function runs the callback function for the thread.
@@ -45,8 +37,9 @@ final class CoroutineThread extends Thread implements CoroutineThreadInterface {
 
     private mixed $callback = null;
 
-    public function setCallback(callable $callback) : void {
+    public function __construct(callable $callback) {
         $this->callback = $callback;
+        parent::__construct($callback);
     }
 
     public function onRun() : void {
