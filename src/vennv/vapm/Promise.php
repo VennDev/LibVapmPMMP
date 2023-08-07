@@ -370,42 +370,6 @@ final class Promise implements PromiseInterface {
     /**
      * @throws Throwable
      */
-    private function runCallback(callable $callback, mixed ...$input) : CallbackResult {
-        $fiber = new Fiber($callback);
-        $fiber->start(...$input);
-
-        $timeStart = microtime(true);
-
-        $hasError = false;
-
-        while (!$fiber->isTerminated()) {
-            $diff = microtime(true) - $timeStart;
-
-            if ($diff > Settings::TIME_DROP) {
-                $hasError = true;
-                $this->timeOut = $diff;
-                $this->status = StatusPromise::REJECTED;
-                $this->result = "Promise timeout";
-                break;
-            }
-
-            if ($fiber->isSuspended()) {
-                $fiber->resume();
-            }
-        }
-
-        try {
-            $result = new CallbackResult($hasError, $fiber->getReturn());
-        } catch (Throwable $e) {
-            $result = new CallbackResult(true, $e);
-        }
-
-        return $result;
-    }
-
-    /**
-     * @throws Throwable
-     */
     public function useCallbacks() : void {
         $result = $this->result;
 
@@ -413,31 +377,20 @@ final class Promise implements PromiseInterface {
             $callbacks = $this->callbacksResolve;
             $master = $callbacks["master"];
 
-            $callbackResult = $this->runCallback($master, $result);
-
-            if (!$callbackResult->hasError()) {
-                $this->result = $callbackResult->getResult();
-            }
+            $this->result = call_user_func($master, $result);
 
             unset($callbacks["master"]);
 
             if (count($callbacks) > 0) {
-                $callbackResult = $this->runCallback($callbacks[0], $this->result);
+                $resultFirstCallback = call_user_func($callbacks[0], $this->result);
 
-                if (!$callbackResult->hasError()) {
-                    $this->result = $callbackResult->getResult();
-                    $this->return = $callbackResult->getResult();
-                    $this->checkStatus($callbacks, $this->return);
-                }
+                $this->result = $resultFirstCallback;
+                $this->return = $resultFirstCallback;
+                $this->checkStatus($callbacks, $this->return);
             }
         } else if ($this->isRejected()) {
             if (is_callable($this->callbackReject) && is_callable($this->callbackFinally)) {
-                $callbackResult = $this->runCallback($this->callbackReject, $result);
-
-                if (!$callbackResult->hasError()) {
-                    $this->result = $callbackResult->getResult();
-                }
-
+                $this->result = call_user_func($this->callbackReject, $result);
                 call_user_func($this->callbackFinally);
             }
         }
