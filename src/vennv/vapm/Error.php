@@ -42,4 +42,6 @@ final class Error {
 
     public const CANNOT_READ_FILE = "Cannot read file";
 
+    public const INPUT_MUST_BE_STRING_OR_CALLABLE = "Input must be string or callable";
+
 }

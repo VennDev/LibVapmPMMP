@@ -405,14 +405,14 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
                 $input = Utils::outlineToInline($input);
 
                 if (!is_string($input)) {
-                    throw new RuntimeException('Input must be string or callable');
+                    throw new RuntimeException(Error::INPUT_MUST_BE_STRING_OR_CALLABLE);
                 }
 
                 $input = Utils::fixInputCommand($input . ';');
             }
 
             if (!is_string($input)) {
-                throw new RuntimeException('Input must be string or callable');
+                throw new RuntimeException(Error::INPUT_MUST_BE_STRING_OR_CALLABLE);
             }
 
             $command = PHP_BINARY . ' -r "require_once \'' . $pathAutoLoad . '\'; include \'' . $class . '\'; $input = ' . $input . ' $class = new ' . static::class . '($input); $class->onRun();"';

@@ -35,7 +35,7 @@ interface CoroutineThreadInterface {
 
 final class CoroutineThread extends Thread implements CoroutineThreadInterface {
 
-    private mixed $callback = null;
+    private mixed $callback;
 
     public function __construct(callable $callback) {
         $this->callback = $callback;

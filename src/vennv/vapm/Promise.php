@@ -388,9 +388,19 @@ final class Promise implements PromiseInterface {
                 $this->result = "Promise timeout";
                 break;
             }
+
+            if ($fiber->isSuspended()) {
+                $fiber->resume();
+            }
         }
 
-        return new CallbackResult($hasError, $fiber->getReturn());
+        try {
+            $result = new CallbackResult($hasError, $fiber->getReturn());
+        } catch (Throwable $e) {
+            $result = new CallbackResult(true, $e);
+        }
+
+        return $result;
     }
 
     /**
