@@ -27,3 +27,4 @@ public static function init(PluginBase $plugin) : void;
 - [VSharedData](https://github.com/VennDev/VSharedData)
 - [VJesusBucket](https://github.com/VennDev/VJesusBucket)
 - [VBasket](https://github.com/VennDev/VBasket)
+- [VOreSpawner](https://github.com/VennDev/VOreSpawner)
