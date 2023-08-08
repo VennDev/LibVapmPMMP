@@ -150,7 +150,7 @@ final class Utils implements UtilsInterface {
 
     /**
      * @return null|string|array<int, string>
-     *     
+     *
      * Remove comments from a string
      */
     public static function removeComments(string $text) : null|string|array {

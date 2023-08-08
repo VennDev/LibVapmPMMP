@@ -59,7 +59,7 @@ interface ThreadInterface {
      *
      * This method use to start the thread
      */
-    public function start(array $mode = DescriptorSpec::BASIC) : Async;
+    public function start(array $mode = DescriptorSpec::BASIC) : Promise;
 
 }
 
@@ -360,8 +360,14 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
                 if ($item !== '') {
                     $dataExplode = explode('=>', $data);
 
-                    if ($dataExplode[0] === self::POST_ALERT_THREAD) {
-                        $result[] = json_decode($dataExplode[1], true);
+                    if ($dataExplode[0] == self::POST_ALERT_THREAD) {
+                        $try = json_decode($dataExplode[1], true);
+
+                        if (is_array($try)) {
+                            $result[] = $try;
+                        } else {
+                            $result[] = $dataExplode[1];
+                        }
                     }
                 }
             }
@@ -374,14 +380,14 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
 
     /**
      * @param array<int, array<string>> $mode
-     * @return Async
+     * @return Promise
      * @throws ReflectionException
      * @throws Throwable
      * @phpstan-param array<int, array<string>> $mode
-     * @phpstan-return Async
+     * @phpstan-return Promise
      */
-    public function start(array $mode = DescriptorSpec::BASIC) : Async {
-        return new Async(function () use ($mode) : array {
+    public function start(array $mode = DescriptorSpec::BASIC) : Promise {
+        return new Promise(function ($resolve, $reject) use ($mode) : mixed {
             $className = get_called_class();
 
             $reflection = new ReflectionClass($className);
@@ -396,6 +402,7 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
             );
 
             $input = self::$inputs[get_called_class()];
+
             if (is_string($input)) {
                 $input = '\'' . self::$inputs[get_called_class()] . '\'';
             }
@@ -405,27 +412,27 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
                 $input = Utils::removeComments($input);
 
                 if (!is_string($input)) {
-                    throw new RuntimeException(Error::INPUT_MUST_BE_STRING_OR_CALLABLE);
+                    return $reject(new RuntimeException(Error::INPUT_MUST_BE_STRING_OR_CALLABLE));
                 }
 
                 $input = Utils::outlineToInline($input);
 
                 if (!is_string($input)) {
-                    throw new RuntimeException(Error::INPUT_MUST_BE_STRING_OR_CALLABLE);
+                    return $reject(new RuntimeException(Error::INPUT_MUST_BE_STRING_OR_CALLABLE));
                 }
 
-                $input = Utils::fixInputCommand($input . ';');
+                $input = Utils::fixInputCommand($input);
 
                 if (!is_string($input)) {
-                    throw new RuntimeException(Error::INPUT_MUST_BE_STRING_OR_CALLABLE);
+                    return $reject(new RuntimeException(Error::INPUT_MUST_BE_STRING_OR_CALLABLE));
                 }
             }
 
             if (!is_string($input)) {
-                throw new RuntimeException(Error::INPUT_MUST_BE_STRING_OR_CALLABLE);
+                return $reject(new RuntimeException(Error::INPUT_MUST_BE_STRING_OR_CALLABLE));
             }
 
-            $command = PHP_BINARY . ' -r "require_once \'' . $pathAutoLoad . '\'; include \'' . $class . '\'; $input = ' . $input . ' $class = new ' . static::class . '($input); $class->onRun();"';
+            $command = PHP_BINARY . ' -r "require_once \'' . $pathAutoLoad . '\'; include \'' . $class . '\'; $input = ' . $input . '; $class = new ' . static::class . '($input); $class->onRun();"';
 
             unset(self::$inputs[get_called_class()]);
 
@@ -477,7 +484,7 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
                 fclose($pipes[2]);
 
                 if ($error !== '' && is_string($error)) {
-                    throw new ThreadException($error);
+                    return $reject(new ThreadException($error));
                 } else {
                     if (!is_bool($output)) {
                         $explode = explode(PHP_EOL, $output);
@@ -496,13 +503,13 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
                     }
                 }
             } else {
-                throw new ThreadException(Error::UNABLE_START_THREAD);
+                return $reject(new ThreadException(Error::UNABLE_START_THREAD));
             }
 
             proc_close($process);
             unset(self::$threads[$this->getPid()]);
 
-            return self::getAlert($output);
+            return $resolve(self::getAlert($output));
         });
     }
 
