@@ -11,10 +11,10 @@
             "email": "1050080275@sv.hcmunre.edu.vn"
         }
     ],
-	"config": {
-	"allow-plugins": {
-		"phpstan/extension-installer": true
-	}
+    "config": {
+        "allow-plugins": {
+            "phpstan/extension-installer": true
+        }
     },
     "require": {
         "php": "^8.2",
@@ -24,6 +24,12 @@
         "phpstan/phpstan": "*"
     },
     "scripts": {
-	"analyse-src": "./vendor/bin/phpstan analyse -c phpstan.neon.dist"
+        "analyse-src": "./vendor/bin/phpstan analyse -c phpstan.neon.dist"
+    },
+    "extra": {
+        "virion": {
+            "spec": "3.0",
+            "namespace-root": "JackMD\\UpdateNotifier"
+        }
     }
 }
