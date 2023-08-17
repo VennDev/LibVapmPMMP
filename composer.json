@@ -29,7 +29,7 @@
     "extra": {
         "virion": {
             "spec": "3.0",
-            "namespace-root": "JackMD\\UpdateNotifier"
+            "namespace-root": "vennv\\vapm"
         }
     }
 }
