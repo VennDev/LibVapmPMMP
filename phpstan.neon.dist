@@ -1,6 +1,8 @@
 parameters:
-   level: 9
-   paths:
-      - src\vennv
-   treatPhpDocTypesAsCertain: false
-   checkGenericClassInNonGenericObjectType: false
+    level: 9
+    paths:
+        - src/vennv
+    excludePaths:
+        - src/vendor
+    treatPhpDocTypesAsCertain: false
+    checkGenericClassInNonGenericObjectType: false
