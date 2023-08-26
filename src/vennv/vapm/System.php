@@ -1,9 +1,10 @@
 <?php
 
 /**
- * Vapm - A library for PHP about Async, Promise, Coroutine, GreenThread,
- *      Thread and other non-blocking methods. The method is based on Fibers &
- *      Generator & Processes, requires you to have php version from >= 8.1
+ * Vapm - A library support for PHP about Async, Promise, Coroutine, Thread, GreenThread
+ *          and other non-blocking methods. The library also includes some Javascript packages
+ *          such as Express. The method is based on Fibers & Generator & Processes, requires
+ *          you to have php version from >= 8.1
  *
  * Copyright (C) 2023  VennDev
  *
@@ -23,16 +24,16 @@ declare(strict_types = 1);
 namespace vennv\vapm;
 
 use Throwable;
-use function file_get_contents;
 use function curl_init;
-use function curl_multi_init;
 use function curl_multi_add_handle;
-use function curl_multi_exec;
-use function curl_multi_remove_handle;
 use function curl_multi_close;
+use function curl_multi_exec;
 use function curl_multi_getcontent;
-use const CURLOPT_RETURNTRANSFER;
+use function curl_multi_init;
+use function curl_multi_remove_handle;
+use function file_get_contents;
 use const CURLM_OK;
+use const CURLOPT_RETURNTRANSFER;
 
 interface SystemInterface {
 
@@ -49,6 +50,13 @@ interface SystemInterface {
      * This function is used to run the event loop with single event loop
      */
     public static function runSingleEventLoop() : void;
+
+    /**
+     * @throws Throwable
+     *
+     * This function is used to initialize the event loop
+     */
+    public static function init() : void;
 
     /**
      * This function is used to run a callback in the event loop with timeout
@@ -120,10 +128,13 @@ final class System extends EventLoop implements SystemInterface {
      */
     private static array $timings = [];
 
+    private static bool $hasInit = false;
+
     /**
      * @throws Throwable
      */
     public static function runEventLoop() : void {
+        self::init();
         parent::run();
     }
 
@@ -131,10 +142,28 @@ final class System extends EventLoop implements SystemInterface {
      * @throws Throwable
      */
     public static function runSingleEventLoop() : void {
+        self::init();
         parent::runSingle();
     }
 
+    public static function init() : void {
+        if (!self::$hasInit) {
+            self::$hasInit = true;
+
+            register_shutdown_function(function () {
+                self::runSingleEventLoop();
+            });
+        }
+
+        parent::init();
+    }
+
+    /**
+     * @throws Throwable
+     */
     public static function setTimeout(callable $callback, int $timeout) : SampleMacro {
+        self::init();
+
         $sampleMacro = new SampleMacro($callback, $timeout);
         MacroTask::addTask($sampleMacro);
 
@@ -147,7 +176,12 @@ final class System extends EventLoop implements SystemInterface {
         }
     }
 
+    /**
+     * @throws Throwable
+     */
     public static function setInterval(callable $callback, int $interval) : SampleMacro {
+        self::init();
+
         $sampleMacro = new SampleMacro($callback, $interval, true);
         MacroTask::addTask($sampleMacro);
 
@@ -221,7 +255,7 @@ final class System extends EventLoop implements SystemInterface {
                 }
             }
 
-            $running = null;
+            $running = 0;
 
             do {
                 $status = curl_multi_exec($multiHandle, $running);
