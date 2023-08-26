@@ -1,9 +1,10 @@
 <?php
 
 /**
- * Vapm - A library for PHP about Async, Promise, Coroutine, GreenThread,
- *      Thread and other non-blocking methods. The method is based on Fibers &
- *      Generator & Processes, requires you to have php version from >= 8.1
+ * Vapm - A library support for PHP about Async, Promise, Coroutine, Thread, GreenThread
+ *          and other non-blocking methods. The library also includes some Javascript packages
+ *          such as Express. The method is based on Fibers & Generator & Processes, requires
+ *          you to have php version from >= 8.1
  *
  * Copyright (C) 2023  VennDev
  *
@@ -43,5 +44,9 @@ final class Error {
     public const CANNOT_READ_FILE = "Cannot read file";
 
     public const INPUT_MUST_BE_STRING_OR_CALLABLE = "Input must be string or callable";
+
+    public const ERROR_TO_CREATE_SOCKET = "Error to create socket";
+
+    public const PAYLOAD_TOO_LARGE = "Payload too large";
 
 }

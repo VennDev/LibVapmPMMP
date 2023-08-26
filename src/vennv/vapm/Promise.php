@@ -1,9 +1,10 @@
 <?php
 
 /**
- * Vapm - A library for PHP about Async, Promise, Coroutine, GreenThread,
- *      Thread and other non-blocking methods. The method is based on Fibers &
- *      Generator & Processes, requires you to have php version from >= 8.1
+ * Vapm - A library support for PHP about Async, Promise, Coroutine, Thread, GreenThread
+ *          and other non-blocking methods. The library also includes some Javascript packages
+ *          such as Express. The method is based on Fibers & Generator & Processes, requires
+ *          you to have php version from >= 8.1
  *
  * Copyright (C) 2023  VennDev
  *
@@ -22,12 +23,14 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
+use vennv\vapm\System;
 use Fiber;
 use Throwable;
-use function count;
-use function microtime;
-use function is_callable;
+use ArrayObject;
 use function call_user_func;
+use function count;
+use function is_callable;
+use function microtime;
 
 interface PromiseInterface {
 
@@ -199,8 +202,8 @@ final class Promise implements PromiseInterface {
 
     private string $status = StatusPromise::PENDING;
 
-    /** @var array<int|string, callable> $callbacksResolve */
-    private array $callbacksResolve = [];
+    /** @var ArrayObject $callbacksResolve */
+    private ArrayObject $callbacksResolve;
 
     /** @var callable $callbacksReject */
     private mixed $callbackReject;
@@ -223,6 +226,10 @@ final class Promise implements PromiseInterface {
      * @throws Throwable
      */
     public function __construct(callable $callback, bool $justGetResult = false) {
+        System::init();
+
+        $this->callbacksResolve = new ArrayObject();
+
         $this->id = EventLoop::generateId();
 
         $this->callback = $callback;
@@ -250,9 +257,9 @@ final class Promise implements PromiseInterface {
 
         $this->timeStart = microtime(true);
 
-        $this->callbacksResolve["master"] = function ($result) : mixed {
+        $this->callbacksResolve->offsetSet("master", function ($result) : mixed {
             return $result;
-        };
+        });
 
         $this->callbackReject = function ($result) : mixed {
             return $result;
@@ -351,7 +358,6 @@ final class Promise implements PromiseInterface {
 
     public function then(callable $callback) : Promise {
         $this->callbacksResolve[] = $callback;
-
         return $this;
     }
 
@@ -375,6 +381,8 @@ final class Promise implements PromiseInterface {
 
         if ($this->isResolved()) {
             $callbacks = $this->callbacksResolve;
+
+            /** @var callable $master */
             $master = $callbacks["master"];
 
             $this->result = call_user_func($master, $result);
@@ -382,7 +390,10 @@ final class Promise implements PromiseInterface {
             unset($callbacks["master"]);
 
             if (count($callbacks) > 0) {
-                $resultFirstCallback = call_user_func($callbacks[0], $this->result);
+                /** @var callable $callback */
+                $callback = $callbacks[0];
+
+                $resultFirstCallback = call_user_func($callback, $this->result);
 
                 $this->result = $resultFirstCallback;
                 $this->return = $resultFirstCallback;
@@ -397,17 +408,20 @@ final class Promise implements PromiseInterface {
     }
 
     /**
-     * @param array<callable> $callbacks
-     * @phpstan-param array<callable> $callbacks
-     * @throws Throwable
+     * @param ArrayObject $callbacks
+     * @param mixed $return
      */
-    private function checkStatus(array $callbacks, mixed $return) : void {
+    private function checkStatus(ArrayObject $callbacks, mixed $return) : void {
         $lastPromise = null;
 
         while (count($callbacks) > 0) {
             $cancel = false;
 
-            foreach ($callbacks as $case => $callable) {
+            /**
+             * @var int|string $case
+             * @var callable $callback
+             */
+            foreach ($callbacks->getArrayCopy() as $case => $callback) {
                 if ($return === null) {
                     $cancel = true;
                     break;
@@ -420,7 +434,7 @@ final class Promise implements PromiseInterface {
                     $queue2 = MicroTask::getTask($return->getId());
 
                     if (!is_null($queue1)) {
-                        $queue1->then($callable);
+                        $queue1->then($callback);
 
                         if (is_callable($this->callbackReject)) {
                             $queue1->catch($this->callbackReject);
@@ -428,7 +442,7 @@ final class Promise implements PromiseInterface {
 
                         $lastPromise = $queue1;
                     } else if (!is_null($queue2)) {
-                        $queue2->then($callable);
+                        $queue2->then($callback);
 
                         if (is_callable($this->callbackReject)) {
                             $queue2->catch($this->callbackReject);
@@ -437,7 +451,7 @@ final class Promise implements PromiseInterface {
                         $lastPromise = $queue2;
                     }
 
-                    unset($callbacks[$case]);
+                    $callbacks->offsetUnset($case);
                     continue;
                 }
 
@@ -467,11 +481,12 @@ final class Promise implements PromiseInterface {
      */
     public static function all(array $promises) : Promise {
         $promise = new Promise(function ($resolve, $reject) use ($promises) : void {
+            $count = count($promises);
             $results = [];
             $isSolved = false;
 
             while ($isSolved === false) {
-                foreach ($promises as $promise) {
+                foreach ($promises as $index => $promise) {
                     if (is_callable($promise)) {
                         $promise = new Async($promise);
                     }
@@ -487,11 +502,12 @@ final class Promise implements PromiseInterface {
 
                             if ($return->isResolved()) {
                                 $results[] = $return->getResult();
+                                unset($promises[$index]);
                             }
                         }
                     }
 
-                    if (count($results) === count($promises)) {
+                    if (count($results) === $count) {
                         $resolve($results);
                         $isSolved = true;
                     }
@@ -515,11 +531,12 @@ final class Promise implements PromiseInterface {
      */
     public static function allSettled(array $promises) : Promise {
         $promise = new Promise(function ($resolve) use ($promises) : void {
+            $count = count($promises);
             $results = [];
             $isSolved = false;
 
             while ($isSolved === false) {
-                foreach ($promises as $promise) {
+                foreach ($promises as $index => $promise) {
                     if (is_callable($promise)) {
                         $promise = new Async($promise);
                     }
@@ -529,10 +546,11 @@ final class Promise implements PromiseInterface {
 
                         if ($return !== null) {
                             $results[] = new PromiseResult($return->getStatus(), $return->getResult());
+                            unset($promises[$index]);
                         }
                     }
 
-                    if (count($results) === count($promises)) {
+                    if (count($results) === $count) {
                         $resolve($results);
                         $isSolved = true;
                     }
@@ -556,11 +574,12 @@ final class Promise implements PromiseInterface {
      */
     public static function any(array $promises) : Promise {
         $promise = new Promise(function ($resolve, $reject) use ($promises) : void {
+            $count = count($promises);
             $results = [];
             $isSolved = false;
 
             while ($isSolved === false) {
-                foreach ($promises as $promise) {
+                foreach ($promises as $index => $promise) {
                     if (is_callable($promise)) {
                         $promise = new Async($promise);
                     }
@@ -571,6 +590,7 @@ final class Promise implements PromiseInterface {
                         if ($return !== null) {
                             if ($return->isRejected()) {
                                 $results[] = $return->getResult();
+                                unset($promises[$index]);
                             }
 
                             if ($return->isResolved()) {
@@ -580,7 +600,7 @@ final class Promise implements PromiseInterface {
                         }
                     }
 
-                    if (count($results) === count($promises)) {
+                    if (count($results) === $count) {
                         $reject($results);
                         $isSolved = true;
                     }

@@ -1,9 +1,10 @@
 <?php
 
 /**
- * Vapm - A library for PHP about Async, Promise, Coroutine, GreenThread,
- *      Thread and other non-blocking methods. The method is based on Fibers &
- *      Generator & Processes, requires you to have php version from >= 8.1
+ * Vapm - A library support for PHP about Async, Promise, Coroutine, Thread, GreenThread
+ *          and other non-blocking methods. The library also includes some Javascript packages
+ *          such as Express. The method is based on Fibers & Generator & Processes, requires
+ *          you to have php version from >= 8.1
  *
  * Copyright (C) 2023  VennDev
  *
@@ -22,7 +23,7 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
-use Generator;
+use vennv\vapm\System;
 use Throwable;
 use function fclose;
 use function fgets;
@@ -32,7 +33,6 @@ use function fwrite;
 use function stream_set_blocking;
 use function touch;
 use function unlink;
-use const PHP_EOL;
 
 interface StreamInterface {
 

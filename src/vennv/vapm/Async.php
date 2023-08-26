@@ -1,9 +1,10 @@
 <?php
 
 /**
- * Vapm - A library for PHP about Async, Promise, Coroutine, GreenThread,
- *      Thread and other non-blocking methods. The method is based on Fibers &
- *      Generator & Processes, requires you to have php version from >= 8.1
+ * Vapm - A library support for PHP about Async, Promise, Coroutine, Thread, GreenThread
+ *          and other non-blocking methods. The library also includes some Javascript packages
+ *          such as Express. The method is based on Fibers & Generator & Processes, requires
+ *          you to have php version from >= 8.1
  *
  * Copyright (C) 2023  VennDev
  *
@@ -38,18 +39,18 @@ interface AsyncInterface {
 
 final class Async implements AsyncInterface {
 
-    private int $id;
+    private Promise $promise;
 
     /**
      * @throws Throwable
      */
     public function __construct(callable $callback) {
         $promise = new Promise($callback, true);
-        $this->id = $promise->getId();
+        $this->promise = $promise;
     }
 
     public function getId() : int {
-        return $this->id;
+        return $this->promise->getId();
     }
 
     /**

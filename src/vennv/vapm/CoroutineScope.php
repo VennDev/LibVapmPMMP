@@ -1,9 +1,10 @@
 <?php
 
 /**
- * Vapm - A library for PHP about Async, Promise, Coroutine, GreenThread,
- *      Thread and other non-blocking methods. The method is based on Fibers &
- *      Generator & Processes, requires you to have php version from >= 8.1
+ * Vapm - A library support for PHP about Async, Promise, Coroutine, Thread, GreenThread
+ *          and other non-blocking methods. The library also includes some Javascript packages
+ *          such as Express. The method is based on Fibers & Generator & Processes, requires
+ *          you to have php version from >= 8.1
  *
  * Copyright (C) 2023  VennDev
  *
@@ -22,12 +23,12 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
+use Generator;
 use ReflectionException;
 use SplQueue;
-use Generator;
 use Throwable;
-use function is_callable;
 use function call_user_func;
+use function is_callable;
 
 interface CoroutineScopeInterface {
 
@@ -124,7 +125,7 @@ final class CoroutineScope implements CoroutineScopeInterface {
      * @throws Throwable
      */
     public function run() : void {
-        if (self::$taskQueue !== null && !self::$taskQueue->isEmpty() && self::$cancelled === false) {
+        if (self::$taskQueue !== null && !self::$taskQueue->isEmpty() && !self::$cancelled) {
             $coroutine = self::$taskQueue->dequeue();
 
             if ($coroutine instanceof ChildCoroutine) {
@@ -148,9 +149,7 @@ final class CoroutineScope implements CoroutineScopeInterface {
     }
 
     private static function schedule(ChildCoroutine|CoroutineScope $childCoroutine) : void {
-        if (self::$taskQueue === null) {
-            self::$taskQueue = new SplQueue();
-        }
+        if (self::$taskQueue === null) self::$taskQueue = new SplQueue();
 
         self::$taskQueue->enqueue($childCoroutine);
     }

@@ -1,9 +1,10 @@
 <?php
 
 /**
- * Vapm - A library for PHP about Async, Promise, Coroutine, GreenThread,
- *      Thread and other non-blocking methods. The method is based on Fibers &
- *      Generator & Processes, requires you to have php version from >= 8.1
+ * Vapm - A library support for PHP about Async, Promise, Coroutine, Thread, GreenThread
+ *          and other non-blocking methods. The library also includes some Javascript packages
+ *          such as Express. The method is based on Fibers & Generator & Processes, requires
+ *          you to have php version from >= 8.1
  *
  * Copyright (C) 2023  VennDev
  *
@@ -22,11 +23,14 @@ declare(strict_types = 1);
 
 namespace vennv\vapm;
 
+use SplObjectStorage;
 use Throwable;
 use function count;
 use const PHP_INT_MAX;
 
 interface EventLoopInterface {
+
+    public static function init() : void;
 
     public static function generateId() : int;
 
@@ -34,23 +38,27 @@ interface EventLoopInterface {
 
     public static function removeQueue(int $id) : void;
 
+    public static function isQueue(int $id) : bool;
+
     public static function getQueue(int $id) : ?Promise;
 
     /**
-     * @return array<int, Promise>
+     * @return SplObjectStorage
      */
-    public static function getQueues() : array;
+    public static function getQueues() : SplObjectStorage;
 
     public static function addReturn(Promise $promise) : void;
 
     public static function removeReturn(int $id) : void;
 
+    public static function isReturn(int $id) : bool;
+
     public static function getReturn(int $id) : ?Promise;
 
     /**
-     * @return array<int, Promise>
+     * @return SplObjectStorage
      */
-    public static function getReturns() : array;
+    public static function getReturns() : SplObjectStorage;
 
 }
 
@@ -59,14 +67,19 @@ class EventLoop implements EventLoopInterface {
     protected static int $nextId = 0;
 
     /**
-     * @var array<int, Promise>
+     * @var SplObjectStorage
      */
-    protected static array $queues = [];
+    protected static SplObjectStorage $queues;
 
     /**
-     * @var array<int, Promise>
+     * @var SplObjectStorage
      */
-    protected static array $returns = [];
+    protected static SplObjectStorage $returns;
+
+    public static function init() : void {
+        if (!isset(self::$queues)) self::$queues = new SplObjectStorage();
+        if (!isset(self::$returns)) self::$returns = new SplObjectStorage();
+    }
 
     public static function generateId() : int {
         if (self::$nextId >= PHP_INT_MAX) {
@@ -77,55 +90,102 @@ class EventLoop implements EventLoopInterface {
     }
 
     public static function addQueue(Promise $promise) : void {
-        $id = $promise->getId();
-
-        if (!isset(self::$queues[$id])) {
-            self::$queues[$id] = $promise;
-        }
+        if (!self::getQueue($promise->getId())) self::$queues->offsetSet($promise, $promise->getId());
     }
 
     public static function removeQueue(int $id) : void {
-        unset(self::$queues[$id]);
+        /**
+         * @var Promise $promise
+         */
+        foreach (self::$queues as $promise) {
+            if ($promise->getId() === $id) {
+                self::$queues->offsetUnset($promise);
+                break;
+            }
+        }
+    }
+
+    public static function isQueue(int $id) : bool {
+        /**
+         * @var Promise $promise
+         */
+        foreach (self::$queues as $promise) {
+            if ($promise->getId() === $id) return true;
+        }
+
+        return false;
     }
 
     public static function getQueue(int $id) : ?Promise {
-        return self::$queues[$id] ?? null;
+        /**
+         * @var Promise $promise
+         */
+        foreach (self::$queues as $promise) {
+            if ($promise->getId() === $id) return $promise;
+        }
+
+        return null;
     }
 
     /**
-     * @return array<int, Promise>
+     * @return SplObjectStorage
      */
-    public static function getQueues() : array {
+    public static function getQueues() : SplObjectStorage {
         return self::$queues;
     }
 
     public static function addReturn(Promise $promise) : void {
-        $id = $promise->getId();
+        if (!self::getReturn($promise->getId())) self::$returns->offsetSet($promise);
+    }
 
-        if (!isset(self::$returns[$id])) {
-            self::$returns[$id] = $promise;
+    public static function isReturn(int $id) : bool {
+        /**
+         * @var Promise $promise
+         */
+        foreach (self::$returns as $promise) {
+            if ($promise->getId() === $id) return true;
         }
+
+        return false;
     }
 
     public static function removeReturn(int $id) : void {
-        unset(self::$returns[$id]);
+        /**
+         * @var Promise $promise
+         */
+        foreach (self::$returns as $promise) {
+            if ($promise->getId() === $id) {
+                self::$returns->offsetUnset($promise);
+                break;
+            }
+        }
     }
 
     public static function getReturn(int $id) : ?Promise {
-        return self::$returns[$id] ?? null;
+        /**
+         * @var Promise $promise
+         */
+        foreach (self::$returns as $promise) {
+            if ($promise->getId() === $id) return $promise;
+        }
+
+        return null;
     }
 
     /**
-     * @return array<int, Promise>
+     * @return SplObjectStorage
      */
-    public static function getReturns() : array {
+    public static function getReturns() : SplObjectStorage {
         return self::$returns;
     }
 
     private static function clearGarbage() : void {
-        foreach (self::$returns as $id => $promise) {
+        /**
+         * @var Promise $promise
+         */
+        foreach (self::$returns as $promise) {
             if ($promise->canDrop()) {
-                self::removeReturn($id);
+                self::removeReturn($promise->getId());
             }
         }
     }
@@ -138,7 +198,11 @@ class EventLoop implements EventLoopInterface {
             GreenThread::run();
         }
 
-        foreach (self::$queues as $id => $promise) {
+        /**
+         * @var Promise $promise
+         */
+        foreach (self::$queues as $promise) {
+            $id = $promise->getId();
             $fiber = $promise->getFiber();
 
             if ($fiber->isSuspended()) {
