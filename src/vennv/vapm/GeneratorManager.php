@@ -19,11 +19,12 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm;
 
-interface GeneratorManagerInterface {
+interface GeneratorManagerInterface
+{
 
     /**
      * @param int $milliseconds
@@ -32,13 +33,15 @@ interface GeneratorManagerInterface {
      * This is a function that calculates the seconds from milliseconds for Generator vapm.
      * For example, if you run a function with multiple yields, this calculates the time spent on each of them in seconds.
      */
-    public static function calculateSeconds(int $milliseconds) : int;
+    public static function calculateSeconds(int $milliseconds): int;
 
 }
 
-final class GeneratorManager implements GeneratorManagerInterface {
+final class GeneratorManager implements GeneratorManagerInterface
+{
 
-    public static function calculateSeconds(int $milliseconds) : int {
+    public static function calculateSeconds(int $milliseconds): int
+    {
         return ($milliseconds * 1000) + ($milliseconds * 550);
     }
 

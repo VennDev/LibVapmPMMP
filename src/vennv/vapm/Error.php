@@ -19,11 +19,12 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm;
 
-final class Error {
+final class Error
+{
 
     public const FAILED_IN_FETCHING_DATA = "Error in fetching data";
 
@@ -48,5 +49,7 @@ final class Error {
     public const ERROR_TO_CREATE_SOCKET = "Error to create socket";
 
     public const PAYLOAD_TOO_LARGE = "Payload too large";
+
+    public const INVALID_ARRAY = "Invalid array";
 
 }

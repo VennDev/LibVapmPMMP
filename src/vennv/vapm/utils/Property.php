@@ -19,7 +19,7 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm\utils;
 
@@ -27,7 +27,8 @@ use Exception;
 use function property_exists;
 
 // This is trait for JsonData|StaticData class
-trait Property {
+trait Property
+{
 
     /**
      * @param object $data
@@ -35,15 +36,14 @@ trait Property {
      * @return object
      * @throws Exception
      */
-    public function update(object $data, array $options) : object {
+    public function update(object $data, array $options): object
+    {
         /**
          * @var string $key
          * @var mixed $value
          */
         foreach ($options as $key => $value) {
-            if (property_exists($data, $key)) {
-                $data->{$key} = $value; /* @phpstan-ignore-line */
-            }
+            if (property_exists($data, $key)) $data->{$key} = $value; /* @phpstan-ignore-line */
         }
 
         return $data;

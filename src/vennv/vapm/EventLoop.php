@@ -19,7 +19,7 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm;
 
@@ -28,41 +28,43 @@ use Throwable;
 use function count;
 use const PHP_INT_MAX;
 
-interface EventLoopInterface {
+interface EventLoopInterface
+{
 
-    public static function init() : void;
+    public static function init(): void;
 
-    public static function generateId() : int;
+    public static function generateId(): int;
 
-    public static function addQueue(Promise $promise) : void;
+    public static function addQueue(Promise $promise): void;
 
-    public static function removeQueue(int $id) : void;
+    public static function removeQueue(int $id): void;
 
-    public static function isQueue(int $id) : bool;
+    public static function isQueue(int $id): bool;
 
-    public static function getQueue(int $id) : ?Promise;
-
-    /**
-     * @return SplObjectStorage
-     */
-    public static function getQueues() : SplObjectStorage;
-
-    public static function addReturn(Promise $promise) : void;
-
-    public static function removeReturn(int $id) : void;
-
-    public static function isReturn(int $id) : bool;
-
-    public static function getReturn(int $id) : ?Promise;
+    public static function getQueue(int $id): ?Promise;
 
     /**
      * @return SplObjectStorage
      */
-    public static function getReturns() : SplObjectStorage;
+    public static function getQueues(): SplObjectStorage;
+
+    public static function addReturn(Promise $promise): void;
+
+    public static function removeReturn(int $id): void;
+
+    public static function isReturn(int $id): bool;
+
+    public static function getReturn(int $id): ?Promise;
+
+    /**
+     * @return SplObjectStorage
+     */
+    public static function getReturns(): SplObjectStorage;
 
 }
 
-class EventLoop implements EventLoopInterface {
+class EventLoop implements EventLoopInterface
+{
 
     protected static int $nextId = 0;
 
@@ -76,24 +78,25 @@ class EventLoop implements EventLoopInterface {
      */
     protected static SplObjectStorage $returns;
 
-    public static function init() : void {
+    public static function init(): void
+    {
         if (!isset(self::$queues)) self::$queues = new SplObjectStorage();
         if (!isset(self::$returns)) self::$returns = new SplObjectStorage();
     }
 
-    public static function generateId() : int {
-        if (self::$nextId >= PHP_INT_MAX) {
-            self::$nextId = 0;
-        }
-
+    public static function generateId(): int
+    {
+        if (self::$nextId >= PHP_INT_MAX) self::$nextId = 0;
         return self::$nextId++;
     }
 
-    public static function addQueue(Promise $promise) : void {
+    public static function addQueue(Promise $promise): void
+    {
         if (!self::getQueue($promise->getId())) self::$queues->offsetSet($promise, $promise->getId());
     }
 
-    public static function removeQueue(int $id) : void {
+    public static function removeQueue(int $id): void
+    {
         /**
          * @var Promise $promise
          */
@@ -105,51 +108,42 @@ class EventLoop implements EventLoopInterface {
         }
     }
 
-    public static function isQueue(int $id) : bool {
-        /**
-         * @var Promise $promise
-         */
-        foreach (self::$queues as $promise) {
-            if ($promise->getId() === $id) return true;
-        }
-
+    public static function isQueue(int $id): bool
+    {
+        /* @var Promise $promise */
+        foreach (self::$queues as $promise) if ($promise instanceof Promise && $promise->getId() === $id) return true;
         return false;
     }
 
-    public static function getQueue(int $id) : ?Promise {
-        /**
-         * @var Promise $promise
-         */
-        foreach (self::$queues as $promise) {
-            if ($promise->getId() === $id) return $promise;
-        }
-
+    public static function getQueue(int $id): ?Promise
+    {
+        /* @var Promise $promise */
+        foreach (self::$queues as $promise) if ($promise instanceof Promise && $promise->getId() === $id) return $promise;
         return null;
     }
 
     /**
      * @return SplObjectStorage
      */
-    public static function getQueues() : SplObjectStorage {
+    public static function getQueues(): SplObjectStorage
+    {
         return self::$queues;
     }
 
-    public static function addReturn(Promise $promise) : void {
+    public static function addReturn(Promise $promise): void
+    {
         if (!self::getReturn($promise->getId())) self::$returns->offsetSet($promise);
     }
 
-    public static function isReturn(int $id) : bool {
-        /**
-         * @var Promise $promise
-         */
-        foreach (self::$returns as $promise) {
-            if ($promise->getId() === $id) return true;
-        }
-
+    public static function isReturn(int $id): bool
+    {
+        /* @var Promise $promise */
+        foreach (self::$returns as $promise) if ($promise instanceof Promise && $promise->getId() === $id) return true;
         return false;
     }
 
-    public static function removeReturn(int $id) : void {
+    public static function removeReturn(int $id): void
+    {
         /**
          * @var Promise $promise
          */
@@ -161,42 +155,33 @@ class EventLoop implements EventLoopInterface {
         }
     }
 
-    public static function getReturn(int $id) : ?Promise {
-        /**
-         * @var Promise $promise
-         */
-        foreach (self::$returns as $promise) {
-            if ($promise->getId() === $id) return $promise;
-        }
-
+    public static function getReturn(int $id): ?Promise
+    {
+        /* @var Promise $promise */
+        foreach (self::$returns as $promise) if ($promise instanceof Promise && $promise->getId() === $id) return $promise;
         return null;
     }
 
     /**
      * @return SplObjectStorage
      */
-    public static function getReturns() : SplObjectStorage {
+    public static function getReturns(): SplObjectStorage
+    {
         return self::$returns;
     }
 
-    private static function clearGarbage() : void {
-        /**
-         * @var Promise $promise
-         */
-        foreach (self::$returns as $promise) {
-            if ($promise->canDrop()) {
-                self::removeReturn($promise->getId());
-            }
-        }
+    private static function clearGarbage(): void
+    {
+        /* @var Promise $promise */
+        foreach (self::$returns as $promise) if ($promise instanceof Promise && $promise->canDrop()) self::removeReturn($promise->getId());
     }
 
     /**
      * @throws Throwable
      */
-    protected static function run() : void {
-        if (count(GreenThread::getFibers()) > 0) {
-            GreenThread::run();
-        }
+    protected static function run(): void
+    {
+        if (count(GreenThread::getFibers()) > 0) GreenThread::run();
 
         /**
          * @var Promise $promise
@@ -217,13 +202,8 @@ class EventLoop implements EventLoopInterface {
             }
         }
 
-        if (count(MicroTask::getTasks()) > 0) {
-            MicroTask::run();
-        }
-
-        if (count(MacroTask::getTasks()) > 0) {
-            MacroTask::run();
-        }
+        if (count(MicroTask::getTasks()) > 0) MicroTask::run();
+        if (count(MacroTask::getTasks()) > 0) MacroTask::run();
 
         self::clearGarbage();
     }
@@ -231,10 +211,9 @@ class EventLoop implements EventLoopInterface {
     /**
      * @throws Throwable
      */
-    protected static function runSingle() : void {
-        while (count(self::$queues) > 0 || count(MicroTask::getTasks()) > 0 || count(MacroTask::getTasks()) > 0 || count(GreenThread::getFibers()) > 0) {
-            self::run();
-        }
+    protected static function runSingle(): void
+    {
+        while (count(self::$queues) > 0 || count(MicroTask::getTasks()) > 0 || count(MacroTask::getTasks()) > 0 || count(GreenThread::getFibers()) > 0) self::run();
     }
 
 }

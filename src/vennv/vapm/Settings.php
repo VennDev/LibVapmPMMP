@@ -19,11 +19,12 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm;
 
-final class Settings {
+final class Settings
+{
 
     /**
      * The time in seconds to check should drop the promise if the promise is not resolved or rejected

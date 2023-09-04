@@ -19,7 +19,7 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm;
 
@@ -49,12 +49,13 @@ use const PHP_EOL;
 use const STDIN;
 use const STDOUT;
 
-interface ThreadInterface {
+interface ThreadInterface
+{
 
     /**
      * This abstract method use to run the thread
      */
-    public function onRun() : void;
+    public function onRun(): void;
 
     /**
      * @param array<int, array<string>> $mode
@@ -64,41 +65,42 @@ interface ThreadInterface {
      *
      * This method use to start the thread
      */
-    public function start(array $mode = DescriptorSpec::BASIC) : Promise;
+    public function start(array $mode = DescriptorSpec::BASIC): Promise;
 
 }
 
-interface ThreadedInterface {
+interface ThreadedInterface
+{
 
     /**
      * @return mixed
      */
-    public function getInput() : mixed;
+    public function getInput(): mixed;
 
     /**
      * This method use to get the pid of the thread
      */
-    public function getPid() : int;
+    public function getPid(): int;
 
     /**
      * This method use to get the exit code of the thread
      */
-    public function getExitCode() : int;
+    public function getExitCode(): int;
 
     /*
      * This method use to get the running status of the thread
      */
-    public function isRunning() : bool;
+    public function isRunning(): bool;
 
     /**
      * This method use to get the signaled status of the thread
      */
-    public function isSignaled() : bool;
+    public function isSignaled(): bool;
 
     /**
      * This method use to get the stopped status of the thread
      */
-    public function isStopped() : bool;
+    public function isStopped(): bool;
 
     /**
      * @return array<string, mixed>
@@ -106,7 +108,7 @@ interface ThreadedInterface {
      *
      * This method use to get the shared data of the main thread
      */
-    public static function getDataMainThread() : array;
+    public static function getDataMainThread(): array;
 
     /**
      * @param array<string, mixed> $shared
@@ -114,7 +116,7 @@ interface ThreadedInterface {
      *
      * This method use to set the shared data of the main thread
      */
-    public static function setShared(array $shared) : void;
+    public static function setShared(array $shared): void;
 
     /**
      * @param string $key
@@ -123,14 +125,14 @@ interface ThreadedInterface {
      *
      * This method use to add the shared data of the MAIN-THREAD
      */
-    public static function addShared(string $key, mixed $value) : void;
+    public static function addShared(string $key, mixed $value): void;
 
     /**
      * @return array<string, mixed>
      *
      * This method use to get the shared data of the child thread
      */
-    public static function getSharedData() : array;
+    public static function getSharedData(): array;
 
     /**
      * @param array<string, mixed> $data
@@ -139,7 +141,7 @@ interface ThreadedInterface {
      *
      * This method use to post all data the main thread
      */
-    public static function postMainThread(array $data) : void;
+    public static function postMainThread(array $data): void;
 
     /**
      * @param string $data
@@ -147,15 +149,15 @@ interface ThreadedInterface {
      *
      * This method use to load the shared data from the main thread
      */
-    public static function loadSharedData(string $data) : void;
+    public static function loadSharedData(string $data): void;
 
     /**
      * @param string $data
      * @return void
      *
-     * This method use to alert for the main thread
+     * This method use to post the data on the thread
      */
-    public static function alert(string $data) : void;
+    public static function post(string $data): void;
 
     /**
      * @param int $pid
@@ -163,7 +165,7 @@ interface ThreadedInterface {
      *
      * This method use to check the thread is running or not
      */
-    public static function threadIsRunning(int $pid) : bool;
+    public static function threadIsRunning(int $pid): bool;
 
     /**
      * @param int $pid
@@ -171,15 +173,16 @@ interface ThreadedInterface {
      *
      * This method use to kill the thread
      */
-    public static function killThread(int $pid) : bool;
+    public static function killThread(int $pid): bool;
 
 }
 
-abstract class Thread implements ThreadInterface, ThreadedInterface {
+abstract class Thread implements ThreadInterface, ThreadedInterface
+{
 
     private const POST_MAIN_THREAD = 'postMainThread'; // example: postMainThread=>{data}
 
-    private const POST_ALERT_THREAD = 'postAlertThread'; // example: postAlertThread=>{data}
+    private const POST_THREAD = 'postThread'; // example: postAlertThread=>{data}
 
     private int $pid = -1;
 
@@ -209,51 +212,63 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
      */
     private static array $inputs = [];
 
-    public function __construct(mixed $input = '') {
+    public function __construct(mixed $input = '')
+    {
         self::$inputs[get_called_class()] = $input;
     }
 
-    public function getInput() : mixed {
+    public function getInput(): mixed
+    {
         return self::$inputs[get_called_class()];
     }
 
-    public function getPid() : int {
+    public function getPid(): int
+    {
         return $this->pid;
     }
 
-    public function setPid(int $pid) : void {
+    public function setPid(int $pid): void
+    {
         $this->pid = $pid;
     }
 
-    public function getExitCode() : int {
+    public function getExitCode(): int
+    {
         return $this->exitCode;
     }
 
-    protected function setExitCode(int $exitCode) : void {
+    protected function setExitCode(int $exitCode): void
+    {
         $this->exitCode = $exitCode;
     }
 
-    public function isRunning() : bool {
+    public function isRunning(): bool
+    {
         return $this->isRunning;
     }
 
-    protected function setRunning(bool $isRunning) : void {
+    protected function setRunning(bool $isRunning): void
+    {
         $this->isRunning = $isRunning;
     }
 
-    public function isSignaled() : bool {
+    public function isSignaled(): bool
+    {
         return $this->signaled;
     }
 
-    protected function setSignaled(bool $signaled) : void {
+    protected function setSignaled(bool $signaled): void
+    {
         $this->signaled = $signaled;
     }
 
-    public function isStopped() : bool {
+    public function isStopped(): bool
+    {
         return $this->stopped;
     }
 
-    protected function setStopped(bool $stopped) : void {
+    protected function setStopped(bool $stopped): void
+    {
         $this->stopped = $stopped;
     }
 
@@ -261,7 +276,8 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
      * @return array<string, mixed>
      * @phpstan-return array<string, mixed>
      */
-    public static function getDataMainThread() : array {
+    public static function getDataMainThread(): array
+    {
         return self::$shared;
     }
 
@@ -269,23 +285,23 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
      * @param array<string, mixed> $shared
      * @phpstan-param array<string, mixed> $shared
      */
-    public static function setShared(array $shared) : void {
+    public static function setShared(array $shared): void
+    {
         self::$shared = $shared;
     }
 
-    public static function addShared(string $key, mixed $value) : void {
+    public static function addShared(string $key, mixed $value): void
+    {
         self::$shared[$key] = $value;
     }
 
-    public static function getSharedData() : array {
+    public static function getSharedData(): array
+    {
         $data = fgets(STDIN);
 
         if (is_string($data)) {
             $data = json_decode($data, true);
-
-            if (is_array($data)) {
-                return $data;
-            }
+            if (is_array($data)) return $data;
         }
 
         return [];
@@ -295,35 +311,38 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
      * @param array<string, mixed> $data
      * @phpstan-param array<string, mixed> $data
      */
-    public static function postMainThread(array $data) : void {
+    public static function postMainThread(array $data): void
+    {
         fwrite(STDOUT, self::POST_MAIN_THREAD . '=>' . json_encode($data) . PHP_EOL);
     }
 
-    private static function isPostMainThread(string $data) : bool {
+    private static function isPostMainThread(string $data): bool
+    {
         return explode('=>', $data)[0] === self::POST_MAIN_THREAD;
     }
 
-    public static function loadSharedData(string $data) : void {
+    public static function loadSharedData(string $data): void
+    {
         $data = explode('=>', $data);
 
         if ($data[0] === self::POST_MAIN_THREAD) {
             $result = json_decode($data[1], true);
-
-            if (is_array($result)) {
-                self::setShared(array_merge(self::$shared, $result));
-            }
+            if (is_array($result)) self::setShared(array_merge(self::$shared, $result));
         }
     }
 
-    public static function alert(string $data) : void {
-        fwrite(STDOUT, self::POST_ALERT_THREAD . '=>' . $data . PHP_EOL);
+    public static function post(string $data): void
+    {
+        fwrite(STDOUT, self::POST_THREAD . '=>' . $data . PHP_EOL);
     }
 
-    public static function threadIsRunning(int $pid) : bool {
+    public static function threadIsRunning(int $pid): bool
+    {
         return isset(self::$threads[$pid]);
     }
 
-    public static function killThread(int $pid) : bool {
+    public static function killThread(int $pid): bool
+    {
         if (isset(self::$threads[$pid])) {
             $thread = self::$threads[$pid];
 
@@ -336,16 +355,17 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
         return false;
     }
 
-    private static function isAlert(string $data) : bool {
-        return explode('=>', $data)[0] === self::POST_ALERT_THREAD;
+    private static function isPost(string $data): bool
+    {
+        return explode('=>', $data)[0] === self::POST_THREAD;
     }
 
-    private static function loadAlert(string $data) : void {
+    private static function loadPost(string $data): void
+    {
         $data = explode('=>', $data);
 
-        if ($data[0] === self::POST_ALERT_THREAD) {
+        if ($data[0] === self::POST_THREAD) {
             $result = json_decode($data[1], true);
-
             echo $result . PHP_EOL;
         }
     }
@@ -355,7 +375,8 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
      * @return array<int, mixed>
      * @phpstan-return array<int, mixed>
      */
-    private static function getAlert(false|string $data) : array {
+    private static function getPost(false|string $data): array
+    {
         $result = [];
 
         if (is_string($data)) {
@@ -365,14 +386,9 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
                 if ($item !== '') {
                     $dataExplode = explode('=>', $data);
 
-                    if ($dataExplode[0] == self::POST_ALERT_THREAD) {
+                    if ($dataExplode[0] == self::POST_THREAD) {
                         $try = json_decode($dataExplode[1], true);
-
-                        if (is_array($try)) {
-                            $result[] = $try;
-                        } else {
-                            $result[] = $dataExplode[1];
-                        }
+                        is_array($try) ? $result[] = $try : $result[] = $dataExplode[1];
                     }
                 }
             }
@@ -381,7 +397,7 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
         return $result;
     }
 
-    abstract public function onRun() : void;
+    abstract public function onRun(): void;
 
     /**
      * @param array<int, array<string>> $mode
@@ -391,8 +407,9 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
      * @phpstan-param array<int, array<string>> $mode
      * @phpstan-return Promise
      */
-    public function start(array $mode = DescriptorSpec::BASIC) : Promise {
-        return new Promise(function ($resolve, $reject) use ($mode) : mixed {
+    public function start(array $mode = DescriptorSpec::BASIC): Promise
+    {
+        return new Promise(function ($resolve, $reject) use ($mode): mixed {
             $className = get_called_class();
 
             $reflection = new ReflectionClass($className);
@@ -408,44 +425,30 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
 
             $input = self::$inputs[get_called_class()];
 
-            if (is_string($input)) {
-                $input = '\'' . self::$inputs[get_called_class()] . '\'';
-            }
+            if (is_string($input)) $input = '\'' . self::$inputs[get_called_class()] . '\'';
 
             if (is_callable($input) && $input instanceof Closure) {
                 $input = Utils::closureToString($input);
                 $input = Utils::removeComments($input);
 
-                if (!is_string($input)) {
-                    return $reject(new RuntimeException(Error::INPUT_MUST_BE_STRING_OR_CALLABLE));
-                }
+                if (!is_string($input)) return $reject(new RuntimeException(Error::INPUT_MUST_BE_STRING_OR_CALLABLE));
 
                 $input = Utils::outlineToInline($input);
 
-                if (!is_string($input)) {
-                    return $reject(new RuntimeException(Error::INPUT_MUST_BE_STRING_OR_CALLABLE));
-                }
+                if (!is_string($input)) return $reject(new RuntimeException(Error::INPUT_MUST_BE_STRING_OR_CALLABLE));
 
                 $input = Utils::fixInputCommand($input);
 
-                if (!is_string($input)) {
-                    return $reject(new RuntimeException(Error::INPUT_MUST_BE_STRING_OR_CALLABLE));
-                }
+                if (!is_string($input)) return $reject(new RuntimeException(Error::INPUT_MUST_BE_STRING_OR_CALLABLE));
             }
 
-            if (!is_string($input)) {
-                return $reject(new RuntimeException(Error::INPUT_MUST_BE_STRING_OR_CALLABLE));
-            }
+            if (!is_string($input)) return $reject(new RuntimeException(Error::INPUT_MUST_BE_STRING_OR_CALLABLE));
 
             $command = PHP_BINARY . ' -r "require_once \'' . $pathAutoLoad . '\'; include \'' . $class . '\'; $input = ' . $input . '; $class = new ' . static::class . '($input); $class->onRun();"';
 
             unset(self::$inputs[get_called_class()]);
 
-            $process = proc_open(
-                $command,
-                $mode,
-                $pipes
-            );
+            $process = proc_open($command, $mode, $pipes);
 
             if (is_resource($process)) {
                 stream_set_blocking($pipes[1], false);
@@ -463,7 +466,6 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
 
                     if (!isset(self::$threads[$status['pid']])) {
                         $this->setPid($status['pid']);
-
                         self::$threads[$status['pid']] = $this;
                     }
 
@@ -496,13 +498,8 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
 
                         foreach ($explode as $item) {
                             if ($item !== '') {
-                                if (self::isPostMainThread($item)) {
-                                    self::loadSharedData($item);
-                                }
-
-                                if (self::isAlert($item)) {
-                                    self::loadAlert($item);
-                                }
+                                if (self::isPostMainThread($item)) self::loadSharedData($item);
+                                if (self::isPost($item)) self::loadPost($item);
                             }
                         }
                     }
@@ -513,8 +510,7 @@ abstract class Thread implements ThreadInterface, ThreadedInterface {
 
             proc_close($process);
             unset(self::$threads[$this->getPid()]);
-
-            return $resolve(self::getAlert($output));
+            return $resolve(self::getPost($output));
         });
     }
 

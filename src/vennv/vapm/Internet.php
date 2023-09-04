@@ -19,7 +19,7 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm;
 
@@ -53,7 +53,8 @@ use const CURLOPT_SSL_VERIFYHOST;
 use const CURLOPT_SSL_VERIFYPEER;
 use const CURLOPT_TIMEOUT_MS;
 
-final class Internet {
+final class Internet
+{
 
     /**
      * GETs a URL using cURL
@@ -68,7 +69,8 @@ final class Internet {
         int    $timeout = 10,
         array  $extraHeaders = [],
         string &$error = null
-    ) : ?InternetRequestResult {
+    ): ?InternetRequestResult
+    {
         try {
             return self::simpleCurl(
                 $page,
@@ -95,7 +97,8 @@ final class Internet {
         int          $timeout = 10,
         array        $extraHeaders = [],
         string       &$error = null
-    ) : ?InternetRequestResult {
+    ): ?InternetRequestResult
+    {
         try {
             return self::simpleCurl($page, $timeout, $extraHeaders, [
                 CURLOPT_POST => 1,
@@ -127,17 +130,14 @@ final class Internet {
         array    $extraHeaders = [],
         array    $extraOpts = [],
         ?Closure $onSuccess = null
-    ) : InternetRequestResult {
+    ): InternetRequestResult
+    {
 
         $time = (int)($timeout * 1000);
 
         $curlHandle = curl_init($page);
 
-        if ($curlHandle === false) {
-            throw new InternetException(
-                "Unable to create new cURL session"
-            );
-        }
+        if ($curlHandle === false) throw new InternetException("Unable to create new cURL session");
 
         curl_setopt_array($curlHandle, $extraOpts +
             [
@@ -160,13 +160,8 @@ final class Internet {
         try {
             $raw = curl_exec($curlHandle);
 
-            if ($raw === false) {
-                throw new InternetException(curl_error($curlHandle));
-            }
-
-            if (!is_string($raw)) {
-                throw new AssumptionFailedError(Error::WRONG_TYPE_WHEN_USE_CURL_EXEC);
-            }
+            if ($raw === false) throw new InternetException(curl_error($curlHandle));
+            if (!is_string($raw)) throw new AssumptionFailedError(Error::WRONG_TYPE_WHEN_USE_CURL_EXEC);
 
             $httpCode = curl_getinfo($curlHandle, CURLINFO_HTTP_CODE);
             $headerSize = curl_getinfo($curlHandle, CURLINFO_HEADER_SIZE);
@@ -180,18 +175,13 @@ final class Internet {
                 foreach (explode("\r\n", $rawHeaderGroup) as $line) {
                     $nameValue = explode(":", $line, 2);
 
-                    if (isset($nameValue[1])) {
-                        $headerGroup[trim(strtolower($nameValue[0]))] = trim($nameValue[1]);
-                    }
-
+                    if (isset($nameValue[1])) $headerGroup[trim(strtolower($nameValue[0]))] = trim($nameValue[1]);
                 }
 
                 $headers[] = $headerGroup;
             }
 
-            if (!is_null($onSuccess)) {
-                $onSuccess($curlHandle);
-            }
+            if (!is_null($onSuccess)) $onSuccess($curlHandle);
 
             return new InternetRequestResult($headers, $body, $httpCode);
         } finally {

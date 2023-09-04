@@ -15,32 +15,38 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm;
 
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\ClosureTask;
 
-interface VapmPMMPInterface {
+interface VapmPMMPInterface
+{
 
-    public static function init(PluginBase $plugin) : void;
+    /**
+     * @param PluginBase $plugin
+     * @return void
+     *
+     * This function is used to initialize the VapmPMMP class.
+     * You should place this function in your onEnable() or onLoad() function.
+     */
+    public static function init(PluginBase $plugin): void;
 
 }
 
-final class VapmPMMP implements VapmPMMPInterface {
+final class VapmPMMP implements VapmPMMPInterface
+{
 
     private static bool $isInit = false;
 
-    public static function init(PluginBase $plugin) : void {
+    public static function init(PluginBase $plugin): void
+    {
         if (!self::$isInit) {
             self::$isInit = true;
-
-            $plugin->getScheduler()->scheduleRepeatingTask(new ClosureTask(
-                function () : void {
-                    System::runEventLoop();
-                }
-            ), 1);
+            EventLoop::init();
+            $plugin->getScheduler()->scheduleRepeatingTask(new ClosureTask(fn() => System::runEventLoop()), 1);
         }
     }
 

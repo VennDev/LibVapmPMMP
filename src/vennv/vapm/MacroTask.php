@@ -19,13 +19,14 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm;
 
 use const PHP_INT_MAX;
 
-final class MacroTask {
+final class MacroTask
+{
 
     private static int $nextId = 0;
 
@@ -34,47 +35,43 @@ final class MacroTask {
      */
     private static array $tasks = [];
 
-    public static function generateId() : int {
-        if (self::$nextId >= PHP_INT_MAX) {
-            self::$nextId = 0;
-        }
+    public static function generateId(): int
+    {
+        if (self::$nextId >= PHP_INT_MAX) self::$nextId = 0;
 
         return self::$nextId++;
     }
 
-    public static function addTask(SampleMacro $sampleMacro) : void {
+    public static function addTask(SampleMacro $sampleMacro): void
+    {
         self::$tasks[$sampleMacro->getId()] = $sampleMacro;
     }
 
-    public static function removeTask(SampleMacro $sampleMacro) : void {
+    public static function removeTask(SampleMacro $sampleMacro): void
+    {
         $id = $sampleMacro->getId();
-
-        if (isset(self::$tasks[$id])) {
-            unset(self::$tasks[$id]);
-        }
+        if (isset(self::$tasks[$id])) unset(self::$tasks[$id]);
     }
 
-    public static function getTask(int $id) : ?SampleMacro {
+    public static function getTask(int $id): ?SampleMacro
+    {
         return self::$tasks[$id] ?? null;
     }
 
     /**
      * @return array<int, SampleMacro>
      */
-    public static function getTasks() : array {
+    public static function getTasks(): array
+    {
         return self::$tasks;
     }
 
-    public static function run() : void {
+    public static function run(): void
+    {
         foreach (self::$tasks as $task) {
             if ($task->checkTimeOut()) {
                 $task->run();
-
-                if (!$task->isRepeat()) {
-                    self::removeTask($task);
-                } else {
-                    $task->resetTimeOut();
-                }
+                !$task->isRepeat() ? self::removeTask($task) : $task->resetTimeOut();
             }
         }
     }

@@ -19,32 +19,42 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm;
 
-interface CoroutineThreadInterface {
+interface CoroutineThreadInterface
+{
 
     /**
      * @return void
      *
      * This function runs the callback function for the thread.
      */
-    public function onRun() : void;
+    public function onRun(): void;
 
 }
 
-final class CoroutineThread extends Thread implements CoroutineThreadInterface {
+final class CoroutineThread extends Thread implements CoroutineThreadInterface
+{
 
     private mixed $callback;
 
-    public function __construct(callable $callback) {
+    public function __construct(callable $callback)
+    {
         $this->callback = $callback;
         parent::__construct($callback);
     }
 
-    public function onRun() : void {
-        if (is_callable($this->callback)) call_user_func($this->callback);
+    public function onRun(): void
+    {
+        if (is_callable($this->callback)) {
+            $callback = call_user_func($this->callback);
+
+            if (!is_string($callback)) $callback = serialize($callback);
+
+            self::post($callback);
+        }
     }
 
 }

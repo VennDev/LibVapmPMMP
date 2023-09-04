@@ -19,13 +19,14 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm;
 
-class Info {
+class Info
+{
 
-    public const VERSION = "1.8.0";
+    public const VERSION = "1.8.3";
 
     public const AUTHOR = "VennV";
 

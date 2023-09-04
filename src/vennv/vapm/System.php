@@ -19,7 +19,7 @@
  * GNU General Public License for more details.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace vennv\vapm;
 
@@ -35,48 +35,49 @@ use function file_get_contents;
 use const CURLM_OK;
 use const CURLOPT_RETURNTRANSFER;
 
-interface SystemInterface {
+interface SystemInterface
+{
 
     /**
      * @throws Throwable
      *
      * This function is used to run the event loop with multiple event loops
      */
-    public static function runEventLoop() : void;
+    public static function runEventLoop(): void;
 
     /**
      * @throws Throwable
      *
      * This function is used to run the event loop with single event loop
      */
-    public static function runSingleEventLoop() : void;
+    public static function runSingleEventLoop(): void;
 
     /**
      * @throws Throwable
      *
      * This function is used to initialize the event loop
      */
-    public static function init() : void;
+    public static function init(): void;
 
     /**
      * This function is used to run a callback in the event loop with timeout
      */
-    public static function setTimeout(callable $callback, int $timeout) : SampleMacro;
+    public static function setTimeout(callable $callback, int $timeout): SampleMacro;
 
     /**
      * This function is used to clear the timeout
      */
-    public static function clearTimeout(SampleMacro $sampleMacro) : void;
+    public static function clearTimeout(SampleMacro $sampleMacro): void;
 
     /**
      * This function is used to run a callback in the event loop with interval
      */
-    public static function setInterval(callable $callback, int $interval) : SampleMacro;
+    public static function setInterval(callable $callback, int $interval): SampleMacro;
 
     /**
      * This function is used to clear the interval
      */
-    public static function clearInterval(SampleMacro $sampleMacro) : void;
+    public static function clearInterval(SampleMacro $sampleMacro): void;
 
     /**
      * @param string $url
@@ -85,7 +86,7 @@ interface SystemInterface {
      * @throws Throwable
      * @phpstan-param array{method?: string, headers?: array<int, string>, timeout?: int, body?: array<string, string>} $options
      */
-    public static function fetch(string $url, array $options = []) : Promise;
+    public static function fetch(string $url, array $options = []): Promise;
 
     /**
      * @param string ...$curls
@@ -94,14 +95,14 @@ interface SystemInterface {
      *
      * Use this to curl multiple addresses at once
      */
-    public static function fetchAll(string ...$curls) : Promise;
+    public static function fetchAll(string ...$curls): Promise;
 
     /**
      * @throws Throwable
      *
      * This is a function used only to retrieve results from an address or file path via the file_get_contents method
      */
-    public static function read(string $path) : Promise;
+    public static function read(string $path): Promise;
 
     /**
      * @param string $name
@@ -109,7 +110,7 @@ interface SystemInterface {
      *
      * This function is used to start a timer
      */
-    public static function time(string $name = 'Console') : void;
+    public static function time(string $name = 'Console'): void;
 
     /**
      * @param string $name
@@ -117,11 +118,12 @@ interface SystemInterface {
      *
      * This function is used to end a timer
      */
-    public static function timeEnd(string $name = 'Console') : void;
+    public static function timeEnd(string $name = 'Console'): void;
 
 }
 
-final class System extends EventLoop implements SystemInterface {
+final class System extends EventLoop implements SystemInterface
+{
 
     /**
      * @var array<string, int|float>
@@ -133,7 +135,8 @@ final class System extends EventLoop implements SystemInterface {
     /**
      * @throws Throwable
      */
-    public static function runEventLoop() : void {
+    public static function runEventLoop(): void
+    {
         self::init();
         parent::run();
     }
@@ -141,15 +144,16 @@ final class System extends EventLoop implements SystemInterface {
     /**
      * @throws Throwable
      */
-    public static function runSingleEventLoop() : void {
+    public static function runSingleEventLoop(): void
+    {
         self::init();
         parent::runSingle();
     }
 
-    public static function init() : void {
+    public static function init(): void
+    {
         if (!self::$hasInit) {
             self::$hasInit = true;
-
             register_shutdown_function(function () {
                 self::runSingleEventLoop();
             });
@@ -161,37 +165,33 @@ final class System extends EventLoop implements SystemInterface {
     /**
      * @throws Throwable
      */
-    public static function setTimeout(callable $callback, int $timeout) : SampleMacro {
+    public static function setTimeout(callable $callback, int $timeout): SampleMacro
+    {
         self::init();
-
         $sampleMacro = new SampleMacro($callback, $timeout);
         MacroTask::addTask($sampleMacro);
-
         return $sampleMacro;
     }
 
-    public static function clearTimeout(SampleMacro $sampleMacro) : void {
-        if ($sampleMacro->isRunning() && !$sampleMacro->isRepeat()) {
-            $sampleMacro->stop();
-        }
+    public static function clearTimeout(SampleMacro $sampleMacro): void
+    {
+        if ($sampleMacro->isRunning() && !$sampleMacro->isRepeat()) $sampleMacro->stop();
     }
 
     /**
      * @throws Throwable
      */
-    public static function setInterval(callable $callback, int $interval) : SampleMacro {
+    public static function setInterval(callable $callback, int $interval): SampleMacro
+    {
         self::init();
-
         $sampleMacro = new SampleMacro($callback, $interval, true);
         MacroTask::addTask($sampleMacro);
-
         return $sampleMacro;
     }
 
-    public static function clearInterval(SampleMacro $sampleMacro) : void {
-        if ($sampleMacro->isRunning() && $sampleMacro->isRepeat()) {
-            $sampleMacro->stop();
-        }
+    public static function clearInterval(SampleMacro $sampleMacro): void
+    {
+        if ($sampleMacro->isRunning() && $sampleMacro->isRepeat()) $sampleMacro->stop();
     }
 
     /**
@@ -201,7 +201,8 @@ final class System extends EventLoop implements SystemInterface {
      * @throws Throwable
      * @phpstan-param array{method?: string, headers?: array<int, string>, timeout?: int, body?: array<string, string>} $options
      */
-    public static function fetch(string $url, array $options = []) : Promise {
+    public static function fetch(string $url, array $options = []): Promise
+    {
         return new Promise(function ($resolve, $reject) use ($url, $options) {
             self::setTimeout(function () use ($resolve, $reject, $url, $options) {
                 $method = $options["method"] ?? "GET";
@@ -215,17 +216,8 @@ final class System extends EventLoop implements SystemInterface {
                 /** @var array<string, string> $body */
                 $body = $options["body"] ?? [];
 
-                if ($method === "GET") {
-                    $result = Internet::getURL($url, $timeout, $headers);
-                } else {
-                    $result = Internet::postURL($url, $body, $timeout, $headers);
-                }
-
-                if ($result === null) {
-                    $reject(Error::FAILED_IN_FETCHING_DATA);
-                } else {
-                    $resolve($result);
-                }
+                $method === "GET" ? $result = Internet::getURL($url, $timeout, $headers) : $result = Internet::postURL($url, $body, $timeout, $headers);
+                $result === null ? $reject(Error::FAILED_IN_FETCHING_DATA) : $resolve($result);
             }, 0);
         });
     }
@@ -237,20 +229,18 @@ final class System extends EventLoop implements SystemInterface {
      *
      * Use this to curl multiple addresses at once
      */
-    public static function fetchAll(string ...$curls) : Promise {
-        return new Promise(function ($resolve, $reject) use ($curls) : void {
+    public static function fetchAll(string ...$curls): Promise
+    {
+        return new Promise(function ($resolve, $reject) use ($curls): void {
             $multiHandle = curl_multi_init();
             $handles = [];
-
             foreach ($curls as $url) {
                 $handle = curl_init($url);
-
                 if ($handle === false) {
                     $reject(Error::FAILED_IN_FETCHING_DATA);
                 } else {
                     curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
                     curl_multi_add_handle($multiHandle, $handle);
-
                     $handles[] = $handle;
                 }
             }
@@ -259,23 +249,17 @@ final class System extends EventLoop implements SystemInterface {
 
             do {
                 $status = curl_multi_exec($multiHandle, $running);
-
-                if ($status !== CURLM_OK) {
-                    $reject(Error::FAILED_IN_FETCHING_DATA);
-                }
-
+                if ($status !== CURLM_OK) $reject(Error::FAILED_IN_FETCHING_DATA);
                 FiberManager::wait();
             } while ($running > 0);
 
             $results = [];
-
             foreach ($handles as $handle) {
                 $results[] = curl_multi_getcontent($handle);
                 curl_multi_remove_handle($multiHandle, $handle);
             }
 
             curl_multi_close($multiHandle);
-
             $resolve($results);
         });
     }
@@ -283,32 +267,26 @@ final class System extends EventLoop implements SystemInterface {
     /**
      * @throws Throwable
      */
-    public static function read(string $path) : Promise {
+    public static function read(string $path): Promise
+    {
         return new Promise(function ($resolve, $reject) use ($path) {
             self::setTimeout(function () use ($resolve, $reject, $path) {
                 $ch = file_get_contents($path);
-
-                if ($ch === false) {
-                    $reject(Error::FAILED_IN_FETCHING_DATA);
-                } else {
-                    $resolve($ch);
-                }
+                $ch === false ? $reject(Error::FAILED_IN_FETCHING_DATA) : $resolve($ch);
             }, 0);
         });
     }
 
-    public static function time(string $name = 'Console') : void {
+    public static function time(string $name = 'Console'): void
+    {
         self::$timings[$name] = microtime(true);
     }
 
-    public static function timeEnd(string $name = 'Console') : void {
-        if (!isset(self::$timings[$name])) {
-            return;
-        }
-
+    public static function timeEnd(string $name = 'Console'): void
+    {
+        if (!isset(self::$timings[$name])) return;
         $time = microtime(true) - self::$timings[$name];
         echo "Time for $name: $time\n";
-
         unset(self::$timings[$name]);
     }
 
