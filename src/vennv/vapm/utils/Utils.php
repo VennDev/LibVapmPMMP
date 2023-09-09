@@ -30,7 +30,8 @@ use RecursiveIteratorIterator;
 use ReflectionException;
 use ReflectionFunction;
 use SplFileInfo;
-use vennv\vapm\Error;
+use vennv\vapm\simultaneous\Error;
+use vennv\vapm\simultaneous\Promise;
 use function array_slice;
 use function file;
 use function implode;
@@ -125,6 +126,14 @@ interface UtilsInterface
      * @return Generator
      */
     public static function splitArray(array $array, int $size): Generator;
+
+    /**
+     * @param string $class
+     * @return bool
+     *
+     * This method is used to check if the current class is the same as the class passed in
+     */
+    public static function isClass(string $class): bool;
 
 }
 
@@ -281,6 +290,31 @@ final class Utils implements UtilsInterface
             $offset += $length;
             $remainder--;
         }
+    }
+
+    /**
+     * @param string $class
+     * @return bool
+     * @throws ReflectionException
+     */
+    public static function isClass(string $class): bool
+    {
+        $trace = debug_backtrace();
+        if (isset($trace[2])) {
+            if (!empty($trace[2]['args'])) {
+                $args = $trace[2]['args'];
+                /** @var Closure $closure */
+                $closure = $args[0];
+                $reflectionFunction = new ReflectionFunction($closure);
+                $scopeClass = $reflectionFunction->getClosureScopeClass();
+                if ($scopeClass === null) return false;
+                return $scopeClass->getName() === $class;
+            } else {
+                return true; // This is a class
+            }
+        }
+
+        return false;
     }
 
 }

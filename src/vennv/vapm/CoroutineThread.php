@@ -50,9 +50,7 @@ final class CoroutineThread extends Thread implements CoroutineThreadInterface
     {
         if (is_callable($this->callback)) {
             $callback = call_user_func($this->callback);
-
             if (!is_string($callback)) $callback = serialize($callback);
-
             self::post($callback);
         }
     }

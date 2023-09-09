@@ -23,7 +23,9 @@ declare(strict_types=1);
 
 namespace vennv\vapm;
 
+use vennv\vapm\utils\Utils;
 use Throwable;
+use RuntimeException;
 use function is_callable;
 
 interface AsyncInterface
@@ -62,6 +64,8 @@ final class Async implements AsyncInterface
      */
     public static function await(mixed $await): mixed
     {
+        if (!Utils::isClass(Async::class)) throw new RuntimeException(Error::ASYNC_AWAIT_MUST_CALL_IN_ASYNC_FUNCTION);
+
         $result = $await;
 
         if (is_callable($await)) $await = new Async($await);

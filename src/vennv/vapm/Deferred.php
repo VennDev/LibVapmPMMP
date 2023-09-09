@@ -37,9 +37,22 @@ interface DeferredInterface
      * @param DeferredInterface ...$deferreds
      * @return Generator
      *
-     * This method is used to get the result of the deferred.
+     * This method is used to get all the results of the deferred.
      */
     public static function awaitAll(DeferredInterface ...$deferreds): Generator;
+
+    /**
+     * @param DeferredInterface ...$deferreds
+     * @return Generator
+     *
+     * This method is used to get the first result of the deferred.
+     */
+    public static function awaitAny(DeferredInterface ...$deferreds): Generator;
+
+    /**
+     * This method is used to check if the deferred is finished.
+     */
+    public function isFinished(): bool;
 
     /**
      * This method is used to get the child coroutine of the deferred.
@@ -98,6 +111,34 @@ final class Deferred implements DeferredInterface
         }
 
         return $result;
+    }
+
+    public static function awaitAny(DeferredInterface ...$deferreds): Generator
+    {
+        $result = [];
+
+        while (count($result) <= count($deferreds)) {
+            foreach ($deferreds as $deferred) {
+                $childCoroutine = $deferred->getChildCoroutine();
+
+                if ($childCoroutine->isFinished()) {
+                    $result[] = $childCoroutine->getReturn();
+                    $deferreds = [];
+                    break;
+                } else {
+                    $childCoroutine->run();
+                }
+            }
+
+            yield;
+        }
+
+        return $result;
+    }
+
+    public function isFinished(): bool
+    {
+        return $this->childCoroutine->isFinished();
     }
 
     public function getChildCoroutine(): ChildCoroutine

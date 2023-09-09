@@ -52,4 +52,8 @@ final class Error
 
     public const INVALID_ARRAY = "Invalid array";
 
+    public const ASYNC_AWAIT_MUST_CALL_IN_ASYNC_FUNCTION = "Async::await() must call in async function";
+
+    public const GREEN_THREAD_MUST_CALL_IN_GREEN_THREAD_FUNCTION = "GreenThread::sleep() must call in green thread scope";
+
 }

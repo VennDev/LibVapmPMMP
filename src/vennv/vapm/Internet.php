@@ -171,10 +171,8 @@ final class Internet
 
             foreach (explode("\r\n\r\n", $rawHeaders) as $rawHeaderGroup) {
                 $headerGroup = [];
-
                 foreach (explode("\r\n", $rawHeaderGroup) as $line) {
                     $nameValue = explode(":", $line, 2);
-
                     if (isset($nameValue[1])) $headerGroup[trim(strtolower($nameValue[0]))] = trim($nameValue[1]);
                 }
 

@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace vennv\vapm;
 
-use vennv\vapm\System;
 use Throwable;
 use function fclose;
 use function fgets;

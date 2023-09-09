@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace vennv\vapm;
 
-use vennv\vapm\System;
 use Fiber;
 use Throwable;
 use ArrayObject;
@@ -232,9 +231,7 @@ final class Promise implements PromiseInterface
         System::init();
 
         $this->callbacksResolve = new ArrayObject();
-
         $this->id = EventLoop::generateId();
-
         $this->callback = $callback;
         $this->fiber = new Fiber($callback);
 
@@ -414,9 +411,7 @@ final class Promise implements PromiseInterface
             if (count($callbacks) > 0) {
                 /** @var callable $callback */
                 $callback = $callbacks[0];
-
                 $resultFirstCallback = call_user_func($callback, $this->result);
-
                 $this->result = $resultFirstCallback;
                 $this->return = $resultFirstCallback;
                 $this->checkStatus($callbacks, $this->return);
@@ -455,18 +450,13 @@ final class Promise implements PromiseInterface
 
                     $queue1 = EventLoop::getQueue($return->getId());
                     $queue2 = MicroTask::getTask($return->getId());
-
                     if (!is_null($queue1)) {
                         $queue1->then($callback);
-
                         if (is_callable($this->callbackReject)) $queue1->catch($this->callbackReject);
-
                         $lastPromise = $queue1;
                     } else if (!is_null($queue2)) {
                         $queue2->then($callback);
-
                         if (is_callable($this->callbackReject)) $queue2->catch($this->callbackReject);
-
                         $lastPromise = $queue2;
                     }
 
