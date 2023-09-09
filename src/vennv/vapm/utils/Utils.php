@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace vennv\vapm\utils;
 
+use vennv\vapm\Error;
 use Closure;
 use Generator;
 use RecursiveDirectoryIterator;
@@ -30,8 +31,6 @@ use RecursiveIteratorIterator;
 use ReflectionException;
 use ReflectionFunction;
 use SplFileInfo;
-use vennv\vapm\simultaneous\Error;
-use vennv\vapm\simultaneous\Promise;
 use function array_slice;
 use function file;
 use function implode;
