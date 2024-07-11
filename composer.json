@@ -1,6 +1,6 @@
 {
     "name": "vennv/vapm-pmmp",
-    "keywords": ["vapm-pmmp", "asynchronous", "LibVapmPMMP", "lib-vapm-pmmp"],
+    "keywords": ["vapm-pmmp", "asynchronous", "LibVapmPMMP", "lib-vapm-pmmp", "process", "thread"],
     "license": "LGPL-2.0-only",
     "version": "1.8.8",
     "autoload": {
