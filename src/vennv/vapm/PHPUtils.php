@@ -30,6 +30,11 @@ final class PHPUtils
 
     /**
      * @throws Throwable
+     * @param array<int|float|string|object> $array
+     * @param callable $callback
+     * @return Async
+     *
+     * @phpstan-param array<int|float|string|object> $array
      */
     public static function forEach(array $array, callable $callback): Async
     {
@@ -43,6 +48,11 @@ final class PHPUtils
 
     /**
      * @throws Throwable
+     * @param array<int|float|string|object> $array
+     * @param callable $callback
+     * @return Async
+     *
+     * @phpstan-param array<int|float|string|object> $array
      */
     public static function arrayMap(array $array, callable $callback): Async
     {
@@ -58,6 +68,11 @@ final class PHPUtils
 
     /**
      * @throws Throwable
+     * @param array<int|float|string|object> $array
+     * @param callable $callback
+     * @return Async
+     *
+     * @phpstan-param array<int|float|string|object> $array
      */
     public static function arrayFilter(array $array, callable $callback): Async
     {
@@ -74,9 +89,14 @@ final class PHPUtils
     }
 
     /**
+     * @param array<int|float|string|object> $array
+     * @param callable $callback
+     * @param mixed $initialValue
+     * @return Async
+     *
      * @throws Throwable
      */
-    public static function arrayReduce(array $array, callable $callback, $initialValue): Async
+    public static function arrayReduce(array $array, callable $callback, mixed $initialValue): Async
     {
         return new Async(function () use ($array, $callback, $initialValue) {
             $accumulator = $initialValue;
@@ -89,6 +109,10 @@ final class PHPUtils
     }
 
     /**
+     * @param array<int|float|string|object> $array
+     * @param string $className
+     * @return Async
+     *
      * @throws Throwable
      */
     public static function instanceOfAll(array $array, string $className): Async
@@ -103,6 +127,10 @@ final class PHPUtils
     }
 
     /**
+     * @param array<int|float|string|object> $array
+     * @param string $className
+     * @return Async
+     *
      * @throws Throwable
      */
     public static function instanceOfAny(array $array, string $className): Async
