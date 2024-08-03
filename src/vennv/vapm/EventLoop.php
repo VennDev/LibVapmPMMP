@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace vennv\vapm;
 
+use GlobalLogger;
 use SplObjectStorage;
 use Throwable;
 use function count;
