@@ -391,7 +391,7 @@ final class Promise implements PromiseInterface
         return $this;
     }
 
-    /**
+   /**
      * @throws Throwable
      */
     public function useCallbacks(): void
@@ -417,11 +417,9 @@ final class Promise implements PromiseInterface
                 $this->checkStatus($callbacks, $this->return);
             }
         } else if ($this->isRejected()) {
-            if (is_callable($this->callbackReject) && is_callable($this->callbackFinally)) {
-                $this->result = call_user_func($this->callbackReject, $result);
-                call_user_func($this->callbackFinally);
-            }
+            if (is_callable($this->callbackReject)) $this->result = call_user_func($this->callbackReject, $result);
         }
+        if (is_callable($this->callbackFinally)) call_user_func($this->callbackFinally);
     }
 
     /**
