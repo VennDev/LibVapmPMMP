@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace vennv\vapm;
 
-use GlobalLogger;
 use SplObjectStorage;
 use Throwable;
 use function count;
@@ -201,7 +200,7 @@ class EventLoop implements EventLoopInterface
                 try {
                     if ($promise->isJustGetResult()) $promise->setResult($fiber->getReturn());
                 } catch (Throwable $e) {
-                    GlobalLogger::get()->warning($e->getMessage());
+                    echo $e->getMessage();
                 }
                 MicroTask::addTask($id, $promise);
                 self::removeQueue($id);
