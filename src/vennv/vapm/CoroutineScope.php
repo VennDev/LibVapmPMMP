@@ -64,7 +64,7 @@ interface CoroutineScopeInterface
     /**
      * This function runs the coroutine.
      */
-    public function run(): void;
+    public function run(): Async;
 
 }
 
@@ -127,25 +127,27 @@ final class CoroutineScope implements CoroutineScopeInterface
      * @throws ReflectionException
      * @throws Throwable
      */
-    public function run(): void
+    public function run(): Async
     {
-        if (self::$taskQueue?->isEmpty() === false && !self::$cancelled) {
-            $coroutine = self::$taskQueue->dequeue();
+        return new Async(function (): void {
+            if (self::$taskQueue?->isEmpty() === false && !self::$cancelled) {
+                $coroutine = self::$taskQueue->dequeue();
 
-            if ($coroutine instanceof ChildCoroutine) {
-                $coroutine->run();
+                if ($coroutine instanceof ChildCoroutine) {
+                    $coroutine->run();
 
-                if (!$coroutine->isFinished()) self::schedule($coroutine);
+                    if (!$coroutine->isFinished()) self::schedule($coroutine);
+                }
+
+                if ($coroutine instanceof CoroutineScope) {
+                    Async::await($coroutine->run());
+
+                    if (!$coroutine->isFinished()) self::schedule($coroutine);
+                }
+            } else {
+                self::$finished = true;
             }
-
-            if ($coroutine instanceof CoroutineScope) {
-                $coroutine->run();
-
-                if (!$coroutine->isFinished()) self::schedule($coroutine);
-            }
-        } else {
-            self::$finished = true;
-        }
+        });
     }
 
     private static function schedule(ChildCoroutine|CoroutineScope $childCoroutine): void
