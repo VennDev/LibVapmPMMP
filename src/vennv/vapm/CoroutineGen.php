@@ -80,22 +80,19 @@ final class CoroutineGen implements CoroutineGenInterface
      */
     public static function runBlocking(mixed ...$coroutines): void
     {
-        new Async(function () use ($coroutines): void {
-            foreach ($coroutines as $coroutine) {
-                if (is_callable($coroutine)) $coroutine = call_user_func($coroutine);
+        foreach ($coroutines as $coroutine) {
+            if (is_callable($coroutine)) $coroutine = call_user_func($coroutine);
 
-                if ($coroutine instanceof CoroutineScope) {
-                    self::schedule($coroutine);
-                } else if ($coroutine instanceof Generator) {
-                    self::schedule(new ChildCoroutine($coroutine));
-                } else {
-                    call_user_func(fn() => $coroutine);
-                }
-                FiberManager::wait();
+            if ($coroutine instanceof CoroutineScope) {
+                self::schedule($coroutine);
+            } else if ($coroutine instanceof Generator) {
+                self::schedule(new ChildCoroutine($coroutine));
+            } else {
+                call_user_func(fn() => $coroutine);
             }
+        }
 
-            self::run();
-        });
+        self::run();
     }
 
     /**
@@ -127,7 +124,7 @@ final class CoroutineGen implements CoroutineGenInterface
 
     public static function delay(int $milliseconds): Generator
     {
-        for ($i = 0; $i < GeneratorManager::calculateSeconds($milliseconds); $i++) yield;
+        for ($i = 0; $i < GeneratorManager::calculateSeconds((int)($milliseconds/5)); $i++) yield;
     }
 
     /**
@@ -156,19 +153,25 @@ final class CoroutineGen implements CoroutineGenInterface
     {
         new Async(function (): void {
             try {
+                $fnWait = function (&$i) {
+                    FiberManager::wait();
+                    $i = 0;
+                };
+                $i = 0;
                 while (self::$taskQueue?->isEmpty() === false) {
                     $coroutine = self::$taskQueue->dequeue();
 
                     if ($coroutine instanceof ChildCoroutine) {
                         $coroutine->run();
                         if (!$coroutine->isFinished()) self::schedule($coroutine);
+                        if ($i >= 5) $fnWait($i);
                     }
 
                     if ($coroutine instanceof CoroutineScope) {
                         Async::await($coroutine->run());
                         if (!$coroutine->isFinished()) self::schedule($coroutine);
                     }
-                    FiberManager::wait();
+                    $i++;
                 }
             } catch (Throwable $e) {
                 echo $e->getMessage();
