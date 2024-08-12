@@ -78,7 +78,6 @@ class EventLoop implements EventLoopInterface
      * @var array<int, Promise>
      */
     protected static array $returns = [];
-    protected static bool $isCleaningGarbage = false;
 
     public static function init(): void
     {
@@ -175,10 +174,15 @@ class EventLoop implements EventLoopInterface
     {
         if (count(GreenThread::getFibers()) > 0) GreenThread::run();
 
+        $i = 0;
+        $limit = min((int)((count(self::$queues) / 2) + 1), 100); // Limit 100 promises per loop
+
         /**
          * @var Promise $promise
          */
         foreach (self::getQueues() as $promise) {
+            if ($i >= $limit) break;
+
             $id = $promise->getId();
             $fiber = $promise->getFiber();
 
@@ -196,7 +200,12 @@ class EventLoop implements EventLoopInterface
                 }
                 MicroTask::addTask($id, $promise);
                 self::$queues->offsetUnset($promise); // Remove from queue
+            } else {
+                self::$queues->detach($promise); // Remove from queue
+                self::$queues->attach($promise, $id); // Add to queue again
             }
+
+            $i++;
         }
 
         if (count(MicroTask::getTasks()) > 0) MicroTask::run();
