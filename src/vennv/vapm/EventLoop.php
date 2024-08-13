@@ -67,6 +67,8 @@ interface EventLoopInterface
 class EventLoop implements EventLoopInterface
 {
 
+    protected static int $limit = 10;
+
     protected static int $nextId = 0;
 
     /**
@@ -175,13 +177,12 @@ class EventLoop implements EventLoopInterface
         if (count(GreenThread::getFibers()) > 0) GreenThread::run();
 
         $i = 0;
-        $limit = min((int)((count(self::$queues) / 2) + 1), 100); // Limit 100 promises per loop
 
         /**
          * @var Promise $promise
          */
         foreach (self::getQueues() as $promise) {
-            if ($i >= $limit) break;
+            if ($i++ >= self::$limit) break;
 
             $id = $promise->getId();
             $fiber = $promise->getFiber();
@@ -204,8 +205,6 @@ class EventLoop implements EventLoopInterface
                 self::$queues->detach($promise); // Remove from queue
                 self::$queues->attach($promise, $id); // Add to queue again
             }
-
-            $i++;
         }
 
         if (count(MicroTask::getTasks()) > 0) MicroTask::run();
@@ -219,6 +218,7 @@ class EventLoop implements EventLoopInterface
      */
     protected static function runSingle(): void
     {
+        self::$limit = min((int)((count(self::$queues) / 2) + 1), 100); // Limit 100 promises per loop
         while (count(self::$queues) > 0 || count(MicroTask::getTasks()) > 0 || count(MacroTask::getTasks()) > 0 || count(GreenThread::getFibers()) > 0) self::run();
     }
 
