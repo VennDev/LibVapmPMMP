@@ -162,16 +162,15 @@ final class CoroutineGen implements CoroutineGenInterface
                     $coroutine = self::$taskQueue->dequeue();
 
                     if ($coroutine instanceof ChildCoroutine) {
+                        if ($i++ >= 5) $fnWait($i);
                         $coroutine->run();
                         if (!$coroutine->isFinished()) self::schedule($coroutine);
-                        if ($i >= 5) $fnWait($i);
                     }
 
                     if ($coroutine instanceof CoroutineScope) {
                         Async::await($coroutine->run());
                         if (!$coroutine->isFinished()) self::schedule($coroutine);
                     }
-                    $i++;
                 }
             } catch (Throwable $e) {
                 echo $e->getMessage();
