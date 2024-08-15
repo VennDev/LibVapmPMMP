@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace vennv\vapm;
 
-use vennv\vapm\utils\Utils;
 use function call_user_func;
 use function microtime;
 
