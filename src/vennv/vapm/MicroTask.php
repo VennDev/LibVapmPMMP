@@ -23,105 +23,59 @@ declare(strict_types=1);
 
 namespace vennv\vapm;
 
-use function call_user_func;
+use Throwable;
+use SplQueue;
 use function microtime;
 
-interface SampleMacroInterface
+final class MicroTask
 {
 
-    public function isRepeat(): bool;
+    /**
+     * @var ?SplQueue
+     */
+    private static ?SplQueue $tasks = null;
 
-    public function getTimeOut(): float;
-
-    public function getTimeStart(): float;
-
-    public function getCallback(): callable;
-
-    public function getId(): int;
-
-    public function checkTimeOut(): bool;
-
-    public function resetTimeOut(): void;
-
-    public function isRunning(): bool;
-
-    public function run(): void;
-
-    public function stop(): void;
-
-}
-
-final class SampleMacro implements SampleMacroInterface
-{
-
-    private float $timeOut;
-
-    private float $timeStart;
-
-    private bool $isRepeat;
-
-    /** @var callable $callback */
-    private mixed $callback;
-
-    private int $id;
-
-    public function __construct(callable $callback, int $timeOut = 0, bool $isRepeat = false)
+    public static function init(): void
     {
-        $this->id = MacroTask::generateId();
-        $this->timeOut = Utils::milliSecsToSecs($timeOut);
-        $this->isRepeat = $isRepeat;
-        $this->timeStart = microtime(true);
-        $this->callback = $callback;
+        if (self::$tasks === null) self::$tasks = new SplQueue();
     }
 
-    public function isRepeat(): bool
+    public static function addTask(Promise $promise): void
     {
-        return $this->isRepeat;
+        self::$tasks?->enqueue($promise);
     }
 
-    public function getTimeOut(): float
+    public static function getTask(int $id): ?Promise
     {
-        return $this->timeOut;
+        while (self::$tasks !== null && !self::$tasks->isEmpty()) {
+            /** @var Promise $promise */
+            $promise = self::$tasks->dequeue();
+            if ($promise->getId() === $id) return $promise;
+            self::$tasks->enqueue($promise);
+        }
+        return null;
     }
 
-    public function getTimeStart(): float
+    /**
+     * @return ?SplQueue
+     */
+    public static function getTasks(): ?SplQueue
     {
-        return $this->timeStart;
+        return self::$tasks;
     }
 
-    public function getCallback(): callable
+    /**
+     * @throws Throwable
+     */
+    public static function run(): void
     {
-        return $this->callback;
-    }
-
-    public function getId(): int
-    {
-        return $this->id;
-    }
-
-    public function checkTimeOut(): bool
-    {
-        return microtime(true) - $this->timeStart >= $this->timeOut;
-    }
-
-    public function resetTimeOut(): void
-    {
-        $this->timeStart = microtime(true);
-    }
-
-    public function isRunning(): bool
-    {
-        return MacroTask::getTask($this->id) !== null;
-    }
-
-    public function run(): void
-    {
-        call_user_func($this->callback);
-    }
-
-    public function stop(): void
-    {
-        MacroTask::removeTask($this->id);
+        while (self::$tasks !== null && !self::$tasks->isEmpty()) {
+            /** @var Promise $promise */
+            $promise = self::$tasks->dequeue();
+            $promise->useCallbacks();
+            $promise->setTimeEnd(microtime(true));
+            EventLoop::addReturn($promise);
+        }
     }
 
 }
