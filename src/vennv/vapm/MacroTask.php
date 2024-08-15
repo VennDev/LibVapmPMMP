@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace vennv\vapm;
 
+use SplQueue;
 use const PHP_INT_MAX;
 
 final class MacroTask
@@ -31,47 +32,68 @@ final class MacroTask
     private static int $nextId = 0;
 
     /**
-     * @var array<int, SampleMacro>
+     * @var ?SplQueue
      */
-    private static array $tasks = [];
+    private static ?SplQueue $tasks = null;
+
+    public static function init(): void
+    {
+        if (self::$tasks === null) self::$tasks = new SplQueue();
+    }
 
     public static function generateId(): int
     {
         if (self::$nextId >= PHP_INT_MAX) self::$nextId = 0;
-
         return self::$nextId++;
+    }
+
+    public static function removeTask(int $id): void
+    {
+        if (self::$tasks === null) return;
+        $queue = new SplQueue();
+        while (!self::$tasks->isEmpty()) {
+            /** @var SampleMacro $task */
+            $task = self::$tasks->dequeue();
+            if ($task->getId() !== $id) $queue->enqueue($task);
+        }
+        self::$tasks = $queue;
     }
 
     public static function addTask(SampleMacro $sampleMacro): void
     {
-        self::$tasks[$sampleMacro->getId()] = $sampleMacro;
-    }
-
-    public static function removeTask(SampleMacro $sampleMacro): void
-    {
-        $id = $sampleMacro->getId();
-        if (isset(self::$tasks[$id])) unset(self::$tasks[$id]);
+        self::$tasks?->enqueue($sampleMacro);
     }
 
     public static function getTask(int $id): ?SampleMacro
     {
-        return self::$tasks[$id] ?? null;
+        while (self::$tasks !== null && !self::$tasks->isEmpty()) {
+            /** @var SampleMacro $task */
+            $task = self::$tasks->dequeue();
+            if ($task->getId() === $id) return $task;
+            self::$tasks->enqueue($task);
+        }
+        return null;
     }
 
     /**
-     * @return array<int, SampleMacro>
+     * @return ?SplQueue
      */
-    public static function getTasks(): array
+    public static function getTasks(): ?SplQueue
     {
         return self::$tasks;
     }
 
     public static function run(): void
     {
-        foreach (self::$tasks as $task) {
+        while (self::$tasks !== null && !self::$tasks->isEmpty()) {
+            /** @var SampleMacro $task */
+            $task = self::$tasks->dequeue();
             if ($task->checkTimeOut()) {
                 $task->run();
-                !$task->isRepeat() ? self::removeTask($task) : $task->resetTimeOut();
+                if ($task->isRepeat()) {
+                    $task->resetTimeOut();
+                    self::$tasks->enqueue($task);
+                }
             }
         }
     }
