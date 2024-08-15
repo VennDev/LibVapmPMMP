@@ -26,7 +26,6 @@ namespace vennv\vapm;
 use Generator;
 use SplQueue;
 use Throwable;
-use function count;
 use const PHP_INT_MAX;
 
 interface EventLoopInterface
@@ -162,16 +161,10 @@ class EventLoop implements EventLoopInterface
      */
     protected static function run(): void
     {
-        if (count(GreenThread::getFibers()) > 0) GreenThread::run();
-
         $i = 0;
-        
-        while (self::$queues->isEmpty() === false) {
-            if ($i++ >= self::$limit) break;
+        while (!self::$queues->isEmpty() && $i++ < self::$limit) {
             /** @var Promise $promise */
             $promise = self::$queues->dequeue();
-
-            $id = $promise->getId();
             $fiber = $promise->getFiber();
 
             if ($fiber->isSuspended()) {
@@ -186,14 +179,14 @@ class EventLoop implements EventLoopInterface
                 } catch (Throwable $e) {
                     echo $e->getMessage();
                 }
-                MicroTask::addTask($id, $promise);
+                MicroTask::addTask($promise);
             } else {
                 self::$queues->enqueue($promise); // Add to queue again
             }
         }
 
-        if (count(MicroTask::getTasks()) > 0) MicroTask::run();
-        if (count(MacroTask::getTasks()) > 0) MacroTask::run();
+        if (!MicroTask::getTasks()?->isEmpty()) MicroTask::run();
+        if (!MacroTask::getTasks()?->isEmpty()) MacroTask::run();
 
         self::clearGarbage();
     }
@@ -203,8 +196,8 @@ class EventLoop implements EventLoopInterface
      */
     protected static function runSingle(): void
     {
-        self::$limit = min((int)(self::$queues->count() / 2) + 1, 100); // Limit 100 promises per loop
-        while (self::$queues->isEmpty() === false || count(MicroTask::getTasks()) > 0 || count(MacroTask::getTasks()) > 0 || count(GreenThread::getFibers()) > 0) self::run();
+        self::$limit = min((int)((self::$queues->count() / 2) + 1), 100); // Limit 100 promises per loop
+        while (!self::$queues->isEmpty() || !MicroTask::getTasks()?->isEmpty() || !MacroTask::getTasks()?->isEmpty()) self::run();
     }
 
 }
