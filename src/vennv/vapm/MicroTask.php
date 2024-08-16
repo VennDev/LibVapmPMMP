@@ -24,42 +24,35 @@ declare(strict_types=1);
 namespace vennv\vapm;
 
 use Throwable;
-use SplQueue;
 use function microtime;
 
 final class MicroTask
 {
 
     /**
-     * @var ?SplQueue
+     * @var array<int, Promise>
      */
-    private static ?SplQueue $tasks = null;
+    private static array $tasks = [];
 
-    public static function init(): void
+    public static function addTask(int $id, Promise $promise): void
     {
-        if (self::$tasks === null) self::$tasks = new SplQueue();
+        self::$tasks[$id] = $promise;
     }
 
-    public static function addTask(Promise $promise): void
+    public static function removeTask(int $id): void
     {
-        self::$tasks?->enqueue($promise);
+        unset(self::$tasks[$id]);
     }
 
     public static function getTask(int $id): ?Promise
     {
-        while (self::$tasks !== null && !self::$tasks->isEmpty()) {
-            /** @var Promise $promise */
-            $promise = self::$tasks->dequeue();
-            if ($promise->getId() === $id) return $promise;
-            self::$tasks->enqueue($promise);
-        }
-        return null;
+        return self::$tasks[$id] ?? null;
     }
 
     /**
-     * @return ?SplQueue
+     * @return array<int, Promise>
      */
-    public static function getTasks(): ?SplQueue
+    public static function getTasks(): array
     {
         return self::$tasks;
     }
@@ -69,12 +62,13 @@ final class MicroTask
      */
     public static function run(): void
     {
-        while (self::$tasks !== null && !self::$tasks->isEmpty()) {
-            /** @var Promise $promise */
-            $promise = self::$tasks->dequeue();
+        foreach (self::$tasks as $id => $promise) {
             $promise->useCallbacks();
             $promise->setTimeEnd(microtime(true));
+
             EventLoop::addReturn($promise);
+
+            self::removeTask($id);
         }
     }
 

@@ -24,8 +24,9 @@ declare(strict_types=1);
 namespace vennv\vapm;
 
 use Generator;
-use SplQueue;
+use SplObjectStorage;
 use Throwable;
+use function count;
 use const PHP_INT_MAX;
 
 interface EventLoopInterface
@@ -42,6 +43,11 @@ interface EventLoopInterface
     public static function isQueue(int $id): bool;
 
     public static function getQueue(int $id): ?Promise;
+
+    /**
+     * @return Generator
+     */
+    public static function getQueues(): Generator;
 
     public static function addReturn(Promise $promise): void;
 
@@ -66,9 +72,9 @@ class EventLoop implements EventLoopInterface
     protected static int $nextId = 0;
 
     /**
-     * @var SplQueue
+     * @var SplObjectStorage
      */
-    protected static SplQueue $queues;
+    protected static SplObjectStorage $queues;
 
     /**
      * @var array<int, Promise>
@@ -77,7 +83,7 @@ class EventLoop implements EventLoopInterface
 
     public static function init(): void
     {
-        if (!isset(self::$queues)) self::$queues = new SplQueue();
+        if (!isset(self::$queues)) self::$queues = new SplObjectStorage();
     }
 
     public static function generateId(): int
@@ -88,34 +94,41 @@ class EventLoop implements EventLoopInterface
 
     public static function addQueue(Promise $promise): void
     {
-        self::$queues->enqueue($promise);
+        if (!self::getQueue($promise->getId())) self::$queues->offsetSet($promise, $promise->getId());
     }
 
     public static function removeQueue(int $id): void
     {
-        while (self::$queues->isEmpty() === false) {
-            $promise = self::$queues->dequeue();
-            if ($promise instanceof Promise && $promise->getId() !== $id) self::$queues->enqueue($promise);
+        foreach (self::$queues as $promise) {
+            if ($promise instanceof Promise && $promise->getId() === $id) {
+                self::$queues->offsetUnset($promise);
+                break;
+            }
         }
     }
 
     public static function isQueue(int $id): bool
     {
-        while (self::$queues->isEmpty() === false) {
-            $promise = self::$queues->dequeue();
-            if ($promise instanceof Promise && $promise->getId() === $id) return true;
-        }
+        /* @var Promise $promise */
+        foreach (self::$queues as $promise) if ($promise instanceof Promise && $promise->getId() === $id) return true;
         return false;
     }
 
     public static function getQueue(int $id): ?Promise
     {
-        while (self::$queues->isEmpty() === false) {
-            $promise = self::$queues->dequeue();
-            if ($promise instanceof Promise && $promise->getId() === $id) return $promise;
-            self::$queues->enqueue($promise); // Add to queue again
-        }
+        /* @var Promise $promise */
+        foreach (self::$queues as $promise) if ($promise instanceof Promise && $promise->getId() === $id) return $promise;
         return null;
+    }
+
+    /**
+     * @return Generator
+     */
+    public static function getQueues(): Generator
+    {
+        foreach (self::$queues as $promise) {
+            yield $promise;
+        }
     }
 
     public static function addReturn(Promise $promise): void
@@ -162,9 +175,14 @@ class EventLoop implements EventLoopInterface
     protected static function run(): void
     {
         $i = 0;
-        while (!self::$queues->isEmpty() && $i++ < self::$limit) {
-            /** @var Promise $promise */
-            $promise = self::$queues->dequeue();
+
+        /**
+         * @var Promise $promise
+         */
+        foreach (self::getQueues() as $promise) {
+            if ($i++ >= self::$limit) break;
+
+            $id = $promise->getId();
             $fiber = $promise->getFiber();
 
             if ($fiber->isSuspended()) {
@@ -179,14 +197,16 @@ class EventLoop implements EventLoopInterface
                 } catch (Throwable $e) {
                     echo $e->getMessage();
                 }
-                MicroTask::addTask($promise);
+                MicroTask::addTask($id, $promise);
+                self::$queues->offsetUnset($promise); // Remove from queue
             } else {
-                self::$queues->enqueue($promise); // Add to queue again
+                self::$queues->detach($promise); // Remove from queue
+                self::$queues->attach($promise, $id); // Add to queue again
             }
         }
 
-        if (!MicroTask::getTasks()?->isEmpty()) MicroTask::run();
-        if (!MacroTask::getTasks()?->isEmpty()) MacroTask::run();
+        if (count(MicroTask::getTasks()) > 0) MicroTask::run();
+        if (count(MacroTask::getTasks()) > 0) MacroTask::run();
 
         self::clearGarbage();
     }
@@ -196,8 +216,8 @@ class EventLoop implements EventLoopInterface
      */
     protected static function runSingle(): void
     {
-        self::$limit = min((int)((self::$queues->count() / 2) + 1), 100); // Limit 100 promises per loop
-        while (!self::$queues->isEmpty() || !MicroTask::getTasks()?->isEmpty() || !MacroTask::getTasks()?->isEmpty()) self::run();
+        self::$limit = min((int)((count(self::$queues) / 2) + 1), 100); // Limit 100 promises per loop
+        while (count(self::$queues) > 0 || count(MicroTask::getTasks()) > 0 || count(MacroTask::getTasks()) > 0) self::run();
     }
 
 }

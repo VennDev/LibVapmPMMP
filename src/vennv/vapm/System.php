@@ -154,8 +154,6 @@ final class System extends EventLoop implements SystemInterface
     {
         if (!self::$hasInit) {
             self::$hasInit = true;
-            MacroTask::init();
-            MicroTask::init();
             register_shutdown_function(function () {
                 self::runSingleEventLoop();
             });

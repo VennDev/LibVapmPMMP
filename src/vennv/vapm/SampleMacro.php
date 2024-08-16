@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace vennv\vapm;
 
+use vennv\vapm\utils\Utils;
 use function call_user_func;
 use function microtime;
 
@@ -121,7 +122,7 @@ final class SampleMacro implements SampleMacroInterface
 
     public function stop(): void
     {
-        MacroTask::removeTask($this->id);
+        MacroTask::removeTask($this);
     }
 
 }
