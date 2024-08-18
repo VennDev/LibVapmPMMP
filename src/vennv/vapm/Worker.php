@@ -229,33 +229,29 @@ final class Worker implements WorkerInterface
                     if (!$this->isLocked()) {
                         if (count($promises) < $threads && $work->count() > 0) {
                             $callbackQueue = $work->dequeue();
-
+                            
                             if (!is_callable($callbackQueue)) continue;
 
-                            $thread = new CoroutineThread($callbackQueue);
+                            $thread = new ClosureThread($callbackQueue);
                             $promises[] = $thread->start();
                         } else {
                             /** @var Promise $promise */
                             foreach ($promises as $index => $promise) {
                                 $result = EventLoop::getReturn($promise->getId());
-
                                 if ($result !== null) {
                                     $result = $promise->getResult();
                                     $this->collect($result);
                                     unset($promises[$index]);
-
                                     $totalCountWorks--;
                                 }
                             }
                         }
                     }
-
                     FiberManager::wait();
                 }
 
                 while (count($this->childWorkers) > 0) {
                     $childWorker = array_shift($this->childWorkers);
-
                     if ($childWorker !== null) {
                         /** @var WorkerInterface $worker */
                         $worker = $childWorker[0];
@@ -271,7 +267,6 @@ final class Worker implements WorkerInterface
                 }
 
                 $data = Async::await(Stream::flattenArray($this->get()));
-
                 call_user_func($callback, $data, $this);
             }
         });

@@ -110,7 +110,7 @@ final class CoroutineScope implements CoroutineScopeInterface
                 self::schedule($callback);
             } else if (is_callable($callback)) {
                 if (self::$dispatcher === Dispatchers::IO) {
-                    $thread = new CoroutineThread($callback);
+                    $thread = new ClosureThread($callback);
                     $thread->start();
                 }
 

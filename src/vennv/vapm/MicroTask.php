@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace vennv\vapm;
 
 use Throwable;
+use Generator;
 use function microtime;
 
 final class MicroTask
@@ -50,11 +51,11 @@ final class MicroTask
     }
 
     /**
-     * @return array<int, Promise>
+     * @return Generator
      */
-    public static function getTasks(): array
+    public static function getTasks(): Generator
     {
-        return self::$tasks;
+        foreach (self::$tasks as $id => $promise) yield $id => $promise;
     }
 
     public static function isPrepare(): bool
@@ -67,12 +68,12 @@ final class MicroTask
      */
     public static function run(): void
     {
-        foreach (self::$tasks as $id => $promise) {
+        foreach (self::getTasks() as $id => $promise) {
+            /** @var Promise $promise */
             $promise->useCallbacks();
             $promise->setTimeEnd(microtime(true));
-
             EventLoop::addReturn($promise);
-
+            /** @var int $id */
             self::removeTask($id);
         }
     }

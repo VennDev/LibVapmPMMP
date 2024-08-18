@@ -153,16 +153,11 @@ final class CoroutineGen implements CoroutineGenInterface
     {
         new Async(function (): void {
             try {
-                $fnWait = function (&$i) {
-                    FiberManager::wait();
-                    $i = 0;
-                };
-                $i = 0;
                 while (self::$taskQueue?->isEmpty() === false) {
                     $coroutine = self::$taskQueue->dequeue();
 
                     if ($coroutine instanceof ChildCoroutine) {
-                        if ($i++ >= 5) $fnWait($i);
+                        if (rand(1, 2) == 2) FiberManager::wait();
                         $coroutine->run();
                         if (!$coroutine->isFinished()) self::schedule($coroutine);
                     }

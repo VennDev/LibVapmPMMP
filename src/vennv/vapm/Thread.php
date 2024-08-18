@@ -355,21 +355,6 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
         return false;
     }
 
-    private static function isPost(string $data): bool
-    {
-        return explode('=>', $data)[0] === self::POST_THREAD;
-    }
-
-    private static function loadPost(string $data): void
-    {
-        $data = explode('=>', $data);
-
-        if ($data[0] === self::POST_THREAD) {
-            $result = json_decode($data[1], true);
-            echo $result . PHP_EOL;
-        }
-    }
-
     /**
      * @param false|string $data
      * @return array<int, mixed>
@@ -495,12 +480,8 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
                 } else {
                     if (!is_bool($output)) {
                         $explode = explode(PHP_EOL, $output);
-
                         foreach ($explode as $item) {
-                            if ($item !== '') {
-                                if (self::isPostMainThread($item)) self::loadSharedData($item);
-                                if (self::isPost($item)) self::loadPost($item);
-                            }
+                            if ($item !== '' && self::isPostMainThread($item)) self::loadSharedData($item);
                         }
                     }
                 }

@@ -58,9 +58,7 @@ interface EventLoopInterface
 class EventLoop implements EventLoopInterface
 {
 
-    protected static ?float $lastTimeUpdateLimit = null;
-
-    protected static int $limit = 20;
+    protected const LIMIT = 50;
 
     protected static int $nextId = 0;
 
@@ -105,7 +103,7 @@ class EventLoop implements EventLoopInterface
 
     public static function addReturn(Promise $promise): void
     {
-        if (!isset(self::$returns[$promise->getId()])) self::$returns[$promise->getId()] = $promise;
+        self::$returns[$promise->getId()] = $promise;
     }
 
     public static function isReturn(int $id): bool
@@ -144,14 +142,9 @@ class EventLoop implements EventLoopInterface
      */
     protected static function run(): void
     {
-        if (self::$lastTimeUpdateLimit === null || (microtime(true) - self::$lastTimeUpdateLimit) >= 3) {
-            self::$limit = min((int)(self::$queues->count() / 2 + 1), 100); // Limit 100 promises per loop
-            self::$lastTimeUpdateLimit = microtime(true);
-        }
-
         $i = 0;
         while (!self::$queues->isEmpty()) {
-            if ($i++ >= self::$limit) break;
+            if ($i++ >= self::LIMIT) break;
             /**
              * @var Promise $promise
              */

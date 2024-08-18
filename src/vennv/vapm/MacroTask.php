@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace vennv\vapm;
 
+use Generator;
 use const PHP_INT_MAX;
 
 final class MacroTask
@@ -58,11 +59,11 @@ final class MacroTask
     }
 
     /**
-     * @return array<int, SampleMacro>
+     * @return Generator
      */
-    public static function getTasks(): array
+    public static function getTasks(): Generator
     {
-        return self::$tasks;
+        foreach (self::$tasks as $id => $task) yield $id => $task;
     }
 
     public static function isPrepare(): bool
@@ -72,7 +73,8 @@ final class MacroTask
 
     public static function run(): void
     {
-        foreach (self::$tasks as $task) {
+        foreach (self::getTasks() as $task) {
+            /** @var SampleMacro $task */
             if ($task->checkTimeOut()) {
                 $task->run();
                 !$task->isRepeat() ? self::removeTask($task) : $task->resetTimeOut();
