@@ -179,7 +179,7 @@ class EventLoop implements EventLoopInterface
      */
     protected static function runSingle(): void
     {
-        while (!self::$queues->isEmpty() || !CoroutineGen::getTaskQueue()?->isEmpty() || MicroTask::isPrepare() || MacroTask::isPrepare()) self::run();
+        while (!self::$queues->isEmpty() || (CoroutineGen::getTaskQueue() !== null && !CoroutineGen::getTaskQueue()->isEmpty()) || MicroTask::isPrepare() || MacroTask::isPrepare()) self::run();
     }
 
 }
