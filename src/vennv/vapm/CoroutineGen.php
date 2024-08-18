@@ -34,6 +34,13 @@ interface CoroutineGenInterface
 {
 
     /**
+     * @return SplQueue|null
+     *
+     * This function returns the task queue.
+     */
+    public static function getTaskQueue(): ?SplQueue;
+
+    /**
      * @param mixed ...$coroutines
      * @return void
      *
@@ -66,12 +73,24 @@ interface CoroutineGenInterface
      */
     public static function launch(mixed ...$callback): CoroutineScope;
 
+    /**
+     * @return void
+     *
+     * This function runs the task queue.
+     */
+    public static function run(): void;
+
 }
 
 final class CoroutineGen implements CoroutineGenInterface
 {
 
-    protected static ?SplQueue $taskQueue = null;
+    private static ?SplQueue $taskQueue = null;
+
+    public static function getTaskQueue(): ?SplQueue
+    {
+        return self::$taskQueue;
+    }
 
     /**
      * @param mixed ...$coroutines
@@ -80,6 +99,8 @@ final class CoroutineGen implements CoroutineGenInterface
      */
     public static function runBlocking(mixed ...$coroutines): void
     {
+        System::init();
+
         foreach ($coroutines as $coroutine) {
             if (is_callable($coroutine)) $coroutine = call_user_func($coroutine);
 
@@ -149,28 +170,23 @@ final class CoroutineGen implements CoroutineGenInterface
      * @throws ReflectionException
      * @throws Throwable
      */
-    private static function run(): void
+    public static function run(): void
     {
-        new Async(function (): void {
-            try {
-                while (self::$taskQueue?->isEmpty() === false) {
-                    $coroutine = self::$taskQueue->dequeue();
+        $i = 0;
+        while (self::$taskQueue?->isEmpty() === false) {
+            if ($i++ >= 3) break;
+            $coroutine = self::$taskQueue->dequeue();
 
-                    if ($coroutine instanceof ChildCoroutine) {
-                        if (rand(1, 2) == 2) FiberManager::wait();
-                        $coroutine->run();
-                        if (!$coroutine->isFinished()) self::schedule($coroutine);
-                    }
-
-                    if ($coroutine instanceof CoroutineScope) {
-                        Async::await($coroutine->run());
-                        if (!$coroutine->isFinished()) self::schedule($coroutine);
-                    }
-                }
-            } catch (Throwable $e) {
-                echo $e->getMessage();
+            if ($coroutine instanceof ChildCoroutine) {
+                $coroutine->run();
+                if (!$coroutine->isFinished()) self::schedule($coroutine);
             }
-        });
+
+            if ($coroutine instanceof CoroutineScope) {
+                $coroutine->run();
+                if (!$coroutine->isFinished()) self::schedule($coroutine);
+            }
+        }
     }
 
 }

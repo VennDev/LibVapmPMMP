@@ -58,7 +58,7 @@ interface EventLoopInterface
 class EventLoop implements EventLoopInterface
 {
 
-    protected const LIMIT = 50;
+    protected const LIMIT = 20;
 
     protected static int $nextId = 0;
 
@@ -103,7 +103,7 @@ class EventLoop implements EventLoopInterface
 
     public static function addReturn(Promise $promise): void
     {
-        self::$returns[$promise->getId()] = $promise;
+        if (!isset(self::$returns[$promise->getId()])) self::$returns[$promise->getId()] = $promise;
     }
 
     public static function isReturn(int $id): bool
@@ -142,6 +142,8 @@ class EventLoop implements EventLoopInterface
      */
     protected static function run(): void
     {
+        CoroutineGen::run(); // Run CoroutineGen
+
         $i = 0;
         while (!self::$queues->isEmpty()) {
             if ($i++ >= self::LIMIT) break;
@@ -177,7 +179,7 @@ class EventLoop implements EventLoopInterface
      */
     protected static function runSingle(): void
     {
-        while (!self::$queues->isEmpty() || MicroTask::isPrepare() || MacroTask::isPrepare()) self::run();
+        while (!self::$queues->isEmpty() || !CoroutineGen::getTaskQueue()?->isEmpty() || MicroTask::isPrepare() || MacroTask::isPrepare()) self::run();
     }
 
 }
