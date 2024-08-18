@@ -57,6 +57,11 @@ final class MicroTask
         return self::$tasks;
     }
 
+    public static function isPrepare(): bool
+    {
+        return !empty(self::$tasks);
+    }
+
     /**
      * @throws Throwable
      */

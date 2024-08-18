@@ -38,7 +38,6 @@ final class MacroTask
     public static function generateId(): int
     {
         if (self::$nextId >= PHP_INT_MAX) self::$nextId = 0;
-
         return self::$nextId++;
     }
 
@@ -64,6 +63,11 @@ final class MacroTask
     public static function getTasks(): array
     {
         return self::$tasks;
+    }
+
+    public static function isPrepare(): bool
+    {
+        return !empty(self::$tasks);
     }
 
     public static function run(): void

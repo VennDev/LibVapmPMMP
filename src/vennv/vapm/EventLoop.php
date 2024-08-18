@@ -23,8 +23,8 @@ declare(strict_types=1);
 
 namespace vennv\vapm;
 
+use SplQueue;
 use Generator;
-use SplObjectStorage;
 use Throwable;
 use function count;
 use const PHP_INT_MAX;
@@ -38,16 +38,7 @@ interface EventLoopInterface
 
     public static function addQueue(Promise $promise): void;
 
-    public static function removeQueue(int $id): void;
-
-    public static function isQueue(int $id): bool;
-
     public static function getQueue(int $id): ?Promise;
-
-    /**
-     * @return Generator
-     */
-    public static function getQueues(): Generator;
 
     public static function addReturn(Promise $promise): void;
 
@@ -67,14 +58,16 @@ interface EventLoopInterface
 class EventLoop implements EventLoopInterface
 {
 
-    protected static int $limit = 10;
+    protected static ?float $lastTimeUpdateLimit = null;
+
+    protected static int $limit = 20;
 
     protected static int $nextId = 0;
 
     /**
-     * @var SplObjectStorage
+     * @var SplQueue
      */
-    protected static SplObjectStorage $queues;
+    protected static SplQueue $queues;
 
     /**
      * @var array<int, Promise>
@@ -83,7 +76,7 @@ class EventLoop implements EventLoopInterface
 
     public static function init(): void
     {
-        if (!isset(self::$queues)) self::$queues = new SplObjectStorage();
+        if (!isset(self::$queues)) self::$queues = new SplQueue();
     }
 
     public static function generateId(): int
@@ -94,41 +87,20 @@ class EventLoop implements EventLoopInterface
 
     public static function addQueue(Promise $promise): void
     {
-        if (!self::getQueue($promise->getId())) self::$queues->offsetSet($promise, $promise->getId());
-    }
-
-    public static function removeQueue(int $id): void
-    {
-        foreach (self::$queues as $promise) {
-            if ($promise instanceof Promise && $promise->getId() === $id) {
-                self::$queues->offsetUnset($promise);
-                break;
-            }
-        }
-    }
-
-    public static function isQueue(int $id): bool
-    {
-        /* @var Promise $promise */
-        foreach (self::$queues as $promise) if ($promise instanceof Promise && $promise->getId() === $id) return true;
-        return false;
+        self::$queues->enqueue($promise);
     }
 
     public static function getQueue(int $id): ?Promise
     {
-        /* @var Promise $promise */
-        foreach (self::$queues as $promise) if ($promise instanceof Promise && $promise->getId() === $id) return $promise;
-        return null;
-    }
-
-    /**
-     * @return Generator
-     */
-    public static function getQueues(): Generator
-    {
-        foreach (self::$queues as $promise) {
-            yield $promise;
+        while (!self::$queues->isEmpty()) {
+            /**
+             * @var Promise $promise
+             */
+            $promise = self::$queues->dequeue();
+            if ($promise->getId() === $id) return $promise;
+            self::$queues->enqueue($promise);
         }
+        return null;
     }
 
     public static function addReturn(Promise $promise): void
@@ -156,9 +128,7 @@ class EventLoop implements EventLoopInterface
      */
     public static function getReturns(): Generator
     {
-        foreach (self::$returns as $id => $promise) {
-            yield $id => $promise;
-        }
+        foreach (self::$returns as $id => $promise) yield $id => $promise;
     }
 
     /**
@@ -174,23 +144,23 @@ class EventLoop implements EventLoopInterface
      */
     protected static function run(): void
     {
-        $i = 0;
+        if (self::$lastTimeUpdateLimit === null || (microtime(true) - self::$lastTimeUpdateLimit) >= 3) {
+            self::$limit = min((int)(self::$queues->count() / 2 + 1), 100); // Limit 100 promises per loop
+            self::$lastTimeUpdateLimit = microtime(true);
+        }
 
-        /**
-         * @var Promise $promise
-         */
-        foreach (self::getQueues() as $promise) {
+        $i = 0;
+        while (!self::$queues->isEmpty()) {
             if ($i++ >= self::$limit) break;
+            /**
+             * @var Promise $promise
+             */
+            $promise = self::$queues->dequeue();
 
             $id = $promise->getId();
             $fiber = $promise->getFiber();
 
-            if ($fiber->isSuspended()) {
-                $fiber->resume();
-            } else if (!$fiber->isTerminated()) {
-                FiberManager::wait();
-            }
-
+            if ($fiber->isSuspended()) $fiber->resume();
             if ($fiber->isTerminated() && ($promise->getStatus() !== StatusPromise::PENDING || $promise->isJustGetResult())) {
                 try {
                     if ($promise->isJustGetResult()) $promise->setResult($fiber->getReturn());
@@ -198,15 +168,13 @@ class EventLoop implements EventLoopInterface
                     echo $e->getMessage();
                 }
                 MicroTask::addTask($id, $promise);
-                self::$queues->offsetUnset($promise); // Remove from queue
             } else {
-                self::$queues->detach($promise); // Remove from queue
-                self::$queues->attach($promise, $id); // Add to queue again
+                self::$queues->enqueue($promise);
             }
         }
 
-        if (count(MicroTask::getTasks()) > 0) MicroTask::run();
-        if (count(MacroTask::getTasks()) > 0) MacroTask::run();
+        if (MicroTask::isPrepare()) MicroTask::run();
+        if (MacroTask::isPrepare()) MacroTask::run();
 
         self::clearGarbage();
     }
@@ -216,8 +184,7 @@ class EventLoop implements EventLoopInterface
      */
     protected static function runSingle(): void
     {
-        self::$limit = min((int)((count(self::$queues) / 2) + 1), 100); // Limit 100 promises per loop
-        while (count(self::$queues) > 0 || count(MicroTask::getTasks()) > 0 || count(MacroTask::getTasks()) > 0) self::run();
+        while (!self::$queues->isEmpty() || MicroTask::isPrepare() || MacroTask::isPrepare()) self::run();
     }
 
 }

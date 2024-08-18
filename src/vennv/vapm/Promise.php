@@ -420,7 +420,6 @@ final class Promise implements PromiseInterface
         } else if ($this->isRejected()) {
             if (is_callable($this->callbackReject)) $this->result = call_user_func($this->callbackReject, $result);
         }
-        if (is_callable($this->callbackFinally)) call_user_func($this->callbackFinally);
     }
 
     /**
