@@ -318,15 +318,18 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
 
     private static function isPostMainThread(string $data): bool
     {
-        return explode('=>', $data)[0] === self::POST_MAIN_THREAD;
+        return strlen(Utils::getStringAfterSign($data, self::POST_MAIN_THREAD . '=>')) > 0;
+    }
+
+    private static function isPostThread(string $data): bool
+    {
+        return strlen(Utils::getStringAfterSign($data, self::POST_THREAD . '=>')) > 0;
     }
 
     public static function loadSharedData(string $data): void
     {
-        $data = explode('=>', $data);
-
-        if ($data[0] === self::POST_MAIN_THREAD) {
-            $result = json_decode($data[1], true);
+        if (self::isPostMainThread($data)) {
+            $result = json_decode(Utils::getStringAfterSign($data, self::POST_MAIN_THREAD . '=>'), true);
             if (is_array($result)) self::setShared(array_merge(self::$shared, $result));
         }
     }
@@ -353,33 +356,6 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
         }
 
         return false;
-    }
-
-    /**
-     * @param false|string $data
-     * @return array<int, mixed>
-     * @phpstan-return array<int, mixed>
-     */
-    private static function getPost(false|string $data): array
-    {
-        $result = [];
-
-        if (is_string($data)) {
-            $explode = explode(PHP_EOL, $data);
-
-            foreach ($explode as $item) {
-                if ($item !== '') {
-                    $dataExplode = explode('=>', $data);
-
-                    if ($dataExplode[0] == self::POST_THREAD) {
-                        $try = json_decode($dataExplode[1], true);
-                        is_array($try) ? $result[] = $try : $result[] = $dataExplode[1];
-                    }
-                }
-            }
-        }
-
-        return $result;
     }
 
     abstract public function onRun(): void;
@@ -482,6 +458,9 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
                         $explode = explode(PHP_EOL, $output);
                         foreach ($explode as $item) {
                             if ($item !== '' && self::isPostMainThread($item)) self::loadSharedData($item);
+                            elseif ($item !== '' && self::isPostThread($item)) {
+                                $output = Utils::getStringAfterSign($item, self::POST_THREAD . '=>');
+                            }
                         }
                     }
                 }
@@ -491,7 +470,7 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
 
             proc_close($process);
             unset(self::$threads[$this->getPid()]);
-            return $resolve(self::getPost($output));
+            return $resolve($output);
         });
     }
 

@@ -134,6 +134,14 @@ interface UtilsInterface
      */
     public static function isClass(string $class): bool;
 
+
+    /**
+     * @return string
+     * 
+     * Get string after sign
+     */
+    public static function getStringAfterSign(string $string, string $sign): string;
+
 }
 
 final class Utils implements UtilsInterface
@@ -314,6 +322,18 @@ final class Utils implements UtilsInterface
         }
 
         return false;
+    }
+
+    /**
+     * @return string
+     * 
+     * Get string after sign
+     */
+    public static function getStringAfterSign(string $string, string $sign): string
+    {
+        $position = strpos($string, $sign);
+        if ($position === false) return '';
+        return substr($string, $position + strlen($sign));
     }
 
 }
