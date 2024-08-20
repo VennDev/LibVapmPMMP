@@ -42,7 +42,7 @@ final class GeneratorManager implements GeneratorManagerInterface
 
     public static function calculateSeconds(int $milliseconds): int
     {
-        return ($milliseconds * 1000) + ($milliseconds * 550);
+        return $milliseconds * 2000;
     }
 
 }
