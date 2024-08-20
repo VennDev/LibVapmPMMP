@@ -396,6 +396,7 @@ final class Promise implements PromiseInterface
      */
     public function useCallbacks(): void
     {
+        $hasCallbacks = false;
         $result = $this->result;
 
         if ($this->isResolved()) {
@@ -410,6 +411,7 @@ final class Promise implements PromiseInterface
             }
 
             if (count($callbacks) > 0) {
+                $hasCallbacks = true;
                 /** @var callable $callback */
                 $callback = $callbacks[0];
                 $resultFirstCallback = call_user_func($callback, $this->result);
@@ -420,6 +422,7 @@ final class Promise implements PromiseInterface
         } else if ($this->isRejected()) {
             if (is_callable($this->callbackReject)) $this->result = call_user_func($this->callbackReject, $result);
         }
+        if (!$hasCallbacks && is_callable($this->callbackFinally)) call_user_func($this->callbackFinally);
     }
 
     /**
