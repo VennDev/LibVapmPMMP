@@ -477,14 +477,12 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
                 fclose($pipes[1]);
                 fclose($pipes[2]);
 
-                if ($error !== '' && is_string($error)) {
+                if ($error !== '') {
                     return $reject(new ThreadException($error));
                 } else {
-                    if (!is_bool($output)) {
-                        if ($output !== '' && self::isPostMainThread($output)) self::loadSharedData($output);
-                        elseif ($output !== '' && self::isPostThread($output)) {
-                            $output = Utils::getStringAfterSign($output, self::POST_THREAD . '=>');
-                        }
+                    if ($output !== '' && self::isPostMainThread($output)) self::loadSharedData($output);
+                    elseif ($output !== '' && self::isPostThread($output)) {
+                        $output = Utils::getStringAfterSign($output, self::POST_THREAD . '=>');
                     }
                 }
             } else {
