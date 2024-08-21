@@ -452,6 +452,7 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
                         if ($n > 0) {
                             foreach ($read as $stream) {
                                 if (!feof($stream)) {
+                                    stream_set_blocking($stream, false);
                                     $data = stream_get_contents($stream, 1024);
                                     if ($data === false || $data === '') continue;
                                     $stream === $pipes[1] ? $output .= $data : $error .= $data;
