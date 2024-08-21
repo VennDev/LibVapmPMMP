@@ -453,10 +453,7 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
                             foreach ($read as $stream) {
                                 if (!feof($stream)) {
                                     $data = stream_get_contents($stream, 1024);
-                                    if ($data === false || $data === '') {
-                                        if (feof($stream)) continue 2;
-                                        break;
-                                    }
+                                    if ($data === false || $data === '') continue;
                                     $stream === $pipes[1] ? $output .= $data : $error .= $data;
                                 }
                                 FiberManager::wait();
@@ -474,8 +471,8 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
 
                 $outputStream = stream_get_contents($pipes[1]);
                 $errorStream = stream_get_contents($pipes[2]);
-                $output .= str_contains($output, $outputStream) ? '' : $outputStream;
-                $error .= str_contains($error, $errorStream) ? '' : $errorStream;
+                if (!is_bool($outputStream)) $output .= str_contains($output, $outputStream) ? '' : $outputStream;
+                if (!is_bool($errorStream)) $error .= str_contains($error, $errorStream) ? '' : $errorStream;
 
                 fclose($pipes[1]);
                 fclose($pipes[2]);
