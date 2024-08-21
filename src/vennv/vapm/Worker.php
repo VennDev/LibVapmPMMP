@@ -229,7 +229,7 @@ final class Worker implements WorkerInterface
                     if (!$this->isLocked()) {
                         if (count($promises) < $threads && $work->count() > 0) {
                             $callbackQueue = $work->dequeue();
-                            
+
                             if (!is_callable($callbackQueue)) continue;
 
                             $thread = new ClosureThread($callbackQueue);

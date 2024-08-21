@@ -411,42 +411,71 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
 
             $process = proc_open($command, $mode, $pipes);
 
+            $output = '';
+            $error = '';
             if (is_resource($process)) {
+                $data = json_encode(self::getDataMainThread());
+
+                if (is_string($data)) fwrite($pipes[0], $data);
+                fclose($pipes[0]);
+
                 stream_set_blocking($pipes[1], false);
                 stream_set_blocking($pipes[2], false);
 
-                $data = json_encode(self::getDataMainThread());
-
-                if (is_string($data)) {
-                    fwrite($pipes[0], $data);
-                    fclose($pipes[0]);
+                $status = proc_get_status($process);
+                $pid = $status['pid'];
+                if (!isset(self::$threads[$pid])) {
+                    $this->setPid($pid);
+                    self::$threads[$pid] = $this;
                 }
 
-                while (proc_get_status($process)['running']) {
+                $thread = self::$threads[$pid];
+                $thread->setExitCode($status['exitcode']);
+                $thread->setRunning($status['running']);
+                $thread->setSignaled($status['signaled']);
+                $thread->setStopped($status['stopped']);
+                while ($thread->isRunning()) {
                     $status = proc_get_status($process);
-
-                    if (!isset(self::$threads[$status['pid']])) {
-                        $this->setPid($status['pid']);
-                        self::$threads[$status['pid']] = $this;
-                    }
-
-                    $thread = self::$threads[$status['pid']];
-
                     $thread->setExitCode($status['exitcode']);
                     $thread->setRunning($status['running']);
                     $thread->setSignaled($status['signaled']);
                     $thread->setStopped($status['stopped']);
 
-                    if ($thread->isStopped()) {
+                    if ($thread->isRunning()) {
+                        $read = [$pipes[1], $pipes[2]];
+                        $write = null;
+                        $except = null;
+                        $timeout = 0;
+
+                        $n = stream_select($read, $write, $except, $timeout);
+                        if ($n === false) break;
+                        if ($n > 0) {
+                            foreach ($read as $stream) {
+                                if (!feof($stream)) {
+                                    $data = stream_get_contents($stream, 1024);
+                                    if ($data === false || $data === '') {
+                                        if (feof($stream)) continue 2;
+                                        break;
+                                    }
+                                    $stream === $pipes[1] ? $output .= $data : $error .= $data;
+                                }
+                                FiberManager::wait();
+                            }
+                        }
+                    } elseif ($thread->isStopped() || $thread->isSignaled()) {
+                        proc_terminate($process);
+                        break;
+                    } else {
                         proc_terminate($process);
                         break;
                     }
-
                     FiberManager::wait();
                 }
 
-                $output = stream_get_contents($pipes[1]);
-                $error = stream_get_contents($pipes[2]);
+                $outputStream = stream_get_contents($pipes[1]);
+                $errorStream = stream_get_contents($pipes[2]);
+                $output .= str_contains($output, $outputStream) ? '' : $outputStream;
+                $error .= str_contains($error, $errorStream) ? '' : $errorStream;
 
                 fclose($pipes[1]);
                 fclose($pipes[2]);
@@ -455,12 +484,9 @@ abstract class Thread implements ThreadInterface, ThreadedInterface
                     return $reject(new ThreadException($error));
                 } else {
                     if (!is_bool($output)) {
-                        $explode = explode(PHP_EOL, $output);
-                        foreach ($explode as $item) {
-                            if ($item !== '' && self::isPostMainThread($item)) self::loadSharedData($item);
-                            elseif ($item !== '' && self::isPostThread($item)) {
-                                $output = Utils::getStringAfterSign($item, self::POST_THREAD . '=>');
-                            }
+                        if ($output !== '' && self::isPostMainThread($output)) self::loadSharedData($output);
+                        elseif ($output !== '' && self::isPostThread($output)) {
+                            $output = Utils::getStringAfterSign($output, self::POST_THREAD . '=>');
                         }
                     }
                 }

@@ -137,7 +137,7 @@ interface UtilsInterface
 
     /**
      * @return string
-     * 
+     *
      * Get string after sign
      */
     public static function getStringAfterSign(string $string, string $sign): string;
@@ -213,9 +213,10 @@ final class Utils implements UtilsInterface
      */
     public static function removeComments(string $text): null|string|array
     {
-        $text = preg_replace('/\/\/.*?(\r\n|\n|$)/', '', $text);
+        $text = preg_replace('/(?<!:)\/\/.*?(\r\n|\n|$)/', '', $text);
         if ($text === null || is_array($text)) return null;
-        return preg_replace('/\/\*.*?\*\//ms', '', $text);
+        $text = preg_replace('/\/\*[\s\S]*?\*\//', '', $text);
+        return $text;
     }
 
     /**
@@ -326,14 +327,13 @@ final class Utils implements UtilsInterface
 
     /**
      * @return string
-     * 
+     *
      * Get string after sign
      */
     public static function getStringAfterSign(string $string, string $sign): string
     {
-        $position = strpos($string, $sign);
-        if ($position === false) return '';
-        return substr($string, $position + strlen($sign));
+        if (preg_match('/' . preg_quote($sign, '/') . '(.*)/s', $string, $matches)) return $matches[1];
+        return '';
     }
 
 }

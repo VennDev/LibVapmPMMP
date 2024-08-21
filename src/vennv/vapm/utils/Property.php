@@ -43,7 +43,8 @@ trait Property
          * @var mixed $value
          */
         foreach ($options as $key => $value) {
-            if (property_exists($data, $key)) $data->{$key} = $value; /* @phpstan-ignore-line */
+            if (property_exists($data, $key)) $data->{$key} = $value;
+            /* @phpstan-ignore-line */
         }
 
         return $data;

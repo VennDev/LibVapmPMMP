@@ -263,7 +263,8 @@ final class Promise implements PromiseInterface
             return $result;
         };
 
-        $this->callbackFinally = function (): void {};
+        $this->callbackFinally = function (): void {
+        };
 
         EventLoop::addQueue($this);
     }
@@ -396,7 +397,6 @@ final class Promise implements PromiseInterface
      */
     public function useCallbacks(): void
     {
-        $hasCallbacks = false;
         $result = $this->result;
 
         if ($this->isResolved()) {
@@ -411,7 +411,6 @@ final class Promise implements PromiseInterface
             }
 
             if (count($callbacks) > 0) {
-                $hasCallbacks = true;
                 /** @var callable $callback */
                 $callback = $callbacks[0];
                 $resultFirstCallback = call_user_func($callback, $this->result);
@@ -419,10 +418,9 @@ final class Promise implements PromiseInterface
                 $this->return = $resultFirstCallback;
                 $this->checkStatus($callbacks, $this->return);
             }
-        } else if ($this->isRejected()) {
+        } elseif ($this->isRejected()) {
             if (is_callable($this->callbackReject)) $this->result = call_user_func($this->callbackReject, $result);
         }
-        if (!$hasCallbacks && is_callable($this->callbackFinally)) call_user_func($this->callbackFinally);
     }
 
     /**
@@ -455,7 +453,7 @@ final class Promise implements PromiseInterface
                         $queue1->then($callback);
                         if (is_callable($this->callbackReject)) $queue1->catch($this->callbackReject);
                         $lastPromise = $queue1;
-                    } else if (!is_null($queue2)) {
+                    } elseif (!is_null($queue2)) {
                         $queue2->then($callback);
                         if (is_callable($this->callbackReject)) $queue2->catch($this->callbackReject);
                         $lastPromise = $queue2;

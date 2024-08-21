@@ -29,12 +29,12 @@ final class PHPUtils
 {
 
     /**
-     * @throws Throwable
      * @param array<int|float|string|object> $array
      * @param callable $callback
      * @return Async
      *
      * @phpstan-param array<int|float|string|object> $array
+     * @throws Throwable
      */
     public static function forEach(array $array, callable $callback): Async
     {
@@ -47,12 +47,12 @@ final class PHPUtils
     }
 
     /**
-     * @throws Throwable
      * @param array<int|float|string|object> $array
      * @param callable $callback
      * @return Async
      *
      * @phpstan-param array<int|float|string|object> $array
+     * @throws Throwable
      */
     public static function arrayMap(array $array, callable $callback): Async
     {
@@ -67,12 +67,12 @@ final class PHPUtils
     }
 
     /**
-     * @throws Throwable
      * @param array<int|float|string|object> $array
      * @param callable $callback
      * @return Async
      *
      * @phpstan-param array<int|float|string|object> $array
+     * @throws Throwable
      */
     public static function arrayFilter(array $array, callable $callback): Async
     {
