@@ -54,6 +54,6 @@ final class Error
 
     public const ASYNC_AWAIT_MUST_CALL_IN_ASYNC_FUNCTION = "Async::await() must call in async function";
 
-    public const GREEN_THREAD_MUST_CALL_IN_GREEN_THREAD_FUNCTION = "GreenThread::sleep() must call in green thread scope";
+    public const CHANNEL_IS_CLOSED = "Channel is closed";
 
 }
