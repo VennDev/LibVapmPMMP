@@ -154,9 +154,8 @@ final class System extends EventLoop implements SystemInterface
     {
         if (!self::$hasInit) {
             self::$hasInit = true;
-            register_shutdown_function(function () {
-                self::runSingleEventLoop();
-            });
+            register_shutdown_function(fn() => self::runSingleEventLoop());
+            register_tick_function(fn() => self::runEventLoop());
         }
 
         parent::init();
