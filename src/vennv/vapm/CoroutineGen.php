@@ -44,9 +44,17 @@ interface CoroutineGenInterface
      * @param mixed ...$coroutines
      * @return void
      *
-     * This is a non-blocking function that runs all the coroutines passed to it.
+     * This is a blocking function that runs all the coroutines passed to it.
      */
     public static function runNonBlocking(mixed ...$coroutines): void;
+
+    /**
+     * @param mixed ...$coroutines
+     * @return void
+     *
+     * This is a blocking function that runs all the coroutines passed to it.
+     */
+    public static function runBlocking(mixed ...$coroutines): void;
 
     /**
      * @param callable $callback
@@ -105,6 +113,17 @@ final class CoroutineGen implements CoroutineGenInterface
         }
 
         self::run();
+    }
+
+    /**
+     * @param mixed ...$coroutines
+     * @return void
+     * @throws Throwable
+     */
+    public static function runBlocking(mixed ...$coroutines): void
+    {
+        self::runNonBlocking(...$coroutines);
+        while (self::$taskQueue?->isEmpty() === false) self::run();
     }
 
     /**
