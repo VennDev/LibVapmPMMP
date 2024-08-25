@@ -46,7 +46,7 @@ interface CoroutineGenInterface
      *
      * This is a blocking function that runs all the coroutines passed to it.
      */
-    public static function runBlocking(mixed ...$coroutines): void;
+    public static function runNonBlocking(mixed ...$coroutines): void;
 
     /**
      * @param callable $callback
@@ -89,7 +89,7 @@ final class CoroutineGen implements CoroutineGenInterface
      * @return void
      * @throws Throwable
      */
-    public static function runBlocking(mixed ...$coroutines): void
+    public static function runNonBlocking(mixed ...$coroutines): void
     {
         System::init();
         if (self::$taskQueue === null) self::$taskQueue = new SplQueue();
