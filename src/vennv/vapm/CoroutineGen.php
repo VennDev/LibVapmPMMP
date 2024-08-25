@@ -44,7 +44,7 @@ interface CoroutineGenInterface
      * @param mixed ...$coroutines
      * @return void
      *
-     * This is a blocking function that runs all the coroutines passed to it.
+     * This is a non-blocking function that runs all the coroutines passed to it.
      */
     public static function runNonBlocking(mixed ...$coroutines): void;
 
