@@ -43,7 +43,14 @@ interface ChannelInterface
      *
      * This function is used to receive a message from the channel.
      */
-    public function receive(): Generator;
+    public function receiveGen(): Generator;
+
+    /**
+     * @return mixed
+     *
+     * This function is used to receive a message from the channel.
+     */
+    public function receive(): mixed;
 
     /**
      * @return bool
@@ -89,7 +96,7 @@ final class Channel implements ChannelInterface
         $this->locked = false;
     }
 
-    public function receive(): Generator
+    public function receiveGen(): Generator
     {
         $this->exceptionIfClosed();
         while ($this->locked) {
@@ -100,6 +107,18 @@ final class Channel implements ChannelInterface
         $message = array_shift($this->queue);
         $this->locked = false;
         return yield $message;
+    }
+
+    public function receive(): mixed
+    {
+        $this->exceptionIfClosed();
+        while ($this->locked) {
+            CoroutineGen::run();
+        }
+        $this->locked = true;
+        $message = array_shift($this->queue);
+        $this->locked = false;
+        return $message;
     }
 
     public function isEmpty(): bool
