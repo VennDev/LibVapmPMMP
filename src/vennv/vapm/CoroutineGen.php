@@ -101,7 +101,7 @@ final class CoroutineGen implements CoroutineGenInterface
     {
         System::init();
 
-        if (self::$taskQueue === null) self::$taskQueue = new SplQueue();
+        self::$taskQueue ??= new SplQueue();
 
         foreach ($coroutines as $coroutine) {
             if (is_callable($coroutine)) $coroutine = call_user_func($coroutine);
