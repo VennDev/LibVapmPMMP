@@ -1,5 +1,5 @@
 name: LibVapmPMMP
-version: 2.4.7
+version: 2.4.8
 api: 5.0.0
 php: 
   - 8.1
