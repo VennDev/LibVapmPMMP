@@ -63,6 +63,14 @@ Comparing the two asynchronous models, one that uses queues to store and execute
 You can do it by running methods such as ```CoroutineGen::runBlocking()``` or ```AwaitGroup``` which are available in Vapm or more..
 - **Is it okay to handle such asynchronous tasks on the Task-Scheduler?**
 That's perfectly fine because the Task-Schedulers are only allowed to handle up to 20 asynchronous tasks and +1 of the scheduled CoroutineGens.
+- **Why is that okay?**
+That's really stable when you know the processing they wait at the parts where you think it's a really heavy task!
+Example for you: [Click](https://github.com/VennDev/VBasket/blob/main/src/vennv/vbasket/event/VBasketPlantEvent.php#L108)
+As you can see that I stopped at that very moment to do a wait for a task to complete and the Tick-Scheduler would repeat and process again. This makes it possible for many other tasks to be processed simultaneously in the other tick.
+- **Await-Generator Problem**
+The Await-Generator has a problem that if I create a promise and just ask it to run without waiting immediately after I declare it, it's like if you have a for loop for billions of numbers, if I wait and run the promise right below it, it will tell me that I'm synchronizing?
+I've noticed that there is a queue in the library's Await processing class, however, assuming that if no promises are triggered, the promises that need to be fulfilled are when they are processed? and where is their real-time?
+What if I want the promise of processing 1 billion tasks and needing to do it immediately after completing it will fulfill some parameter to do the next thing? Note that this is 1 billion.
 
 - **Speed test:** [Code](https://gist.github.com/VennDev/4f7be83d55abfbbf44ff2d249e94968c) with according to the inherent method, Await-Generator still wants to wait and process as usual without using the Task-Scheduler.
 ![image](https://github.com/user-attachments/assets/07a39109-8db4-488d-a0db-6e3404edadf3)
