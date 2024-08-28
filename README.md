@@ -67,7 +67,7 @@ That's perfectly fine because the Task-Schedulers are only allowed to handle up 
 That's really stable when you know the processing they wait at the parts where you think it's a really heavy task!
 Example for you: [Click](https://github.com/VennDev/VBasket/blob/main/src/vennv/vbasket/event/VBasketPlantEvent.php#L108)
 As you can see that I stopped at that very moment to do a wait for a task to complete and the Tick-Scheduler would repeat and process again. This makes it possible for many other tasks to be processed simultaneously in the other tick.
-- **Await-Generator Problem**
+- **Await-Generator Problem:**
 The Await-Generator has a problem that if I create a promise and just ask it to run without waiting immediately after I declare it, it's like if you have a for loop for billions of numbers, if I wait and run the promise right below it, it will tell me that I'm synchronizing?
 I've noticed that there is a queue in the library's Await processing class, however, assuming that if no promises are triggered, the promises that need to be fulfilled are when they are processed? and where is their real-time?
 What if I want the promise of processing 1 billion tasks and needing to do it immediately after completing it will fulfill some parameter to do the next thing? Note that this is 1 billion.
