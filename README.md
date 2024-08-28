@@ -45,20 +45,20 @@ public static function init(PluginBase $plugin) : void;
 Vapm uses a Task scheduler with tick-based execution and Await-Gennerator uses queue and execute instantly within a scope.
 Comparing the two asynchronous models, one that uses queues to store and execute instantly in a specific scope, and one that saves to the task scheduler for tick execution, should be based on the following factors:
   1. **Performance and Flexibility:**
-     - *Queue and execute instantly in a scope:* This model is usually faster in processing because tasks are executed immediately as they appear in the queue. However, this can lead to overload if there are too many tasks appearing at the same time, as they are all being processed at the same time.
-     - *Task scheduler with tick-based execution:* Using a task scheduler allows you to control the speed at which tasks are processed by executing them in ticks. This helps to avoid overload and allows for a more streamlined allocation of system resources. However, execution may be slower if the ticks are set up with long intervals.
+     - **Queue and execute instantly in a scope:** This model is usually faster in processing because tasks are executed immediately as they appear in the queue. However, this can lead to overload if there are too many tasks appearing at the same time, as they are all being processed at the same time.
+     - **Task scheduler with tick-based execution:** Using a task scheduler allows you to control the speed at which tasks are processed by executing them in ticks. This helps to avoid overload and allows for a more streamlined allocation of system resources. However, execution may be slower if the ticks are set up with long intervals.
   3. **Resource Control:**
-     - *Queue and Instant Execution:* More resources can be consumed in the event that there are too many tasks that need to be processed immediately, leading to the risk of resource exhaustion or increased system latency.
-     - *Task scheduler:* Helps you better manage and control your resources by executing only a limited number of tasks per tick, reducing the pressure on the system.
+     - **Queue and Instant Execution:** More resources can be consumed in the event that there are too many tasks that need to be processed immediately, leading to the risk of resource exhaustion or increased system latency.
+     - **Task scheduler:** Helps you better manage and control your resources by executing only a limited number of tasks per tick, reducing the pressure on the system.
   5. **Real-Time Response:**
-     - *Queue and execute instantly:* It's better if real-time feedback is required, as tasks are processed instantly.
-     - *Task scheduler:* May not be suitable for applications that require instant response, as the task has to wait until the next tick to be processed.
+     - **Queue and execute instantly:** It's better if real-time feedback is required, as tasks are processed instantly.
+     - **Task scheduler:** May not be suitable for applications that require instant response, as the task has to wait until the next tick to be processed.
   7. **Complexity and Maintenance:**
-     - *Queue and execute instantly:* Often simpler to deploy, but difficult to manage if the system is highly complex.
-     - *Task scheduler:* More complex, but offers more flexibility and ease of maintenance in the long run.
+     - **Queue and execute instantly:** Often simpler to deploy, but difficult to manage if the system is highly complex.
+     - **Task scheduler:** More complex, but offers more flexibility and ease of maintenance in the long run.
   9. **Use cases:**
-      - *Queue and Instant Execution:* Suitable for applications that require immediate processing and not too many simultaneous tasks.
-      - *Task scheduler:* Suitable for more complex systems where it is necessary to control the processing of tasks from time to time to ensure stable performance.
+      - **Queue and Instant Execution:** Suitable for applications that require immediate processing and not too many simultaneous tasks.
+      - **Task scheduler:** Suitable for more complex systems where it is necessary to control the processing of tasks from time to time to ensure stable performance.
 **Conclude:** Each model has its own pros and cons, and choosing between them depends on the specific requirements of the system you're developing. If you need real-time performance and the system can withstand heavy loads, the queue model may be a better choice. Conversely, if you need tight resource control and your system needs to handle a large volume of tasks on a regular basis, a task scheduler will be a better choice.
 
 - **Speed test:** [Code](https://gist.github.com/VennDev/4f7be83d55abfbbf44ff2d249e94968c)
