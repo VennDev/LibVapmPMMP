@@ -42,7 +42,6 @@ public static function init(PluginBase $plugin) : void;
 | Await-Generator |           Yes             |    Yes    |          No          |          No           |                  No                 |
 
 - Why handles large systems ?
-``
 Vapm uses a Task scheduler with tick-based execution and Await-Gennerator uses queue and execute instantly within a scope.
 Comparing the two asynchronous models, one that uses queues to store and execute instantly in a specific scope, and one that saves to the task scheduler for tick execution, should be based on the following factors:
 
@@ -53,7 +52,6 @@ Comparing the two asynchronous models, one that uses queues to store and execute
   5. Use cases: Queue and Instant Execution: Suitable for applications that require immediate processing and not too many simultaneous tasks. Task scheduler: Suitable for more complex systems where it is necessary to control the processing of tasks from time to time to ensure stable performance.
 
 -> Conclude: Each model has its own pros and cons, and choosing between them depends on the specific requirements of the system you're developing. If you need real-time performance and the system can withstand heavy loads, the queue model may be a better choice. Conversely, if you need tight resource control and your system needs to handle a large volume of tasks on a regular basis, a task scheduler will be a better choice.
-``
 
 - Tests: [Code](https://gist.github.com/VennDev/4f7be83d55abfbbf44ff2d249e94968c)
 ![image](https://github.com/user-attachments/assets/07a39109-8db4-488d-a0db-6e3404edadf3)
