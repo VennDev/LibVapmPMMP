@@ -62,5 +62,5 @@ Comparing the two asynchronous models, one that uses queues to store and execute
 - **So is there a way for you to use Vapm as a Wait-Generator?**
 You can do it by running methods such as ```CoroutineGen::runBlocking()``` or ```AwaitGroup``` which are available in Vapm or more..
 
-- **Speed test:** [Code](https://gist.github.com/VennDev/4f7be83d55abfbbf44ff2d249e94968c)
+- **Speed test:** [Code](https://gist.github.com/VennDev/4f7be83d55abfbbf44ff2d249e94968c) with according to the inherent method, Await-Generator still wants to wait and process as usual without using the Task-Scheduler.
 ![image](https://github.com/user-attachments/assets/07a39109-8db4-488d-a0db-6e3404edadf3)
