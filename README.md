@@ -126,7 +126,7 @@ if (
         self::$doneLoadWorlds = null;
     });
 }
-// Completely waits and processes each slow incoming content that Channel sends without crashing the server when too many things are sent and received at once.
+// Completely waits and processes each slow incoming content that Channel sends without over-load the server when too many things are sent and received at once.
 ```
 The question arises that why do I have to?? wait a long time to handle a big disagreement like this without handling them asynchronously, quickly and slowly by ticks?
 
