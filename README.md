@@ -79,7 +79,7 @@ Await::f2c(function() use ($channel) {
     }
 });
 ```
-The question arises that why do I have to?? wait a long time to handle a big disagreement like this without handling them asynchronously and quickly?
+The question arises that why do I have to?? wait a long time to handle a big disagreement like this without handling them asynchronously, quickly and slowly by ticks?
 
 - **Speed test:** [Code](https://gist.github.com/VennDev/4f7be83d55abfbbf44ff2d249e94968c) with according to the inherent method, Await-Generator still wants to wait and process as usual without using the Task-Scheduler.
 ![image](https://github.com/user-attachments/assets/07a39109-8db4-488d-a0db-6e3404edadf3)
