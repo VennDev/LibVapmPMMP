@@ -60,9 +60,16 @@ interface AwaitGroupInterface
     /**
      * @return void
      *
-     * This function is used to wait for the count to be zero
+     * This function is used to reset the count
      */
     public function reset(): void;
+
+    /**
+     * @return void
+     *
+     * This function is used to wait for the count to be zero
+     */
+    public function wait(): void;
 
 }
 
@@ -100,7 +107,7 @@ final class AwaitGroup implements AwaitGroupInterface
     public function wait(): void
     {
         while ($this->count > 0) {
-            // Wait for the count to be zero
+            CoroutineGen::run();
         }
     }
 

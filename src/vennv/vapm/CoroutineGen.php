@@ -100,20 +100,15 @@ final class CoroutineGen implements CoroutineGenInterface
     public static function runNonBlocking(mixed ...$coroutines): void
     {
         System::init();
-
         self::$taskQueue ??= new SplQueue();
-
         foreach ($coroutines as $coroutine) {
             if (is_callable($coroutine)) $coroutine = call_user_func($coroutine);
-
             if ($coroutine instanceof Generator) {
                 self::schedule(new ChildCoroutine($coroutine));
             } else {
                 call_user_func(fn() => $coroutine);
             }
         }
-
-        self::run();
     }
 
     /**
@@ -168,9 +163,8 @@ final class CoroutineGen implements CoroutineGenInterface
     {
         if (self::$taskQueue?->isEmpty() === false) {
             $coroutine = self::$taskQueue->dequeue();
-            if ($coroutine instanceof ChildCoroutine) {
-                $coroutine->run();
-                if (!$coroutine->isFinished()) self::schedule($coroutine);
+            if ($coroutine instanceof ChildCoroutine && !$coroutine->isFinished()) {
+                self::schedule($coroutine->run());
             }
         }
     }
