@@ -71,6 +71,7 @@ As you can see that I stopped at that very moment to do a wait for a task to com
 The Await-Generator has a problem that if I create a promise and just ask it to run without waiting immediately after I declare it, it's like if you have a for loop for billions of numbers, if I wait and run the promise right below it, it will tell me that I'm synchronizing?
 I've noticed that there is a queue in the library's Await processing class, however, assuming that if no promises are triggered, the promises that need to be fulfilled are when they are processed? and where is their real-time?
 What if I want the promise of processing 1 billion tasks and needing to do it immediately after completing it will fulfill some parameter to do the next thing? Note that this is 1 billion.
+- Await-Generator
 ```php
 $channel = new Channel;
 Await::f2c(function() use ($channel) {
@@ -78,6 +79,53 @@ Await::f2c(function() use ($channel) {
         yield from $channel->sendAndWait($i);
     }
 });
+```
+- Vapm
+```php
+/**
+ * @throws Throwable
+ */
+public function loadWorlds(): Channel
+{
+    $channel = new Channel();
+    CoroutineGen::runNonBlocking(function () use (&$channel): Generator {
+        $i = 0;
+        foreach (scandir($this->plugin->getServer()->getDataPath() . "worlds") as $world) {
+            if ($world === "." || $world === "..") continue;
+            if ($this->plugin->getManager()->isIslandNether($world)) {
+                $i++;
+                yield from $channel->send($i);
+                $this->applyIslandNether($world);
+            } elseif ($this->plugin->getManager()->isIslandEnd($world)) {
+                $i++;
+                yield from $channel->send($i);
+                $this->applyIslandEnd($world);
+            } else {
+                $this->applyIslandOverworld($world);
+            }
+        }
+        return $i;
+    });
+    return $channel;
+}
+
+// Process with Task by PMMP
+// Load worlds
+if (
+    self::$doneLoadWorlds === null &&
+    (microtime(true) - self::$lastTimeLoadWorlds) >= 5.0
+) {
+    self::$lastTimeLoadWorlds = microtime(true);
+    self::$doneLoadWorlds = $this->plugin->getWorldManager()->loadWorlds();
+} elseif (self::$doneLoadWorlds !== null) {
+    CoroutineGen::runNonBlocking(function (): Generator {
+        $receive = self::$doneLoadWorlds->receiveGen();
+        while ($receive !== null) {
+            $receive = yield from self::$doneLoadWorlds->receiveGen();
+        }
+        self::$doneLoadWorlds = null;
+    });
+}
 ```
 The question arises that why do I have to?? wait a long time to handle a big disagreement like this without handling them asynchronously, quickly and slowly by ticks?
 
