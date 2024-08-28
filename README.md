@@ -32,3 +32,14 @@ public static function init(PluginBase $plugin) : void;
 - [VJesusBucket](https://github.com/VennDev/VJesusBucket)
 - [VBasket](https://github.com/VennDev/VBasket)
 - [VOreSpawner](https://github.com/VennDev/VOreSpawner)
+
+# LibVapmPMMP vs Await-Generator
+- [Await-Generator](https://github.com/SOF3/await-generator)
+
+|   Library       | Asynchronous polymorphism | Cocurrent | Asynchronous threads | Handles large systems |
+| --------------- | ------------------------- | --------- | -------------------- | --------------------- |
+| LibVapmPMMP     |           Yes             |    Yes    |          Yes         |          Yes          |
+| Await-Generator |           Yes             |    Yes    |          No          |          No           |
+
+Tests: [Code](https://gist.github.com/VennDev/4f7be83d55abfbbf44ff2d249e94968c)
+![image](https://github.com/user-attachments/assets/07a39109-8db4-488d-a0db-6e3404edadf3)
