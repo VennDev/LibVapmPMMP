@@ -62,7 +62,7 @@ Comparing the two asynchronous models, one that uses queues to store and execute
 - **So is there a way for you to use Vapm as a Wait-Generator?**
 You can do it by running methods such as ```CoroutineGen::runBlocking()``` or ```AwaitGroup``` which are available in Vapm or more..
 - **Is it okay to handle such asynchronous tasks on the Task-Scheduler?**
-That's perfectly fine because the Task-Schedulers are only allowed to handle up to 20 asynchronous tasks and +1 of the scheduled CoroutineGens.
+That's perfectly fine because the Task-Schedulers are only allowed to handle up to 20 asynchronous tasks and +1 of the scheduled CoroutineGens. (Note that the processing here means that it will process each task only once, and if it is not completed, it will be skipped and processed for the next time!)
 - **Why is that okay?**
 That's really stable when you know the processing they wait at the parts where you think it's a really heavy task!
 Example for you: [Click](https://github.com/VennDev/VBasket/blob/main/src/vennv/vbasket/event/VBasketPlantEvent.php#L108)
