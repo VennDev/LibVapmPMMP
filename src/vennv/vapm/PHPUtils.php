@@ -25,7 +25,7 @@ namespace vennv\vapm;
 
 use Throwable;
 
-final class PHPUtils
+interface PHPUtilsInterface
 {
 
     /**
@@ -35,7 +35,72 @@ final class PHPUtils
      *
      * @phpstan-param array<int|float|string|object> $array
      * @throws Throwable
+     * 
+     * This function is used to iterate over an array and call a callback function for each element.
      */
+    public static function forEach(array $array, callable $callback): Async;
+
+    /**
+     * @param array<int|float|string|object> $array
+     * @param callable $callback
+     * @return Async
+     *
+     * @phpstan-param array<int|float|string|object> $array
+     * @throws Throwable
+     * 
+     * This function is used to map over an array and apply a callback function to each element.
+     */
+    public static function arrayMap(array $array, callable $callback): Async;
+
+    /**
+     * @param array<int|float|string|object> $array
+     * @param callable $callback
+     * @return Async
+     *
+     * @phpstan-param array<int|float|string|object> $array
+     * @throws Throwable
+     */
+    public static function arrayFilter(array $array, callable $callback): Async;
+
+    /**
+     * @param array<int|float|string|object> $array
+     * @param callable $callback
+     * @param mixed $initialValue
+     * @return Async
+     *
+     * @throws Throwable
+     * 
+     * This function is used to reduce an array to a single value by applying a callback function to each element.
+     */
+    public static function arrayReduce(array $array, callable $callback, mixed $initialValue): Async;
+
+    /**
+     * @param array<int|float|string|object> $array
+     * @param string $className
+     * @return Async
+     *
+     * @throws Throwable
+     * 
+     * This function is used to check if all elements in an array are instances of a specific class.
+     */
+    public static function instanceOfAll(array $array, string $className): Async;
+
+    /**
+     * @param array<int|float|string|object> $array
+     * @param string $className
+     * @return Async
+     *
+     * @throws Throwable
+     * 
+     * This function is used to check if any element in an array is an instance of a specific class.
+     */
+    public static function instanceOfAny(array $array, string $className): Async;
+
+}
+
+final class PHPUtils implements PHPUtilsInterface
+{
+
     public static function forEach(array $array, callable $callback): Async
     {
         return new Async(function () use ($array, $callback) {
@@ -46,14 +111,6 @@ final class PHPUtils
         });
     }
 
-    /**
-     * @param array<int|float|string|object> $array
-     * @param callable $callback
-     * @return Async
-     *
-     * @phpstan-param array<int|float|string|object> $array
-     * @throws Throwable
-     */
     public static function arrayMap(array $array, callable $callback): Async
     {
         return new Async(function () use ($array, $callback) {
@@ -66,14 +123,6 @@ final class PHPUtils
         });
     }
 
-    /**
-     * @param array<int|float|string|object> $array
-     * @param callable $callback
-     * @return Async
-     *
-     * @phpstan-param array<int|float|string|object> $array
-     * @throws Throwable
-     */
     public static function arrayFilter(array $array, callable $callback): Async
     {
         return new Async(function () use ($array, $callback) {
@@ -88,14 +137,6 @@ final class PHPUtils
         });
     }
 
-    /**
-     * @param array<int|float|string|object> $array
-     * @param callable $callback
-     * @param mixed $initialValue
-     * @return Async
-     *
-     * @throws Throwable
-     */
     public static function arrayReduce(array $array, callable $callback, mixed $initialValue): Async
     {
         return new Async(function () use ($array, $callback, $initialValue) {
@@ -108,13 +149,6 @@ final class PHPUtils
         });
     }
 
-    /**
-     * @param array<int|float|string|object> $array
-     * @param string $className
-     * @return Async
-     *
-     * @throws Throwable
-     */
     public static function instanceOfAll(array $array, string $className): Async
     {
         return new Async(function () use ($array, $className) {
@@ -126,13 +160,6 @@ final class PHPUtils
         });
     }
 
-    /**
-     * @param array<int|float|string|object> $array
-     * @param string $className
-     * @return Async
-     *
-     * @throws Throwable
-     */
     public static function instanceOfAny(array $array, string $className): Async
     {
         return new Async(function () use ($array, $className) {

@@ -26,7 +26,6 @@ namespace vennv\vapm;
 use SplQueue;
 use Generator;
 use Throwable;
-use function count;
 use const PHP_INT_MAX;
 
 interface EventLoopInterface
@@ -58,12 +57,12 @@ interface EventLoopInterface
 class EventLoop implements EventLoopInterface
 {
 
-    protected const LIMIT = 20;
+    protected const LIMIT = 20; // 20 times run
 
     protected static int $nextId = 0;
 
     /**
-     * @var SplQueue
+     * @var SplQueue<Promise>
      */
     protected static SplQueue $queues;
 
@@ -74,7 +73,7 @@ class EventLoop implements EventLoopInterface
 
     public static function init(): void
     {
-        if (!isset(self::$queues)) self::$queues = new SplQueue();
+        self::$queues ??= new SplQueue();
     }
 
     public static function generateId(): int
@@ -142,34 +141,28 @@ class EventLoop implements EventLoopInterface
      */
     protected static function run(): void
     {
-        CoroutineGen::run(); // Run CoroutineGen
+        CoroutineGen::run();
 
         $i = 0;
-        while (!self::$queues->isEmpty()) {
-            if ($i++ >= self::LIMIT) break;
-            /**
-             * @var Promise $promise
-             */
+        while (!self::$queues->isEmpty() && $i++ < self::LIMIT) {
+            /** @var Promise $promise */
             $promise = self::$queues->dequeue();
-
-            $id = $promise->getId();
             $fiber = $promise->getFiber();
-
             if ($fiber->isSuspended()) $fiber->resume();
             if ($fiber->isTerminated() && ($promise->getStatus() !== StatusPromise::PENDING || $promise->isJustGetResult())) {
                 try {
-                    if ($promise->isJustGetResult()) $promise->setResult($fiber->getReturn());
+                    $promise->isJustGetResult() && $promise->setResult($fiber->getReturn());
                 } catch (Throwable $e) {
                     echo $e->getMessage();
                 }
-                MicroTask::addTask($id, $promise);
+                MicroTask::addTask($promise->getId(), $promise);
             } else {
                 self::$queues->enqueue($promise);
             }
         }
 
-        if (MicroTask::isPrepare()) MicroTask::run();
-        if (MacroTask::isPrepare()) MacroTask::run();
+        MicroTask::isPrepare() && MicroTask::run();
+        MacroTask::isPrepare() && MacroTask::run();
 
         self::clearGarbage();
     }

@@ -31,6 +31,12 @@ use function count;
 use function is_callable;
 use function microtime;
 
+/**
+ * @author  VennDev <venn.dev@gmail.com>
+ * @package vennv\vapm
+ * 
+ * This interface is used to create a promise object that can be used to get the result of a coroutine.
+ */
 interface PromiseInterface
 {
 

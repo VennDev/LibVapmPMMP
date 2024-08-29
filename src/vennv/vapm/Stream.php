@@ -39,6 +39,7 @@ interface StreamInterface
 {
 
     /**
+     * @return Promise
      * @throws Throwable
      *
      * Use this to read a file or url.
@@ -46,6 +47,7 @@ interface StreamInterface
     public static function read(string $path): Promise;
 
     /**
+     * @return Promise
      * @throws Throwable
      *
      * Use this to write to a file.
@@ -53,6 +55,7 @@ interface StreamInterface
     public static function write(string $path, string $data): Promise;
 
     /**
+     * @return Promise
      * @throws Throwable
      *
      * Use this to append to a file.
@@ -60,6 +63,7 @@ interface StreamInterface
     public static function append(string $path, string $data): Promise;
 
     /**
+     * @return Promise
      * @throws Throwable
      *
      * Use this to delete a file.
@@ -67,6 +71,7 @@ interface StreamInterface
     public static function delete(string $path): Promise;
 
     /**
+     * @return Promise
      * @throws Throwable
      *
      * Use this to create a file.
@@ -74,6 +79,7 @@ interface StreamInterface
     public static function create(string $path): Promise;
 
     /**
+     * @return Promise
      * @throws Throwable
      *
      * Use this to create a file or overwrite a file.
@@ -82,6 +88,7 @@ interface StreamInterface
 
     /**
      * @param array<int|string, mixed> $array
+     * @return Promise
      * @throws Throwable
      *
      * Use this to flatten an array.
@@ -242,10 +249,13 @@ final class Stream implements StreamInterface
                     break;
                 }
 
-                foreach ($element as $value) is_array($value) ? array_unshift($stack, $value) : $result[] = $value;
+                foreach ($element as $value) {
+                    is_array($value) ? array_unshift($stack, $value) : $result[] = $value;
+                    FiberManager::wait();
+                }
                 FiberManager::wait();
             }
-
+            
             $resolve($result);
         });
     }

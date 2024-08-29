@@ -28,7 +28,6 @@ use ReflectionException;
 use SplQueue;
 use Generator;
 use Throwable;
-use function call_user_func;
 
 interface CoroutineGenInterface
 {
@@ -102,13 +101,12 @@ final class CoroutineGen implements CoroutineGenInterface
         System::init();
         self::$taskQueue ??= new SplQueue();
         foreach ($coroutines as $coroutine) {
-            if (is_callable($coroutine)) $coroutine = call_user_func($coroutine);
-            if ($coroutine instanceof Generator) {
-                self::schedule(new ChildCoroutine($coroutine));
-            } else {
-                call_user_func(fn() => $coroutine);
-            }
+            $result = is_callable($coroutine) ? $coroutine() : $coroutine;
+            $result instanceof Generator 
+                ? self::schedule(new ChildCoroutine($result))
+                : $result;
         }
+        self::run();
     }
 
     /**
@@ -119,7 +117,9 @@ final class CoroutineGen implements CoroutineGenInterface
     public static function runBlocking(mixed ...$coroutines): void
     {
         self::runNonBlocking(...$coroutines);
-        while (self::$taskQueue?->isEmpty() === false) self::run();
+        while (!self::$taskQueue?->isEmpty()) {
+            self::run();
+        }
     }
 
     /**
@@ -130,10 +130,10 @@ final class CoroutineGen implements CoroutineGenInterface
     {
         return function () use ($coroutines): void {
             foreach ($coroutines as $coroutine) {
-                if (is_callable($coroutine)) {
-                    $coroutine = call_user_func($coroutine);
-                }
-                !$coroutine instanceof Generator ? call_user_func(fn() => $coroutine) : self::schedule(new ChildCoroutine($coroutine));
+                $result = is_callable($coroutine) ? $coroutine() : $coroutine;
+                $result instanceof Generator 
+                    ? self::schedule(new ChildCoroutine($result))
+                    : $result;
             }
             self::run();
         };
@@ -141,7 +141,12 @@ final class CoroutineGen implements CoroutineGenInterface
 
     public static function repeat(callable $callback, int $times): Closure
     {
-        for ($i = 0; $i <= $times; $i++) if (call_user_func($callback) instanceof Generator) $callback = self::processCoroutine($callback);
+        for ($i = 0; $i < $times; $i++) {
+            $result = $callback();
+            if ($result instanceof Generator) {
+                $callback = self::processCoroutine($result);
+            }
+        }
         return fn() => null;
     }
 
@@ -161,8 +166,8 @@ final class CoroutineGen implements CoroutineGenInterface
      */
     public static function run(): void
     {
-        if (self::$taskQueue?->isEmpty() === false) {
-            $coroutine = self::$taskQueue->dequeue();
+        if (!self::$taskQueue?->isEmpty()) {
+            $coroutine = self::$taskQueue?->dequeue();
             if ($coroutine instanceof ChildCoroutine && !$coroutine->isFinished()) {
                 self::schedule($coroutine->run());
             }

@@ -25,6 +25,12 @@ namespace vennv\vapm;
 
 use Generator;
 
+/**
+ * @author  VennDev <venn.dev@gmail.com>
+ * @package vennv\vapm
+ * 
+ * This interface is used to create a deferred object that can be used to get the result of a coroutine.
+ */
 interface DeferredInterface
 {
 

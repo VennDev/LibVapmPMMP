@@ -25,6 +25,12 @@ namespace vennv\vapm;
 
 use Generator;
 
+/**
+ * @author  VennDev <venn.dev@gmail.com>
+ * @package vennv\vapm
+ * 
+ * This interface is used to create a await group object that can be used to wait for a group of coroutines to complete.
+ */
 interface AwaitGroupInterface
 {
 
