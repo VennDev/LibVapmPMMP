@@ -31,6 +31,7 @@ use RecursiveIteratorIterator;
 use ReflectionException;
 use ReflectionFunction;
 use SplFileInfo;
+use Throwable;
 use function array_slice;
 use function file;
 use function implode;
@@ -321,7 +322,6 @@ final class Utils implements UtilsInterface
                 return true; // This is a class
             }
         }
-
         return false;
     }
 
