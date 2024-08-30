@@ -2,7 +2,7 @@
     "name": "vennv/vapm-pmmp",
     "keywords": ["vapm-pmmp", "asynchronous", "LibVapmPMMP", "lib-vapm-pmmp", "process", "thread"],
     "license": "LGPL-2.0-only",
-    "version": "2.5.2",
+    "version": "2.5.3",
     "autoload": {
         "psr-4": {
             "vennv\\vapm\\": "src/vennv/vapm/"
