@@ -133,7 +133,11 @@ class EventLoop implements EventLoopInterface
      */
     private static function clearGarbage(): void
     {
-        foreach (self::getReturns() as $id => $promise) if ($promise instanceof Promise && $promise->canDrop()) unset(self::$returns[$id]);
+        $gc = new GarbageCollection();
+        foreach (self::getReturns() as $id => $promise) {
+            if ($promise instanceof Promise && $promise->canDrop()) unset(self::$returns[$id]);
+            $gc->collectWL();
+        }
     }
 
     /**
@@ -149,7 +153,10 @@ class EventLoop implements EventLoopInterface
             $promise = self::$queues->dequeue();
             $fiber = $promise->getFiber();
             if ($fiber->isSuspended()) $fiber->resume();
-            if ($fiber->isTerminated() && ($promise->getStatus() !== StatusPromise::PENDING || $promise->isJustGetResult())) {
+            if (
+                $fiber->isTerminated() && 
+                ($promise->getStatus() !== StatusPromise::PENDING || $promise->isJustGetResult())
+            ) {
                 try {
                     $promise->isJustGetResult() && $promise->setResult($fiber->getReturn());
                 } catch (Throwable $e) {
@@ -172,7 +179,15 @@ class EventLoop implements EventLoopInterface
      */
     protected static function runSingle(): void
     {
-        while (!self::$queues->isEmpty() || (CoroutineGen::getTaskQueue() !== null && !CoroutineGen::getTaskQueue()->isEmpty()) || MicroTask::isPrepare() || MacroTask::isPrepare()) self::run();
+        $gc = new GarbageCollection();
+        while (
+            !self::$queues->isEmpty() || 
+            (CoroutineGen::getTaskQueue() !== null && !CoroutineGen::getTaskQueue()->isEmpty()) || 
+            MicroTask::isPrepare() || MacroTask::isPrepare()
+        ) {
+            self::run();
+            $gc->collectWL();
+        }
     }
 
 }

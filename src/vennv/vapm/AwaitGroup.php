@@ -112,8 +112,10 @@ final class AwaitGroup implements AwaitGroupInterface
 
     public function wait(): void
     {
+        $gc = new GarbageCollection();
         while ($this->count > 0) {
             CoroutineGen::run();
+            $gc->collectWL();
         }
     }
 

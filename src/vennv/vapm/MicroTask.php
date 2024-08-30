@@ -68,6 +68,7 @@ final class MicroTask
      */
     public static function run(): void
     {
+        $gc = new GarbageCollection();
         foreach (self::getTasks() as $id => $promise) {
             /** @var Promise $promise */
             $promise->useCallbacks();
@@ -75,6 +76,7 @@ final class MicroTask
             EventLoop::addReturn($promise);
             /** @var int $id */
             self::removeTask($id);
+            $gc->collectWL();
         }
     }
 

@@ -111,6 +111,7 @@ final class Deferred implements DeferredInterface
                 } else {
                     $childCoroutine->run();
                 }
+                yield;
             }
 
             yield;
@@ -134,6 +135,7 @@ final class Deferred implements DeferredInterface
                 } else {
                     $childCoroutine->run();
                 }
+                yield;
             }
 
             yield;

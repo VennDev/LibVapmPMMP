@@ -149,9 +149,11 @@ final class Work implements WorkInterface
 
     public function run(): void
     {
+        $gc = new GarbageCollection();
         while (!$this->queue->isEmpty()) {
             $work = $this->queue->dequeue();
             if (is_callable($work)) $work();
+            $gc->collectWL();
         }
     }
 

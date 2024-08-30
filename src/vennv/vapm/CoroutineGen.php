@@ -117,8 +117,11 @@ final class CoroutineGen implements CoroutineGenInterface
     public static function runBlocking(mixed ...$coroutines): void
     {
         self::runNonBlocking(...$coroutines);
+
+        $gc = new GarbageCollection();
         while (!self::$taskQueue?->isEmpty()) {
             self::run();
+            $gc->collectWL();
         }
     }
 
@@ -141,11 +144,13 @@ final class CoroutineGen implements CoroutineGenInterface
 
     public static function repeat(callable $callback, int $times): Closure
     {
+        $gc = new GarbageCollection();
         for ($i = 0; $i < $times; $i++) {
             $result = $callback();
             if ($result instanceof Generator) {
                 $callback = self::processCoroutine($result);
             }
+            $gc->collectWL();
         }
         return fn() => null;
     }

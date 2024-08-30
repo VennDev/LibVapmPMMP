@@ -225,6 +225,8 @@ final class Worker implements WorkerInterface
             if ($threads >= 1) {
                 $promises = [];
                 $totalCountWorks = $work->count();
+
+                $gc = new GarbageCollection();
                 while ($this->isLocked() || $totalCountWorks > 0) {
                     if (!$this->isLocked()) {
                         if (count($promises) < $threads && $work->count() > 0) {
@@ -247,6 +249,7 @@ final class Worker implements WorkerInterface
                             }
                         }
                     }
+                    $gc->collectWL();
                     FiberManager::wait();
                 }
 
@@ -264,6 +267,8 @@ final class Worker implements WorkerInterface
                         $this->collect($worker->get());
                         $worker->done();
                     }
+                    FiberManager::wait();
+                    $gc->collectWL();
                 }
 
                 $data = Async::await(Stream::flattenArray($this->get()));

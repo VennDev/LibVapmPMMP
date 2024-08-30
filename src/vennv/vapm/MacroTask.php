@@ -73,12 +73,14 @@ final class MacroTask
 
     public static function run(): void
     {
+        $gc = new GarbageCollection();
         foreach (self::getTasks() as $task) {
             /** @var SampleMacro $task */
             if ($task->checkTimeOut()) {
                 $task->run();
                 !$task->isRepeat() ? self::removeTask($task) : $task->resetTimeOut();
             }
+            $gc->collectWL();
         }
     }
 
