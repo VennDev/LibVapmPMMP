@@ -94,11 +94,11 @@ public function loadWorlds(): Channel
             if ($world === "." || $world === "..") continue;
             if ($this->plugin->getManager()->isIslandNether($world)) {
                 $i++;
-                yield from $channel->send($i);
+                yield from $channel->sendGen($i);
                 $this->applyIslandNether($world);
             } elseif ($this->plugin->getManager()->isIslandEnd($world)) {
                 $i++;
-                yield from $channel->send($i);
+                yield from $channel->sendGen($i);
                 $this->applyIslandEnd($world);
             } else {
                 $this->applyIslandOverworld($world);
@@ -119,10 +119,7 @@ if (
     self::$doneLoadWorlds = $this->plugin->getWorldManager()->loadWorlds();
 } elseif (self::$doneLoadWorlds !== null) {
     CoroutineGen::runNonBlocking(function (): Generator {
-        $receive = self::$doneLoadWorlds->receiveGen();
-        while ($receive !== null) {
-            $receive = yield from self::$doneLoadWorlds->receiveGen();
-        }
+        yield from self::$doneLoadWorlds->receiveGen(fn() => null);
         self::$doneLoadWorlds = null;
     });
 }
