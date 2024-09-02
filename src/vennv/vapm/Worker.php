@@ -151,7 +151,6 @@ final class Worker implements WorkerInterface
         $this->work = $work;
         $this->options = $options;
         $this->id = $this->generateId();
-
         self::$workers[$this->id] = [];
     }
 
@@ -230,12 +229,9 @@ final class Worker implements WorkerInterface
                 while ($this->isLocked() || $totalCountWorks > 0) {
                     if (!$this->isLocked()) {
                         if (count($promises) < $threads && $work->count() > 0) {
+                            /** @var ClosureThread $callbackQueue */
                             $callbackQueue = $work->dequeue();
-
-                            if (!is_callable($callbackQueue)) continue;
-
-                            $thread = new ClosureThread($callbackQueue);
-                            $promises[] = $thread->start();
+                            $promises[] = $callbackQueue->start();
                         } else {
                             /** @var Promise $promise */
                             foreach ($promises as $index => $promise) {

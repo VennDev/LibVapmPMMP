@@ -31,7 +31,7 @@ use RecursiveIteratorIterator;
 use ReflectionException;
 use ReflectionFunction;
 use SplFileInfo;
-use Throwable;
+use RuntimeException;
 use function array_slice;
 use function file;
 use function implode;
@@ -58,6 +58,14 @@ interface UtilsInterface
      * Transform a closure or callable to string
      */
     public static function closureToString(Closure $closure): string;
+
+    /**
+     * @throws RuntimeException
+     * @return string
+     *
+     * Transform a closure or callable to string
+     */
+    public static function closureToStringSafe(Closure $closure): string;
 
     /**
      * Get all Dot files in a directory
@@ -143,6 +151,22 @@ interface UtilsInterface
      */
     public static function getStringAfterSign(string $string, string $sign): string;
 
+    /**
+     * @param mixed $data
+     * @return array<int|string, bool|string>
+     *
+     * Convert data to string
+     */
+    public static function toStringAny(mixed $data): array;
+
+    /**
+     * @param array<string, string> $data
+     * @return mixed
+     *
+     * Convert data to real it's type
+     */
+    public static function fromStringToAny(array $data): mixed;
+
 }
 
 final class Utils implements UtilsInterface
@@ -179,6 +203,28 @@ final class Utils implements UtilsInterface
         if ($endBracketPos === false) throw new ReflectionException(Error::CANNOT_FIND_FUNCTION_KEYWORD);
 
         return substr($result, $startPos, $endBracketPos - $startPos + 1);
+    }
+
+    /**
+     * @throws RuntimeException
+     * @return string
+     */
+    public static function closureToStringSafe(Closure $closure): string
+    {
+        $input = self::closureToString($closure);
+        $input = self::removeComments($input);
+
+        if (!is_string($input)) throw new RuntimeException(Error::INPUT_MUST_BE_STRING_OR_CALLABLE);
+
+        $input = self::outlineToInline($input);
+
+        if (!is_string($input)) throw new RuntimeException(Error::INPUT_MUST_BE_STRING_OR_CALLABLE);
+
+        $input = self::fixInputCommand($input);
+
+        if (!is_string($input)) throw new RuntimeException(Error::INPUT_MUST_BE_STRING_OR_CALLABLE);
+
+        return $input;
     }
 
     public static function getAllByDotFile(string $path, string $dotFile): Generator
@@ -336,4 +382,56 @@ final class Utils implements UtilsInterface
         return '';
     }
 
+    /**
+     * @param mixed $data
+     * @return array<int|string, bool|string>
+     *
+     * Convert data to string
+     */
+    public static function toStringAny(mixed $data): array
+    {
+        $type = gettype($data);
+        if (!is_callable($data) && (is_array($data) || is_object($data))) {
+            return [$type => json_encode($data)];
+        } elseif (is_bool($data)) {
+            $data = $data ? 'true' : 'false';
+            return [$type => $data];
+        } elseif (is_resource($data)) {
+            return [$type => get_resource_type($data)];
+        } elseif (is_null($data)) {
+            return [$type => 'null'];
+        } elseif (is_callable($data)) {
+            /** @phpstan-ignore-next-line */
+            return ['callable' => self::closureToStringSafe($data)];
+        } elseif (is_string($data)) {
+            return [$type => '\'' . $data . '\''];
+        }
+        /** @phpstan-ignore-next-line */
+        return [$type => (string) $data];
+    }
+
+    /**
+     * @param array<string, string> $data
+     * @return mixed
+     *
+     * Convert data to real it's type
+     */
+    public static function fromStringToAny(array $data): mixed
+    {
+        $type = array_keys($data)[0];
+        $value = array_values($data)[0];
+        return match ($type) {
+            'boolean' => $value === 'true',
+            'integer' => (int) $value,
+            'float' => (float) $value,
+            'double' => (float) $value,
+            'string' => $value,
+            'array' => json_decode($value, true),
+            'object' => json_decode($value),
+            'callable' => eval('return ' . $value . ';'),
+            'null' => null,
+            default => $value,
+        };
+    }
+    
 }

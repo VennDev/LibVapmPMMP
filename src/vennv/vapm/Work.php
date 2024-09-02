@@ -31,11 +31,12 @@ interface WorkInterface
 
     /**
      * @param callable $work
+     * @param array<int|float|array|object|null, mixed> $args
      * @return void
      *
      * The work is a function that will be executed when the work is run.
      */
-    public function add(callable $work): void;
+    public function add(callable $work, array $args = []): void;
 
     /**
      * @param int $index
@@ -107,9 +108,16 @@ final class Work implements WorkInterface
         $this->queue = new SplQueue();
     }
 
-    public function add(callable $work): void
+    /**
+     * @param callable $work
+     * @param array<int|float|array|object|null, mixed> $args
+     * @return void
+     *
+     * Add a work to the work list.
+     */
+    public function add(callable $work, array $args = []): void
     {
-        $this->queue->enqueue($work);
+        $this->queue->enqueue(new ClosureThread($work, $args));
     }
 
     public function remove(int $index): void
@@ -151,8 +159,9 @@ final class Work implements WorkInterface
     {
         $gc = new GarbageCollection();
         while (!$this->queue->isEmpty()) {
+            /** @var ClosureThread $work */
             $work = $this->queue->dequeue();
-            if (is_callable($work)) $work();
+            $work->start();
             $gc->collectWL();
         }
     }

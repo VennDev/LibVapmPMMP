@@ -117,7 +117,6 @@ final class CoroutineGen implements CoroutineGenInterface
     public static function runBlocking(mixed ...$coroutines): void
     {
         self::runNonBlocking(...$coroutines);
-
         $gc = new GarbageCollection();
         while (!self::$taskQueue?->isEmpty()) {
             self::run();

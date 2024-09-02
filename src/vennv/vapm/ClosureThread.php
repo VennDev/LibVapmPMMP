@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace vennv\vapm;
 
+use Generator;
 use function call_user_func;
 use function is_array;
 use function is_bool;
@@ -49,31 +50,42 @@ final class ClosureThread extends Thread implements ClosureThreadInterface
 
     private mixed $callback;
 
-    public function __construct(callable $callback)
+    /**
+     * @var array<int|float|array|object|null, mixed>
+     * @phpstan-var array<int|float|array|object|null, mixed>
+     */
+    private array $argsCallback = [];
+
+    /**
+     * @param callable $callback
+     * @param array<int|float|array|object|null, mixed> $args
+     */
+    public function __construct(callable $callback, array $args = [])
     {
         $this->callback = $callback;
-        parent::__construct($callback);
+        $this->argsCallback = $args;
+        parent::__construct($callback, $args);
     }
 
     public function onRun(): void
     {
         if (is_callable($this->callback)) {
-            $callback = call_user_func($this->callback);
-            if ($callback instanceof \Generator) {
-                $callback = function () use ($callback): \Generator {
+            $callback = call_user_func($this->callback, ...$this->argsCallback);
+            if ($callback instanceof Generator) {
+                $callback = function () use ($callback): Generator {
                     yield from $callback;
                 };
-                $callback = call_user_func($callback);
+                $callback = call_user_func($callback, ...$this->argsCallback);
             }
             if (is_array($callback)) {
                 $callback = json_encode($callback);
-            } elseif (is_object($callback) && !$callback instanceof \Generator) {
+            } elseif (is_object($callback) && !$callback instanceof Generator) {
                 $callback = json_encode($callback);
             } elseif (is_bool($callback)) {
                 $callback = $callback ? 'true' : 'false';
             } elseif (is_null($callback)) {
                 $callback = 'null';
-            } elseif ($callback instanceof \Generator) {
+            } elseif ($callback instanceof Generator) {
                 $callback = json_encode(iterator_to_array($callback));
             } else {
                 $callback = (string)$callback;
